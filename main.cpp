@@ -32,7 +32,9 @@ vector<double> read_parameters(string file_name, string func_name, int nvars) {
 void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method) {
     int status = mkdir(outputDir.c_str(),0777);
 
-    vector<double> init_values_5paras = {400e3, 6.44234e+01,-3.76183e-01, 1.50075e+03,2.16642e+00};
+    // vector<double> init_values_5paras = {400e3, 6.44234e+01,-3.76183e-01, 1.50075e+03,2.16642e+00};
+    vector<double> init_values_5paras = {1.489e5, 64.45, -0.6624, -48.49, 2.158};//slices 17 18 19
+
     vector<double> cbos = {3.18528e+02,3.45506e-03,2.34045e+00,3.40741e+00};
 
     Fitter fitter;
@@ -72,7 +74,7 @@ EnerySlice ESliceParse(char * arg) {
 
 
 // argv[1]: input wiggle file
-// argv[2]: input kloss file
+// argv[2]: input lm file
 // argv[3]: output directory
 // argv[4]: slice index
 int main(int argc,char **argv) {
