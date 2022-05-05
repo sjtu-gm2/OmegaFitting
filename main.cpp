@@ -43,17 +43,17 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method) {
     fitter.SetTimeUnit(Fitter::nano_second);    
 
     //5 paras fit
-    auto info_5pars = fitter.Fit_5paras(method,wiggle,30e3,600e3,init_values_5paras);
+    auto info_5pars = fitter.Fit_5paras(method,wiggle,30e3,300e3,init_values_5paras);
 
     //9 paras fit
     vector<double> init_values_9paras = read_parameters(info_5pars.file_name,info_5pars.function_name,5);
     init_values_9paras.insert(init_values_9paras.end(),cbos.begin(),cbos.end());
-    auto info_9paras = fitter.Fit_9paras_cbo(method,wiggle,30e3,600e3,init_values_9paras);
+    auto info_9paras = fitter.Fit_9paras_cbo(method,wiggle,30e3,300e3,init_values_9paras);
 
     //10 paras fit
     vector<double> init_values_10paras = read_parameters(info_9paras.file_name,info_9paras.function_name,9);
     init_values_10paras.push_back(0.);
-    fitter.Fit_10paras_cbo_lost(method,wiggle,30e3,600e3,init_values_9paras,lm);
+    fitter.Fit_10paras_cbo_lost(method,wiggle,30e3,300e3,init_values_9paras,lm);
 
 };
 
