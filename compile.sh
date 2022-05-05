@@ -1,0 +1,1 @@
+g++ `root-config --cflags --glibs` -I ./rlib/include -L./ -lBlinders -I ./ -o main.exe  FitTools.cpp main.cpp
