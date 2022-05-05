@@ -34,7 +34,7 @@ void Fitter::SetOutputDir(string output_dir) {
     m_output_dir = output_dir;
 }
 
-void Fitter::doFit(const FitInput & fit_in) {
+FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     TString wiggle_name, residual_name, func_name, res_name, fft_name, outf_name;
     wiggle_name.Form("wiggle_%s",fit_in.tag.Data());
     residual_name.Form("residual_%s",fit_in.tag.Data());
@@ -85,14 +85,25 @@ void Fitter::doFit(const FitInput & fit_in) {
     residual->Write();
     fft->Write();
     fout->Close();
+
     cout << "\nOutput file created : "<< outf_name << endl;
     cout << "   wiggle     : " << wiggle_name << endl;
     cout << "   residual   : " << residual_name << endl;
     cout << "   function   : " << func_name << endl;
+    cout << "   FFT        : " << fft_name << endl;
     cout << "   FitResults : " << res_name << endl;
+
+    FitOutputInfo info;
+    info.file_name = outf_name;
+    info.hist_name = wiggle_name;
+    info.residual_name = residual_name;
+    info.function_name = func_name;
+    info.fft_name = fft_name;
+
+    return info;
 }
 
-void Fitter::Fit_5paras(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values) {
+FitOutputInfo Fitter::Fit_5paras(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values) {
     TString tag;
     tag.Form("5paras_%s",name.c_str());
 
@@ -108,10 +119,10 @@ void Fitter::Fit_5paras(string name, TH1* wiggle, double t_start, double t_end, 
     std::function<double(double*,double*)> func = func_5paras;
     fit_in.func = func;
 
-    doFit(fit_in);
+    return doFit(fit_in);
 }
 
-void Fitter::Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values) {
+FitOutputInfo Fitter::Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values) {
     TString tag;
     tag.Form("9paras_cbo_%s",name.c_str());
 
@@ -127,11 +138,11 @@ void Fitter::Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_e
     std::function<double(double*,double*)> func = func_9paras_cbo;
     fit_in.func = func;
 
-    doFit(fit_in);
+    return doFit(fit_in);    
 }
 
 
-void Fitter::Fit_10paras_cbo_lost(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
+FitOutputInfo Fitter::Fit_10paras_cbo_lost(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
     TString tag;
     tag.Form("10paras_cbo_lost_%s",name.c_str());
 
@@ -148,10 +159,10 @@ void Fitter::Fit_10paras_cbo_lost(string name, TH1* wiggle, double t_start, doub
     fit_in.func = func;
     fit_in.lost_muon = lm;
 
-    doFit(fit_in);
+    return doFit(fit_in);
 }
 
-void Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
+FitOutputInfo Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
     TString tag;
     tag.Form("14paras_cbo_lost_vw_%s",name.c_str());
 
@@ -174,7 +185,7 @@ void Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t_start, d
     fit_in.func = func;
     fit_in.lost_muon = lm;
 
-    doFit(fit_in);
+    return doFit(fit_in);
 }
 
 

@@ -32,6 +32,14 @@ struct FitInput {
     TH1 * lost_muon;    
 };
 
+struct FitOutputInfo {
+    string file_name;
+    string hist_name;
+    string function_name;
+    string residual_name;
+    string fft_name;
+};
+
 class Fitter {
   public:
     enum TimeUnit {nano_second, micro_second};
@@ -40,14 +48,14 @@ class Fitter {
     void SetOutputDir(string output_dir);
     void SetTimeUnit(TimeUnit t_unit);
 
-    void Fit_5paras(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
-    void Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
-    void Fit_10paras_cbo_lost(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
-    void Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
+    FitOutputInfo Fit_5paras(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
+    FitOutputInfo Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
+    FitOutputInfo Fit_10paras_cbo_lost(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
+    FitOutputInfo Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
 
 
   private:    
-    void doFit(const FitInput & fit_in);
+    FitOutputInfo doFit(const FitInput & fit_in);
     string m_output_dir;
 };
 #endif
