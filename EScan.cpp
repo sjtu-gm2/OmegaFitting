@@ -1,5 +1,7 @@
 #include <string>
 #include <sys/stat.h>
+#include <json/json.h>
+#include <fstream>
 #include <tuple>
 
 #include "TFile.h"
@@ -10,6 +12,7 @@
 #include "FitTools.h"
 
 using namespace std;
+
 struct EnerySlice {
     string name;
     int bin_start;
@@ -29,14 +32,12 @@ vector<double> read_parameters(string file_name, string func_name, int nvars) {
     return vals;
 }
 
-void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method) {
+void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<float> init_values) {
     int status = mkdir(outputDir.c_str(),0777);
 
-    vector<double> init_values_5paras = {5.54383e+05, 6.43566e+01, -4.08317e-01, -4.62739e+01, 2.16049e+00};
-    // vector<double> init_values_5paras = {5.77253e+05, 6.43716e+01, 4.023, -4.15022e+01, 8.43546e+00}; //slices 17 18 19
-
-    vector<double> cbos = {1.90487e+02,1.81832e-03,2.32591e+00,1.00373e+01};
-
+    vector<double> init_values_5paras;
+    init_values_5paras.insert(init_values_5paras.end(),init_values.begin(),init_values.begin()+5);
+    
     Fitter fitter;
 
     fitter.SetOutputDir(outputDir);
@@ -49,12 +50,12 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method) {
 
     //9 paras fit
     vector<double> init_values_9paras = read_parameters(info_5pars.file_name,info_5pars.function_name,5);
-    init_values_9paras.insert(init_values_9paras.end(),cbos.begin(),cbos.end());
+    init_values_9paras.insert(init_values_9paras.end(),init_values.begin()+5,init_values.begin()+9);
     auto info_9paras = fitter.Fit_9paras_cbo(method,wiggle,start_time,end_time,init_values_9paras);
 
     //10 paras fit
     vector<double> init_values_10paras = read_parameters(info_9paras.file_name,info_9paras.function_name,9);
-    init_values_10paras.push_back(3.8e-9);
+    init_values_10paras.insert(init_values_10paras.end(),init_values.begin()+9,init_values.begin()+10);
     fitter.Fit_10paras_cbo_lost(method,wiggle,start_time,end_time,init_values_9paras,lm);
 }
 
@@ -77,6 +78,7 @@ EnerySlice ESliceParse(char * arg) {
 // argv[2]: input lm file
 // argv[3]: output directory
 // argv[4]: slice index
+// argv[5]: initial values json file
 int main(int argc,char **argv) {
     TFile * file = TFile::Open(argv[1]);
     TH2D * hist_ET = (TH2D*) file->Get("rhoc3_d");
@@ -89,7 +91,13 @@ int main(int argc,char **argv) {
     cout << "Processing " << slice.name << endl;
     TH1D * wiggle = hist_ET->ProjectionX(slice.name.c_str(),slice.bin_start,slice.bin_end);
 
-    FullFit(wiggle,lm,outputDir,slice.name);
-
+    Json::Value json_value;
+    std::ifstream json_file(argv[5]);
+    json_file >> json_value;
+    vector<float> init_values;
+    for(auto val : json_value[argv[4]]) {
+        init_values.push_back(val.asFloat());
+    }
+    FullFit(wiggle,lm,outputDir,slice.name,init_values);
     return 0;
 }
