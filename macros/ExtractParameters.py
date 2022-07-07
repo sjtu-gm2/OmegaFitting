@@ -74,7 +74,10 @@ def ExtractTxt(file_name):
 
 def ExtractROOT(file_name,func_name):
     f = R.TFile(file_name,'read')
+    
     func = f.Get(func_name)    
+    if func==None:
+        return None
     chi2 = func.GetChisquare()
     ndf = func.GetNDF()
     nvars = func.GetNpar()
@@ -99,11 +102,23 @@ def GetInitValuesFromROOT(file_name,json_name):
         e_high = 1100 + 100*n
         func_name = 'func_10paras_cbo_lost_Slice_%s_%s_MeV'%(e_low,e_high)
         entry = ExtractROOT(file_name, func_name)        
+        if entry == None:
+            continue
         entries[n] = entry.getvals()        
     with open(json_name,'w') as json_f:
         json.dump(entries, json_f, sort_keys=True, indent=4)
 
+def GetInitValuesFromROOT_TmethodFit(file_name,json_name):
+    entries = OrderedDict()
 
+    e_low = 1700
+    e_high = 3100
+    func_name = 'func_10paras_cbo_lost_Slice_%s_%s_MeV'%(e_low,e_high)
+    entry = ExtractROOT(file_name, func_name)        
+    
+    entries[0] = entry.getvals()        
+    with open(json_name,'w') as json_f:
+        json.dump(entries, json_f, sort_keys=True, indent=4)
 
 
 
@@ -132,4 +147,7 @@ version = sys.argv[1]
 cut = sys.argv[2]
 
 GetInitValuesFromROOT('./output/%s_%s.root'%(version,cut), 'fitted_values_%s_%s.json'%(version,cut))
+# GetInitValuesFromROOT_TmethodFit('./output/%s_%s.root'%(version,cut), 'fitted_values_%s_%s.json'%(version,cut))
+
+
 
