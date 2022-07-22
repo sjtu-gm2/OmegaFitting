@@ -136,87 +136,26 @@ def GetInitValuesFromROOT_Run23Official(file_name,json_name):
 def GetInitValuesFromROOT_Run23SystScan(file_name,json_name,method,syst):
     entries = OrderedDict()
 
-    
     func_name = 'func_28paras_run23_sjtu_Run2C_%smethod_%s'%(method,syst)
     entry = ExtractROOT(file_name, func_name)        
-    
+
     entries[0] = entry.getvals()        
     with open(json_name,'w') as json_f:
         json.dump(entries, json_f, sort_keys=True, indent=4)
 
     print ('generated: %s'%(json_name))
 
-
-# entries = ExtractTxt('./logs/newfitter_All.log')
-# for entry in entries:
-#     print ('-----------------')
-#     print (entry)
-    
-
-
-# for n in range(20):
-#     entry = ExtractROOT('./output/newfitter_All.root', 'func_9paras_cbo_Slice_2500_2600_MeV')
-#     print (entry)
-
-
-# version = sys.argv[1]
-# cut = sys.argv[2]
-
-
-dataset = "Run2all"
-
-# seed = "gain_A_10"
-
-
-# GetInitValuesFromROOT_Run23Official('./data/%s_seedscan_result_Bingzhi_149ns.root'%(dataset), 'pre_fitted_values_%s_%smethod_seed_%s.json'%(dataset,method,seed))
-# GetInitValuesFromROOT_Run23Official('./data/%s_seedscan_result_Bingzhi_149ns.root'%(dataset), 'pre_fitted_values_%s_%smethod_seed_%s.json'%(dataset,method,seed))
-# GetInitValuesFromROOT_Run23SystScan('./output/Run2C_Amethod_gain_A_Scan/result_28paras_run23_sjtu_Run2C_Amethod_gain_A_10.root', 'fitter_28paras_run23_sjtu_Run2C_Amethod_gain_A_10.json')
-# GetInitValuesFromROOT_Run23SystScan('./output/Run2C_Amethod_gain_A_Scan_random_adhoc.root', 'fitter_28paras_run23_sjtu_Run2C_Amethod_gain_A_random_adhoc_10.json','A')
-# GetInitValuesFromROOT_Run23SystScan('./output/Run2C_Tmethod_gain_A_Scan_random_adhoc.root', 'fitter_28paras_run23_sjtu_Run2C_Tmethod_gain_A_random_adhoc_10.json','T')
-
-def main():
-    for method in ['T','A']:
-        for gain in ['stdp','gain']:
-            for sys in ['A','T']:
-                for version in ['random','random_adhoc']:
-                    scan = '%s_%s'%(gain,sys)
-                    
-                    outputDir = 'json/Run2C_%smethod_%s_%s_Scan_%s'%(method,gain,sys,version)
-                    for m in range(20):
-                        inputROOT = 'output/Run2C_%smethod_%s_Scan_%s/result_28paras_run23_sjtu_Run2C_%smethod_%s_%s.root'%(method,scan,version,method,scan,m)
-                        json_name = 'Scan_%s.json'%(m)
-                        syst = '%s_%s_%s'%(gain,sys,m)
-                        os.system('mkdir -p %s'%(outputDir))
-                        GetInitValuesFromROOT_Run23SystScan(inputROOT, '%s/%s'%(outputDir,json_name),method,syst)
-
-
 if __name__ == '__main__':
     method = sys.argv[1]
     scan = sys.argv[2]
     m = sys.argv[3]
     version = sys.argv[4]
-    # method = 'T'
-    # scan = 'gain_A'
-    # m = '10'
-    # version = 'sys.argv[4]'
-    # if version.startswith('Run4U'): 
-    #     dataset = 'Run4U'
-    # else:
-    #     dataset = 
-
-    # inputROOT = 'output/Run4U_Tmethod_gain_A_Scan_Run4U_preliminary.root'
-    # outputDir = './'
-
 
     inputROOT = 'output/Run2C_%smethod_%s_Scan_%s/result_28paras_run23_sjtu_Run2C_%smethod_%s_%s.root'%(method,scan,version,method,scan,m)
     outputDir = 'json/Run2C_%smethod_%s_Scan_%s'%(method,scan,version)
-
 
     os.system('mkdir -p %s'%(outputDir))
     syst = '%s_%s'%(scan,m)
     json_name = 'Scan_%s.json'%(m)
 
     GetInitValuesFromROOT_Run23SystScan(inputROOT, '%s/%s'%(outputDir,json_name),method,syst)
-    # main()
-# GetInitValuesFromROOT('./output/%s_%s.root'%(version,cut), 'fitted_values_%s_%s.json'%(version,cut))
-# GetInitValuesFromROOT_TmethodFit('./output/%s_%s.root'%(version,cut), 'fitted_values_%s_%s.json'%(version,cut))

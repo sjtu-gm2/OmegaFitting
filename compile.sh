@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ALL="NO"
-TARGET=./srcs/main.cpp
+TARGET=./OmegaFitting/main.cpp
 while [[ $# -gt 0 ]]; do
   case $1 in
     -t|--target)
@@ -36,14 +36,14 @@ EXE=${BASENAME%.*}.exe
 [ -d output ] || mkdir output
 
 if [[ ${ALL} == 'YES' ]];then
-  g++ -g -Wall -Wextra -O3 -funroll-loops -finline-functions -fomit-frame-pointer -fpic -I./srcs/rlib/include -c \
-    -o ./objs/Random.o ./srcs/rlib/src/Random.cpp &&\
-  g++ -I srcs/rlib/include -I /usr/local/opt/openssl/include srcs/Blinders.cc -std=c++11 -Wall -Wextra -Werror -pedantic-errors -fpic -c \
+  g++ -g -Wall -Wextra -O3 -funroll-loops -finline-functions -fomit-frame-pointer -fpic -I./OmegaFitting/rlib/include -c \
+    -o ./objs/Random.o ./OmegaFitting/rlib/src/Random.cpp &&\
+  g++ -I OmegaFitting/rlib/include -I /usr/local/opt/openssl/include OmegaFitting/Blinders.cc -std=c++11 -Wall -Wextra -Werror -pedantic-errors -fpic -c \
     -o ./objs/Blinders.o &&\
   g++ -shared -L/usr/local/opt/openssl/lib -lssl -lcrypto \
     -o ./objs/libBlinders.so ./objs/Blinders.o ./objs/Random.o
 fi
 
-g++ `root-config --cflags --glibs` -I ./srcs/rlib/include -L./objs -lBlinders -I ./srcs -I/usr/local/include -L/usr/local/lib -ljsoncpp \
-  -o ${EXE} ./srcs/FitTools.cpp ${TARGET} \
+g++ `root-config --cflags --glibs` -I ./OmegaFitting/rlib/include -L./objs -lBlinders -I ./OmegaFitting -I/usr/local/include -L/usr/local/lib -ljsoncpp \
+  -o ${EXE} ./OmegaFitting/FitTools.cpp ${TARGET} \
 && echo -e "Generated ${EXE} from ${TARGET}"

@@ -9,7 +9,8 @@ const double Pi = 3.14159265358979323846264338327950288419716939937510582;
 
 double time_scale = 1.0;
 Blinders::fitType ftype = Blinders::kOmega_a;
-Blinders * getBlinded = new Blinders(ftype, "Unexpected virtue of ignorance.");
+Blinders * getBlinded = new Blinders(ftype, "stay home, stay healthy!");
+// Blinders * getBlinded = new Blinders(ftype, "Unexpected virtue of ignorance.");
 TH1 * lost_muon;
 
 void FillData(TH1* th1,std::vector<double> & data);
@@ -20,6 +21,7 @@ double func_5paras(double *x,double *p);
 double func_9paras_cbo(double *x,double *p);
 double func_10paras_cbo_lost(double *x, double *p);
 double func_14paras_cbo_lost_vw(double *x, double *p);
+double func_28paras_cbo_VW_lost_expansion(double *x, double *p);
 
 Fitter::Fitter() {
 }
@@ -188,7 +190,35 @@ FitOutputInfo Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t
     return doFit(fit_in);
 }
 
+FitOutputInfo Fitter::Fit_28paras_run23_official(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
+    TString tag;
+    tag.Form("28paras_run23_sjtu_%s",name.c_str());
 
+    FitInput fit_in;
+    fit_in.tag = tag;
+    fit_in.wiggle = wiggle;
+    fit_in.t_start = t_start;
+    fit_in.t_end = t_end;
+    fit_in.init_values = init_values;
+    fit_in.nvars = 28;
+    string name_vars[] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "k_{loss}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW-cbo}","#phi_{VW-cbo}","A_{VW+cbo}","#phi_{VW+cbo}"
+    };
+
+    fit_in.name_vars = name_vars;
+    std::function<double(double*,double*)> func = func_28paras_cbo_VW_lost_expansion;
+
+    fit_in.func = func;
+    fit_in.lost_muon = lm;
+
+    return doFit(fit_in);
+}
 
 // fft implement
 
@@ -320,4 +350,59 @@ double func_14paras_cbo_lost_vw(double *x, double *p) {
     double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + phi_cbo);
     double vw  = 1-TMath::Exp(-time/tau_vw)*asym_vw*TMath::Cos(omega_vw*time + phi_vw);
     return  norm *(1 - k*aloss)* TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) *  cbo * vw;
+}
+
+
+
+//1.9MHz func, 28 paras
+double func_28paras_cbo_VW_lost_expansion(double *x, double *p) {
+    double time = x[0];
+    // 5-par
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double R = p[3];
+    double phi = p[4];
+    double omega = getBlinded->paramToFreq(R);
+    // cbo-par
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+    double fcbo = 2.34;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+    // vw-par
+    double tau_vw = p[9];
+    double asym_vw = p[10];
+    double omega_vw = p[11]*fvw;
+    double phi_vw = p[12];
+    // expansion-par
+    double asym_vwcbo = p[24];
+    double phi_vwcbo = p[25];
+    double asym_vw_cbo = p[26];
+    double phi_vw_cbo = p[27];
+    double expan = (1 - exp(-time/tau_cbo)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
+    // k_loss
+    double k = p[13];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+    // dcbo-par
+    double asym_dcbo = p[14];
+    double phi_dcbo = p[15];
+    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
+    // vo-par
+    double tau_vo = p[20];
+    double asym_vo = p[21];
+    double omega_vo = p[22]*fvo;
+    double phi_vo = p[23];
+    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    // modification of A and phi
+    double A1_cbo = p[16];
+    double phi1_cbo = p[17];
+    double A2_cbo = p[18];
+    double phi2_cbo = p[19];
+    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
+    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
 }

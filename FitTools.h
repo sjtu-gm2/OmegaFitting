@@ -52,6 +52,7 @@ class Fitter {
     FitOutputInfo Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
     FitOutputInfo Fit_10paras_cbo_lost(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
     FitOutputInfo Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
+    FitOutputInfo Fit_28paras_run23_official(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
 
 
   private:    
