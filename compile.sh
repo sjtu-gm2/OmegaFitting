@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ALL="NO"
+
 TARGET=./OmegaFitting/main.cpp
 while [[ $# -gt 0 ]]; do
   case $1 in
@@ -17,7 +18,7 @@ while [[ $# -gt 0 ]]; do
     --all)
       ALL="YES"
       shift # past argument
-      ;;
+      ;;    
     -*|--*)
       echo "Unknown option $1"
       exit 1

@@ -44,18 +44,25 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double
     fitter.SetOutputDir(outputDir);
     fitter.SetTimeUnit(Fitter::micro_second);
 
-    //5 paras fit
-    // vector<double> init_values_5paras;
-    // init_values_5paras.insert(init_values_5paras.end(),init_values.begin(),init_values.begin()+5);
-    // auto info_5pars = fitter.Fit_5paras(method,wiggle,start_time,end_time,init_values_5paras);
+    cout << "Fit with 28 parameters" << endl;
+    auto info = fitter.Fit_28paras_run23_official(method,wiggle,start_time,end_time,init_values,lm);
 
+    if(info.fitStatus!=0) {
+        // cout <<" Status = "<< info.fitStatus << endl;
+        // cout << " restart with 5 parameters fit" << endl;
+    
 
-    // vector<double> init_values_28paras = read_parameters(info_5pars.file_name,info_5pars.function_name,5);
-    // init_values_28paras.insert(init_values_28paras.end(),init_values.begin()+5,init_values.end());
+        // //5 paras fit
+        // vector<double> init_values_5paras;
+        // init_values_5paras.insert(init_values_5paras.end(),init_values.begin(),init_values.begin()+5);
+        // auto info_5pars = fitter.Fit_5paras(method,wiggle,start_time,end_time,init_values_5paras);
 
+        // // 28 paras fit
+        // vector<double> init_values_28paras = read_parameters(info_5pars.file_name,info_5pars.function_name,5);
+        // init_values_28paras.insert(init_values_28paras.end(),init_values.begin()+5,init_values.end());
 
-
-    fitter.Fit_28paras_run23_official(method,wiggle,start_time,end_time,init_values,lm);
+        // auto info_28 = fitter.Fit_28paras_run23_official(method,wiggle,start_time,end_time,init_values_28paras,lm);
+    }   
 }
 
 EnerySlice ESliceParse(char * arg) {
@@ -109,7 +116,7 @@ int main(int argc,char **argv) {
     TH1D * wiggle = (TH1D*) file->Get(hname)->Clone();
 
     TFile * file_lm = TFile::Open(argv[2]);
-    TH1 * lm = (TH1*)file_lm->Get("run2all_LM_integral");
+    TH1 * lm = (TH1*)file_lm->Get(Form("%s_LM_integral",argv[7]));
 
     string outputDir(argv[3]);    
     // EnerySlice slice = ESliceParseTMethod(argv[4]);
@@ -129,6 +136,7 @@ int main(int argc,char **argv) {
 
     cout << "Using end time up to " << end_time << "micro second" << endl;
     string name = Form("%s_%smethod_%s_%s",argv[7],argv[4],argv[5],argv[8]);
+    cout << "Do full fit" << endl;
     FullFit(wiggle,lm,outputDir,name,init_values);
     return 0;
 }

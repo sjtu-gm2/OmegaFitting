@@ -137,7 +137,7 @@ def GetInitValuesFromROOT_Run23SystScan(file_name,json_name,method,syst):
     entries = OrderedDict()
 
     
-    func_name = 'func_28paras_run23_sjtu_Run2C_%smethod_%s'%(method,syst)
+    func_name = 'func_28paras_run23_sjtu_%s_%smethod_%s'%(dataset,method,syst)
     entry = ExtractROOT(file_name, func_name)        
     
     entries[0] = entry.getvals()        
@@ -163,7 +163,7 @@ def GetInitValuesFromROOT_Run23SystScan(file_name,json_name,method,syst):
 # cut = sys.argv[2]
 
 
-dataset = "Run2all"
+# dataset = "Run2all"
 
 # seed = "gain_A_10"
 
@@ -195,6 +195,8 @@ if __name__ == '__main__':
     scan = sys.argv[2]
     m = sys.argv[3]
     version = sys.argv[4]
+    dataset = sys.argv[5]
+
     # method = 'T'
     # scan = 'gain_A'
     # m = '10'
@@ -208,8 +210,8 @@ if __name__ == '__main__':
     # outputDir = './'
 
 
-    inputROOT = 'output/Run2C_%smethod_%s_Scan_%s/result_28paras_run23_sjtu_Run2C_%smethod_%s_%s.root'%(method,scan,version,method,scan,m)
-    outputDir = 'json/Run2C_%smethod_%s_Scan_%s'%(method,scan,version)
+    inputROOT = 'output/%s_%smethod_%s_Scan_%s/result_28paras_run23_sjtu_%s_%smethod_%s_%s.root'%(dataset,method,scan,version,dataset,method,scan,m)
+    outputDir = 'json/%s_%smethod_%s_Scan_%s'%(dataset,method,scan,version)
 
 
     os.system('mkdir -p %s'%(outputDir))

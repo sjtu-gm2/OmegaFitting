@@ -143,6 +143,19 @@ def GetInitValuesFromROOT_Run23SystScan(file_name,json_name,method,syst):
     with open(json_name,'w') as json_f:
         json.dump(entries, json_f, sort_keys=True, indent=4)
 
+    txt_name = json_name[:-4] + 'txt'
+    with open(txt_name,'w') as txt_f:
+        lines = []
+        for entry in entries[0]:
+            lines.append('%s\n'%(entry))
+        txt_f.writelines(lines)
+
+        
+
+
+
+
+
     print ('generated: %s'%(json_name))
 
 if __name__ == '__main__':

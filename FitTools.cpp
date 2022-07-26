@@ -56,10 +56,11 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     }
     fit_func->SetNpx(4500);
     TFitResultPtr fit_res = fit_hist->Fit(fit_func,"REMS");
+    Int_t fitStatus = fit_res;
 
     double chi2 = fit_func->GetChisquare();
     double ndf = fit_func->GetNDF();
-    cout << "Chi2/NDF = " << chi2/ndf << "    chi2=" << chi2 << " ndf=" << ndf << endl;
+    cout << "Chi2/NDF = " << chi2/ndf << "     Status="<< fitStatus << "    chi2=" << chi2 << " ndf=" << ndf << endl;
     fit_res->SetName(res_name.Data());
 
     TH1 * residual = (TH1*)fit_in.wiggle->Clone(residual_name.Data());
@@ -101,6 +102,7 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     info.residual_name = residual_name;
     info.function_name = func_name;
     info.fft_name = fft_name;
+    info.fitStatus = fitStatus;
 
     return info;
 }

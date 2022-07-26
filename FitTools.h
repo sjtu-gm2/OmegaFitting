@@ -38,6 +38,7 @@ struct FitOutputInfo {
     string function_name;
     string residual_name;
     string fft_name;
+    int fitStatus;
 };
 
 class Fitter {
