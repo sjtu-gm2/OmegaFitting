@@ -117,7 +117,7 @@ def GetInitValuesFromROOT_TmethodFit(file_name,json_name):
     func_name = 'func_10paras_cbo_lost_Slice_%s_%s_MeV'%(e_low,e_high)
     entry = ExtractROOT(file_name, func_name)        
     
-    entries[0] = entry.getvals()        
+    entries[0] = entry.getvals()
     with open(json_name,'w') as json_f:
         json.dump(entries, json_f, sort_keys=True, indent=4)
 
@@ -158,17 +158,70 @@ def GetInitValuesFromROOT_Run23SystScan(file_name,json_name,method,syst):
 
     print ('generated: %s'%(json_name))
 
+
+def GetInitValuesFromROOT_Run4U(version,tag):
+    entries = OrderedDict()
+    func_name = 'func_28paras_run23_sjtu_{0:}_{1:}'.format(version,tag)
+    file_name = './output/{0:}/result_28paras_run23_sjtu_{0:}_{1:}.root'.format(version,tag)
+    json_name = './json/{0:}/{1:}.json'.format(version,tag)
+
+    entry = ExtractROOT(file_name, func_name)
+    print      (file_name)
+    print      (func_name)
+
+    entries[0] = entry.getvals()
+    with open(json_name,'w') as json_f:
+        json.dump(entries, json_f, sort_keys=True, indent=4)
+
+    txt_name = json_name[:-4] + 'txt'
+    with open(txt_name,'w') as txt_f:
+        lines = []
+        for entry in entries[0]:
+            lines.append('%s\n'%(entry))
+        txt_f.writelines(lines)
+
+        
+
+
+
+
+
+    print ('generated: %s'%(json_name))
+
+
+
+def get_run2_official():
+    
+    seed = {
+        'A' : 84,
+        'T' : 137
+    }
+
+    entries = OrderedDict()    
+    file_name = '/Users/cheng/WorkRun23/data/Run2all_seedscan_result_Bingzhi_149ns.root'
+    for method in ['A','T']:
+        func_name = 'Amethod_fitfunc_seed_%s'%(seed[method])
+        json_name = './run2_nominal_%s.json'%(method)
+
+        entry = ExtractROOT(file_name, func_name)
+        print      (file_name)
+        print      (func_name)
+
+        entries[0] = entry.getvals()
+        with open(json_name,'w') as json_f:
+            json.dump(entries, json_f, sort_keys=True, indent=4)
+
+        txt_name = json_name[:-4] + 'txt'
+        with open(txt_name,'w') as txt_f:
+            lines = []
+            for entry in entries[0]:
+                lines.append('%s\n'%(entry))
+            txt_f.writelines(lines)    
+
 if __name__ == '__main__':
-    method = sys.argv[1]
-    scan = sys.argv[2]
-    m = sys.argv[3]
-    version = sys.argv[4]
+         
 
-    inputROOT = 'output/Run2C_%smethod_%s_Scan_%s/result_28paras_run23_sjtu_Run2C_%smethod_%s_%s.root'%(method,scan,version,method,scan,m)
-    outputDir = 'json/Run2C_%smethod_%s_Scan_%s'%(method,scan,version)
+    GetInitValuesFromROOT_Run4U(sys.argv[1],sys.argv[2])
 
-    os.system('mkdir -p %s'%(outputDir))
-    syst = '%s_%s'%(scan,m)
-    json_name = 'Scan_%s.json'%(m)
+    # get_run2_official()
 
-    GetInitValuesFromROOT_Run23SystScan(inputROOT, '%s/%s'%(outputDir,json_name),method,syst)
