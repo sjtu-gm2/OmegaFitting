@@ -1,5 +1,4 @@
 #include "FitTools.h"
-#include "configure_version.h"
 
 using namespace std;
 using namespace blinding;
@@ -11,15 +10,35 @@ double time_scale = 1.0;
 Blinders::fitType ftype = Blinders::kOmega_a;
 
 #if data_version_major == 4
-    Blinders * getBlinded = new Blinders(ftype, "Unexpected virtue of ignorance.");
+Blinders * getBlinded = new Blinders(ftype, "Unexpected virtue of ignorance.");
 #elif data_version_major == 2
-    Blinders * getBlinded = new Blinders(ftype, "stay home, stay healthy!");
-#else    
-    Blinders * getBlinded = new Blinders(ftype, "Bla Bla Bla!");
+Blinders * getBlinded = new Blinders(ftype, "stay home, stay healthy!");
+#elif data_version_major == 3
+Blinders * getBlinded = new Blinders(ftype, "Bla Bla Bla!");
 #endif
 
-
 TH1 * lost_muon;
+
+
+vector<double> GetInitialValuesD(string file_path, string index) {
+  vector<double> init_values;
+#ifdef USE_JSON
+  Json::Value json_value;
+  std::ifstream json_file(file_path.c_str());
+  cout << "load parameters from json:" << file_path << endl;  
+  json_file >> json_value;  
+  for(auto val : json_value[index.c_str()]) {
+      init_values.push_back(double(val.asFloat()));
+  }  
+#else 
+  TFile * file = TFile::Open(file_path.c_str());
+  TArrayD * arrayd = file->Get<TArrayD>(index.c_str());
+  for(int n=0;n<ad->fN;n++) {
+    init_values.push_back(ad->At(n));
+  }
+#endif
+  return init_values;
+}
 
 void FillData(TH1* th1,std::vector<double> & data);
 void FillHist(TH1* th1,const std::vector<double> & data,bool isAbs=true);
@@ -32,6 +51,7 @@ double func_14paras_cbo_lost_vw(double *x, double *p);
 double func_28paras_cbo_VW_lost_expansion(double *x, double *p);
 
 Fitter::Fitter() {
+    cout << "Fitting on Run" << data_version_major << " data" << endl;
 }
 
 void Fitter::SetTimeUnit(TimeUnit t_unit) {

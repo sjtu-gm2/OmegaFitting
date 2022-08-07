@@ -1,10 +1,18 @@
 #ifndef FITTOOLS_H
 #define FITTOOLS_H
 
+#include "configure.h"
+
 #include <string>
 #include <iostream>
 #include <functional>
 #include <iomanip>
+#include <fstream>
+#include <vector>
+
+#ifdef USE_JSON
+#include <json/json.h>
+#endif
 
 #include "TH1D.h"
 #include "TH1.h"
@@ -17,8 +25,9 @@
 #include "pocketfft_hdronly.h"
 #include "Blinders.hh"
 
-
 using namespace std;
+
+vector<double> GetInitialValuesD(string file_path, string index);
 
 struct FitInput {
     TString tag;    
@@ -41,6 +50,7 @@ struct FitOutputInfo {
     int fitStatus;
 };
 
+
 class Fitter {
   public:
     enum TimeUnit {nano_second, micro_second};
@@ -60,4 +70,5 @@ class Fitter {
     FitOutputInfo doFit(const FitInput & fit_in);
     string m_output_dir;
 };
+
 #endif

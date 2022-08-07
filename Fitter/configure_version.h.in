@@ -1,2 +1,0 @@
-#define data_version_major @data_version_major@
-#define data_version_minor @data_version_minor@
