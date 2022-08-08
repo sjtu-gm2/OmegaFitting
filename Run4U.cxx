@@ -28,7 +28,7 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double
     fitter.SetOutputDir(outputDir);
     fitter.SetTimeUnit(Fitter::nano_second);
     if(chain_fit==0) {
-        fitter.Fit_28paras_run23_official(method,wiggle,start_time,end_time,init_values,lm);
+        fitter.Fit_28paras_cbo_lost_vw_expansion(method,wiggle,start_time,end_time,init_values,lm);
     }
     else if(chain_fit==1) {
         // 5 paras fit 
@@ -40,7 +40,7 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double
         vector<double> init_values_28paras = read_parameters(info_5pars.file_name,info_5pars.function_name,5);
         init_values_28paras.insert(init_values_28paras.end(),init_values.begin()+5,init_values.end());
 
-        fitter.Fit_28paras_run23_official(method,wiggle,start_time,end_time,init_values_28paras,lm);
+        fitter.Fit_28paras_cbo_lost_vw_expansion(method,wiggle,start_time,end_time,init_values_28paras,lm);
           
     }    
 }

@@ -48,7 +48,7 @@ double func_5paras(double *x,double *p);
 double func_9paras_cbo(double *x,double *p);
 double func_10paras_cbo_lost(double *x, double *p);
 double func_14paras_cbo_lost_vw(double *x, double *p);
-double func_28paras_cbo_VW_lost_expansion(double *x, double *p);
+double func_28paras_cbo_lost_vw_expansion(double *x, double *p);
 
 Fitter::Fitter() {
     cout << "Fitting on Run" << data_version_major << " data" << endl;
@@ -220,9 +220,9 @@ FitOutputInfo Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t
     return doFit(fit_in);
 }
 
-FitOutputInfo Fitter::Fit_28paras_run23_official(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
+FitOutputInfo Fitter::Fit_28paras_cbo_lost_vw_expansion(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
     TString tag;
-    tag.Form("28paras_run23_sjtu_%s",name.c_str());
+    tag.Form("28paras_cbo_lost_vw_expansion_%s",name.c_str());
 
     FitInput fit_in;
     fit_in.tag = tag;
@@ -242,7 +242,7 @@ FitOutputInfo Fitter::Fit_28paras_run23_official(string name, TH1* wiggle, doubl
     };
 
     fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_28paras_cbo_VW_lost_expansion;
+    std::function<double(double*,double*)> func = func_28paras_cbo_lost_vw_expansion;
 
     fit_in.func = func;
     fit_in.lost_muon = lm;
@@ -385,8 +385,8 @@ double func_14paras_cbo_lost_vw(double *x, double *p) {
 
 
 //1.9MHz func, 28 paras
-double func_28paras_cbo_VW_lost_expansion(double *x, double *p) {
-    double time = x[0];
+double func_28paras_cbo_lost_vw_expansion(double *x, double *p) {
+    double time = x[0] / time_scale;
     // 5-par
     double norm = p[0];
     double life = p[1];
