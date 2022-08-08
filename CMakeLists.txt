@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 set(Run "4.0" CACHE STRING "Gm2 data period")
+set(Main "Run4U" CACHE STRING "Main SRC file")
 
 project(ROOTEXAMPLE VERSION ${Run})
 
@@ -15,5 +16,5 @@ list(APPEND EXTRA_LIBS ROOT::Net ROOT::Hist)
 add_subdirectory(Fitter)
 list(APPEND EXTRA_LIBS FITTER)
 
-add_executable(MAIN test.cxx)
+add_executable(MAIN ${Main}.cxx)
 target_link_libraries(MAIN PUBLIC ${EXTRA_LIBS})

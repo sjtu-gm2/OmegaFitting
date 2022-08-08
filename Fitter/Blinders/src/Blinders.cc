@@ -66,8 +66,7 @@ m_r( 0 )
 // all the work is done in the most general constructor with the appropriate nominal values
 Blinders::Blinders( Blinders::fitType ftype, const std::string& blindingString, double boxWidth, double gaussWidth ) :
 Blinders( ftype, 0, 0, blindingString, boxWidth, gaussWidth )
-{
-  std::cout << "Bliding string = " << blindingString << std::endl; 
+{  
   std::cout << " + ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++ +" << std::endl;
   std::cout << " +                                                                      +" << std::endl;
   std::cout << " +           You have chose to blind your fitting according to          +" << std::endl;
