@@ -50,7 +50,7 @@ double func_10paras_cbo_lost(double *x, double *p);
 double func_14paras_cbo_lost_vw(double *x, double *p);
 double func_28paras_cbo_lost_vw_expansion(double *x, double *p);
 
-Fitter::Fitter() {
+Fitter::Fitter() : max_attempts(1) {
     cout << "Fitting on Run" << data_version_major << " data" << endl;
 }
 
@@ -82,13 +82,38 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
         fit_func->SetParName(n,fit_in.name_vars[n].c_str());
         fit_func->SetParameter(n,fit_in.init_values[n]);
     }
+    
     fit_func->SetNpx(4500);
-    TFitResultPtr fit_res = fit_hist->Fit(fit_func,"REMS");
-    Int_t fitStatus = fit_res;
 
-    double chi2 = fit_func->GetChisquare();
-    double ndf = fit_func->GetNDF();
-    cout << "Chi2/NDF = " << chi2/ndf << "     Status="<< fitStatus << "    chi2=" << chi2 << " ndf=" << ndf << endl;
+    TFitResultPtr fit_res;
+    Int_t fitStatus;    
+    bool IsValid;
+    double chi2,ndf;
+
+    fit_res = fit_hist->Fit(fit_func,"REMS");
+    
+    fitStatus = fit_res;
+    IsValid = fit_res->IsValid();
+    chi2 = fit_func->GetChisquare();
+    ndf = fit_func->GetNDF();
+
+    cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< IsValid << "     Status="<< fitStatus << endl;
+    
+    int refit = 1;
+    while(max_attempts>1 && !IsValid) {
+        cout << "Invalide fitting!!! Retry " << refit++ << endl;
+        fit_res = fit_hist->Fit(fit_func,"QREMS");
+    
+        fitStatus = fit_res;
+        IsValid = fit_res->IsValid();
+        chi2 = fit_func->GetChisquare();
+        ndf = fit_func->GetNDF();
+
+        cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< IsValid << "     Status="<< fitStatus << endl;
+        max_attempts--;
+    }
+    
+
     fit_res->SetName(res_name.Data());
 
     TH1 * residual = (TH1*)fit_in.wiggle->Clone(residual_name.Data());
@@ -338,7 +363,7 @@ double func_10paras_cbo_lost(double *x, double *p) {
     double phi_cbo = p[8];
 
     // k_loss
-    double k = p[9];
+    double k = p[9]*1e-9;
     double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + phi_cbo);

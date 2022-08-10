@@ -54,10 +54,13 @@ struct FitOutputInfo {
 class Fitter {
   public:
     enum TimeUnit {nano_second, micro_second};
+    int max_attempts;
     
     Fitter();
+
     void SetOutputDir(string output_dir);
     void SetTimeUnit(TimeUnit t_unit);
+    void SetMaxAttempts(int attempts) {max_attempts = attempts;};
 
     FitOutputInfo Fit_5paras(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
     FitOutputInfo Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
