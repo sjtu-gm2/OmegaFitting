@@ -1,4 +1,5 @@
 #include "FitTools.h"
+#include <sstream>
 
 using namespace std;
 using namespace blinding;
@@ -40,15 +41,7 @@ vector<double> GetInitialValuesD(string file_path, string index) {
   return init_values;
 }
 
-void FillData(TH1* th1,std::vector<double> & data);
-void FillHist(TH1* th1,const std::vector<double> & data,bool isAbs=true);
-void FFT(TH1* hist, TH1* hist_fft, bool isAbs=true);
 
-double func_5paras(double *x,double *p);
-double func_9paras_cbo(double *x,double *p);
-double func_10paras_cbo_lost(double *x, double *p);
-double func_14paras_cbo_lost_vw(double *x, double *p);
-double func_28paras_cbo_lost_vw_expansion(double *x, double *p);
 
 Fitter::Fitter() : max_attempts(1) {
     cout << "Fitting on Run" << data_version_major << " data" << endl;
@@ -85,37 +78,44 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     
     fit_func->SetNpx(4500);
 
-    TFitResultPtr fit_res;
+        
     Int_t fitStatus;    
-    bool IsValid;
+    bool IsValid = false;
     double chi2,ndf;
 
-    fit_res = fit_hist->Fit(fit_func,"REMS");
-    
+    TFitResultPtr fit_res = fit_hist->Fit(fit_func,"REMS");
+
     fitStatus = fit_res;
     IsValid = fit_res->IsValid();
     chi2 = fit_func->GetChisquare();
     ndf = fit_func->GetNDF();
 
     cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< IsValid << "     Status="<< fitStatus << endl;
-    
-    int refit = 1;
-    while(max_attempts>1 && !IsValid) {
-        cout << "Invalide fitting!!! Retry " << refit++ << endl;
-        fit_res = fit_hist->Fit(fit_func,"QREMS");
-    
-        fitStatus = fit_res;
-        IsValid = fit_res->IsValid();
-        chi2 = fit_func->GetChisquare();
-        ndf = fit_func->GetNDF();
 
-        cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< IsValid << "     Status="<< fitStatus << endl;
-        max_attempts--;
+    int refit = 1;
+    int max_attempts_ = max_attempts;
+    while(max_attempts_>0 && !IsValid) {
+     cout << "Invalid fitting!!! Retry " << refit++ << endl;
+     fit_res = fit_hist->Fit(fit_func,"QREMS");
+
+     fitStatus = fit_res;
+     IsValid = fit_res->IsValid();
+     chi2 = fit_func->GetChisquare();
+     ndf = fit_func->GetNDF();
+
+     cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< IsValid << "     Status="<< fitStatus << endl;
+     max_attempts_--;
     }
-    
+
+    cout << "\nResult-"<< fit_in.tag <<  "\tChi2/NDF=" << chi2/ndf << "\tValid="<< IsValid << "\tStatus="<< fitStatus
+    << "\tR=" << fit_func->GetParameter(3) << "+-" << fit_func->GetParError(3) << endl;
+
+    vector<double> fit_values = fit_in.init_values;
+    for(int n=0;n<fit_in.nvars;n++){
+        fit_values[n] = fit_func->GetParameter(n);
+    }
 
     fit_res->SetName(res_name.Data());
-
     TH1 * residual = (TH1*)fit_in.wiggle->Clone(residual_name.Data());
     residual->Reset();
     int bin_t_start = residual->GetXaxis()->FindBin(fit_in.t_start) + 1;
@@ -142,6 +142,8 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     fft->Write();
     fout->Close();
 
+
+
     cout << "\nOutput file created : "<< outf_name << endl;
     cout << "   wiggle     : " << wiggle_name << endl;
     cout << "   residual   : " << residual_name << endl;
@@ -155,7 +157,8 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     info.residual_name = residual_name;
     info.function_name = func_name;
     info.fft_name = fft_name;
-    info.fitStatus = fitStatus;
+    // info.fitStatus = IsValid;
+    info.fit_values = fit_values;
 
     return info;
 }
@@ -234,7 +237,7 @@ FitOutputInfo Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t
         "N","#tau","A","R","#phi",
         "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
         "k_{loss}",
-        "#tau_{vw}","A_{vw}","#omega_{vw}","#phi_{vw}"
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}"
     };
     fit_in.name_vars = name_vars;
     std::function<double(double*,double*)> func = func_14paras_cbo_lost_vw;
@@ -244,6 +247,61 @@ FitOutputInfo Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t
 
     return doFit(fit_in);
 }
+
+FitOutputInfo Fitter::Fit_14paras_cbo_lost_vo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
+    TString tag;
+    tag.Form("14paras_cbo_lost_vo_%s",name.c_str());
+
+    FitInput fit_in;
+    fit_in.tag = tag;
+    fit_in.wiggle = wiggle;
+    fit_in.t_start = t_start;
+    fit_in.t_end = t_end;
+    fit_in.init_values = init_values;
+    fit_in.nvars = 14;
+    string name_vars[] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+    };
+    fit_in.name_vars = name_vars;
+    std::function<double(double*,double*)> func = func_14paras_cbo_lost_vo;
+
+    fit_in.func = func;
+    fit_in.lost_muon = lm;
+
+    return doFit(fit_in);
+}
+
+
+FitOutputInfo Fitter::Fit_18paras_cbo_lost_vo_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
+    TString tag;
+    tag.Form("18paras_cbo_lost_vo_vw_%s",name.c_str());
+
+    FitInput fit_in;
+    fit_in.tag = tag;
+    fit_in.wiggle = wiggle;
+    fit_in.t_start = t_start;
+    fit_in.t_end = t_end;
+    fit_in.init_values = init_values;
+    fit_in.nvars = 18;
+    string name_vars[] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",        
+    };
+    fit_in.name_vars = name_vars;
+    std::function<double(double*,double*)> func = func_18paras_cbo_lost_vo_vw;
+
+    fit_in.func = func;
+    fit_in.lost_muon = lm;
+
+    return doFit(fit_in);
+}
+
 
 FitOutputInfo Fitter::Fit_28paras_cbo_lost_vw_expansion(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
     TString tag;
@@ -259,8 +317,8 @@ FitOutputInfo Fitter::Fit_28paras_cbo_lost_vw_expansion(string name, TH1* wiggle
     string name_vars[] = {
         "N_{0}","#tau","A","R","#phi_{0}",
         "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
-        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "A_{VW-cbo}","#phi_{VW-cbo}","A_{VW+cbo}","#phi_{VW+cbo}"
@@ -268,6 +326,36 @@ FitOutputInfo Fitter::Fit_28paras_cbo_lost_vw_expansion(string name, TH1* wiggle
 
     fit_in.name_vars = name_vars;
     std::function<double(double*,double*)> func = func_28paras_cbo_lost_vw_expansion;
+
+    fit_in.func = func;
+    fit_in.lost_muon = lm;
+
+    return doFit(fit_in);
+}
+
+FitOutputInfo Fitter::Fit_22paras_cbo_lost_vw_expansion_lite(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
+    TString tag;
+    tag.Form("22paras_cbo_lost_vw_expansion_lite_%s",name.c_str());
+
+    FitInput fit_in;
+    fit_in.tag = tag;
+    fit_in.wiggle = wiggle;
+    fit_in.t_start = t_start;
+    fit_in.t_end = t_end;
+    fit_in.init_values = init_values;
+    fit_in.nvars = 22;
+    string name_vars[] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{VW+cbo}","#phi_{VW+cbo}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{cbo,A}","#phi_{cbo,A}",        
+    };
+
+    fit_in.name_vars = name_vars;
+    std::function<double(double*,double*)> func = func_22paras_cbo_lost_vw_expansion_lite;
 
     fit_in.func = func;
     fit_in.lost_muon = lm;
@@ -389,24 +477,113 @@ double func_14paras_cbo_lost_vw(double *x, double *p) {
     double phi_cbo = p[8];
 
     // k_loss
-    double k = p[9];
+    double k = p[9]*1e-9;
     double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // 4 paras: vw
-    // double fcbo = 2.34
-    // fc = 2*Pi/0.1492;
-    // fvo = TMath::Sqrt(fcbo*(2*fc - fcbo));
-    // fvw = fc - 2*fvo;
+    double fcbo = 2.32657;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+
     double tau_vw = p[10];
     double asym_vw = p[11];
-    double omega_vw = p[12];
+    double omega_vw = p[12]*fvw;
     double phi_vw = p[13];
+
+
+
 
     double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + phi_cbo);
     double vw  = 1-TMath::Exp(-time/tau_vw)*asym_vw*TMath::Cos(omega_vw*time + phi_vw);
     return  norm *(1 - k*aloss)* TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) *  cbo * vw;
 }
 
+
+double func_14paras_cbo_lost_vo(double *x, double *p) {
+    double time = x[0] / time_scale;
+    
+    // 5 paras
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];  
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // 4 paras: cbo
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+
+    // k_loss
+    double k = p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // 4 paras: vw
+    double fcbo = 2.34;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+
+    double tau_vo = p[10];
+    double asym_vo = p[11];
+    double omega_vo = p[12]*fvo;
+    double phi_vo = p[13];
+
+
+    
+
+    double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + phi_cbo);
+    double vo  = vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    return  norm *(1 - k*aloss)* TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) *  cbo * vo;
+}
+
+
+
+double func_18paras_cbo_lost_vo_vw(double *x, double *p) {
+    double time = x[0] / time_scale;
+    // 5-par
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double R = p[3];
+    double phi = p[4];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+    double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + phi_cbo);
+    
+    double fcbo = 2.32657;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+    
+    // k_loss
+    double k = p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    
+    // vo-par
+    double tau_vo = p[10];
+    double asym_vo = p[11];
+    double omega_vo = p[12]*fvo;
+    double phi_vo = p[13];
+    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+
+    // vw-par
+    double tau_vw = p[14];
+    double asym_vw = p[15];
+    double omega_vw = p[16]*fvw;
+    double phi_vw = p[17];
+    double vw = 1-exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw);
+
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*cos(omega*time + phi)) * cbo * vw * vo;
+}
 
 
 //1.9MHz func, 28 paras
@@ -419,39 +596,47 @@ double func_28paras_cbo_lost_vw_expansion(double *x, double *p) {
     double R = p[3];
     double phi = p[4];
     double omega = getBlinded->paramToFreq(R);
+    
     // cbo-par
     double tau_cbo = p[5];
     double asym_cbo = p[6];
     double omega_cbo = p[7];
     double phi_cbo = p[8];
-    double fcbo = 2.34;
+    
+    double fcbo = 2.32657;
     double fc = 2*M_PI/0.1492;
     double fvo = sqrt(fcbo*(2*fc - fcbo));
     double fvw = fc - 2*fvo;
+    
+    // k_loss
+    double k = p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
     // vw-par
-    double tau_vw = p[9];
-    double asym_vw = p[10];
-    double omega_vw = p[11]*fvw;
-    double phi_vw = p[12];
+    double tau_vw = p[10];
+    double asym_vw = p[11];
+    double omega_vw = p[12]*fvw;
+    double phi_vw = p[13];
+
     // expansion-par
     double asym_vwcbo = p[24];
     double phi_vwcbo = p[25];
     double asym_vw_cbo = p[26];
     double phi_vw_cbo = p[27];
     double expan = (1 - exp(-time/tau_cbo)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    // k_loss
-    double k = p[13];
-    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+    
     // dcbo-par
     double asym_dcbo = p[14];
     double phi_dcbo = p[15];
     double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
+    
     // vo-par
     double tau_vo = p[20];
     double asym_vo = p[21];
     double omega_vo = p[22]*fvo;
     double phi_vo = p[23];
     double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    
     // modification of A and phi
     double A1_cbo = p[16];
     double phi1_cbo = p[17];
@@ -459,5 +644,70 @@ double func_28paras_cbo_lost_vw_expansion(double *x, double *p) {
     double phi2_cbo = p[19];
     double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
     double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
+}
+
+//1.9MHz func, 28 paras
+double func_22paras_cbo_lost_vw_expansion_lite(double *x, double *p) {
+    
+    double time = x[0] / time_scale;
+
+    int nvar = 0;
+    // 5-par
+    double norm = p[nvar++];
+    double life = p[nvar++];
+    double asym = p[nvar++];
+    double R = p[nvar++];
+    double phi = p[nvar++];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[nvar++];
+    double asym_cbo = p[nvar++];
+    double omega_cbo = p[nvar++];
+    double phi_cbo = p[nvar++];
+    
+    double fcbo = 2.32657;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+    
+    // k_loss
+    double k = p[nvar++]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // vw-par
+    double tau_vw = p[nvar++];
+    double asym_vw = p[nvar++];
+    double omega_vw = p[nvar++]*fvw;
+    double phi_vw = p[nvar++];
+
+    // expansion-par
+    // double asym_vwcbo = p[24];
+    // double phi_vwcbo = p[25];
+    double asym_vw_cbo = p[nvar++];
+    double phi_vw_cbo = p[nvar++];
+    double expan = (1 - exp(-time/tau_cbo)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
+    
+    // // dcbo-par
+    // // double asym_dcbo = p[14];
+    // // double phi_dcbo = p[15];
+    double dcbo = 1; // - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
+    
+    // vo-par
+    double tau_vo = p[nvar++];
+    double asym_vo = p[nvar++];
+    double omega_vo = p[nvar++]*fvo;
+    double phi_vo = p[nvar++];
+    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    
+    // modification of A and phi
+    double A1_cbo = p[nvar++];
+    double phi1_cbo = p[nvar++];
+    // double A2_cbo = p[18]; 
+    // double phi2_cbo = p[19];
+    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
+    double phit = 1; //- A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
+
     return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
 }
