@@ -80,34 +80,37 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
 
         
     Int_t fitStatus;    
-    bool IsValid = false;
+    bool isValid = false;
     double chi2,ndf;
 
-    TFitResultPtr fit_res = fit_hist->Fit(fit_func,"REMS");
+    TFitResultPtr fit_res;
+
+    fit_res = fit_hist->Fit(fit_func,"REMS");
+
 
     fitStatus = fit_res;
-    IsValid = fit_res->IsValid();
+    isValid = fit_res->IsValid() && (fitStatus%100==0);
     chi2 = fit_func->GetChisquare();
     ndf = fit_func->GetNDF();
 
-    cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< IsValid << "     Status="<< fitStatus << endl;
+    cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< isValid << "     Status="<< fitStatus << endl;
 
     int refit = 1;
     int max_attempts_ = max_attempts;
-    while(max_attempts_>0 && !IsValid) {
+    while(max_attempts_>0 && !isValid) {
      cout << "Invalid fitting!!! Retry " << refit++ << endl;
      fit_res = fit_hist->Fit(fit_func,"QREMS");
 
      fitStatus = fit_res;
-     IsValid = fit_res->IsValid();
+     isValid = fit_res->IsValid() && (fitStatus%100==0);
      chi2 = fit_func->GetChisquare();
      ndf = fit_func->GetNDF();
 
-     cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< IsValid << "     Status="<< fitStatus << endl;
+     cout << "Chi2/NDF = " << chi2/ndf << "    Valid="<< isValid << "     Status="<< fitStatus << endl;
      max_attempts_--;
     }
 
-    cout << "\nResult-"<< fit_in.tag <<  "\tChi2/NDF=" << chi2/ndf << "\tValid="<< IsValid << "\tStatus="<< fitStatus
+    cout << "\nResult-"<< fit_in.tag <<  "\tChi2/NDF=" << chi2/ndf << "\tValid="<< isValid << "\tStatus="<< fitStatus
     << "\tR=" << fit_func->GetParameter(3) << "+-" << fit_func->GetParError(3) << endl;
 
     vector<double> fit_values = fit_in.init_values;
