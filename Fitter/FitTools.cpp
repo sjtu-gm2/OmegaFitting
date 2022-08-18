@@ -34,8 +34,8 @@ vector<double> GetInitialValuesD(string file_path, string index) {
 #else 
   TFile * file = TFile::Open(file_path.c_str());
   TArrayD * arrayd = file->Get<TArrayD>(index.c_str());
-  for(int n=0;n<ad->fN;n++) {
-    init_values.push_back(ad->At(n));
+  for(int n=0;n<arrayd->fN;n++) {
+    init_values.push_back(arrayd->At(n));
   }
 #endif
   return init_values;
