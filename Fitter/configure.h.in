@@ -2,3 +2,26 @@
 #define data_version_minor @data_version_minor@
 
 #cmakedefine USE_JSON
+
+#define REGISTER_FUNC(func_name,num_vars) \
+    FitOutputInfo Fit##func_name(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm=0) {\
+            string fname = #func_name;\
+            if(fname[0]=='_') fname.erase(0,1);\
+            TString tag;\
+            tag.Form("%s_%s",fname.c_str(),name.c_str());\
+            FitInput fit_in;\
+            fit_in.tag = tag;\
+            fit_in.wiggle = wiggle;\
+            fit_in.t_start = t_start;\
+            fit_in.t_end = t_end;\
+            fit_in.init_values = init_values;\
+            fit_in.nvars = num_vars;\
+            fit_in.name_vars = name_vars[fname];\
+            std::function<double(double*,double*)> func = func##func_name;\
+            fit_in.func = func;\
+            fit_in.lost_muon = lm;\
+            return doFit(fit_in);\
+        }
+
+#define DECLARE_FUNC(func_name) \
+        double func##func_name(double *x,double *p);

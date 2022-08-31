@@ -43,6 +43,12 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double
         if(fit_mode == 5) info = fitter.Fit_5paras(method,wiggle,start_time,end_time,info.fit_values);
         if(fit_mode == 9) info = fitter.Fit_9paras_cbo(method,wiggle,start_time,end_time,info.fit_values);
         if(fit_mode == 10) info = fitter.Fit_10paras_cbo_lost(method,wiggle,start_time,end_time,info.fit_values,lm);
+        
+        //changing cbo mode
+        if(fit_mode == 11) info = fitter.Fit_11paras_changing_cbo(method,wiggle,start_time,end_time,info.fit_values);
+        if(fit_mode == 12) info = fitter.Fit_12paras_changing_cbo(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 13) info = fitter.Fit_13paras_cbo_vo(method,wiggle,start_time,end_time,info.fit_values,lm);
+
         if(fit_mode == 14) info = fitter.Fit_14paras_cbo_lost_vo(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 18) info = fitter.Fit_18paras_cbo_lost_vo_vw(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 22) info = fitter.Fit_22paras_cbo_lost_vw_expansion_lite(method,wiggle,start_time,end_time,info.fit_values,lm);
@@ -73,6 +79,7 @@ int main(int argc,char **argv) {
     TFile * file_lm = TFile::Open(argv[3]);
     TH1 * lm = (TH1*)file_lm->Get(argv[4]);
 
+    cout << "Get initialValues from " << argv[5] << "  " << argv[6] << endl;
     vector<double> init_values = GetInitialValuesD(argv[5],argv[6]);
 
 
@@ -89,6 +96,12 @@ int main(int argc,char **argv) {
     if(mode==5) fit_chain = {5,9,10,14,28};
     if(mode==6) fit_chain = {5,9,10,14,18};
     if(mode==7) fit_chain = {5,9,10,22};
+
+    //frequency changing cbo
+    if(mode==8) fit_chain = {5,9,10,12};
+    if(mode==9) fit_chain = {5,9,11};
+    if(mode==10) fit_chain = {5,9,13};
+
 
 
     int attempts = 1;

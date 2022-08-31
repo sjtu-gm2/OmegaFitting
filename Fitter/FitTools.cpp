@@ -20,7 +20,6 @@ Blinders * getBlinded = new Blinders(ftype, "Bla Bla Bla!");
 
 TH1 * lost_muon;
 
-
 vector<double> GetInitialValuesD(string file_path, string index) {
   vector<double> init_values;
 #ifdef USE_JSON
@@ -41,10 +40,69 @@ vector<double> GetInitialValuesD(string file_path, string index) {
   return init_values;
 }
 
-
-
 Fitter::Fitter() : max_attempts(1) {
     cout << "Fitting on Run" << data_version_major << " data" << endl;
+    name_vars["5paras"] = {"N","#tau","A","R","#phi"};
+    name_vars["9paras_cbo"] = {"N","#tau","A","R","#phi","#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}"};
+    name_vars["10paras_cbo_lost"] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}"
+    };
+    name_vars["14paras_cbo_lost_vo"] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+    };
+
+    name_vars["18paras_cbo_lost_vo_vw"] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",        
+    };
+
+    name_vars["28paras_cbo_lost_vw_expansion"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW-cbo}","#phi_{VW-cbo}","A_{VW+cbo}","#phi_{VW+cbo}"
+    };
+
+    name_vars["22paras_cbo_lost_vw_expansion_lite"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{VW+cbo}","#phi_{VW+cbo}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{cbo,A}","#phi_{cbo,A}",        
+    };
+
+    name_vars["12paras_changing_cbo"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}"
+        "A_{1}", "#tau_{1}",
+    };
+
+    name_vars["11paras_changing_cbo"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "A_{1}", "#tau_{1}",        
+    };
+
+    name_vars["13paras_cbo_vo"] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+    };
 }
 
 void Fitter::SetTimeUnit(TimeUnit t_unit) {
@@ -166,207 +224,6 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     return info;
 }
 
-FitOutputInfo Fitter::Fit_5paras(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values) {
-    TString tag;
-    tag.Form("5paras_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 5;
-    string name_vars[] = {"N","#tau","A","R","#phi"};
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_5paras;
-    fit_in.func = func;
-
-    return doFit(fit_in);
-}
-
-FitOutputInfo Fitter::Fit_9paras_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values) {
-    TString tag;
-    tag.Form("9paras_cbo_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 9;
-    string name_vars[] = {"N","#tau","A","R","#phi","#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}"};
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_9paras_cbo;
-    fit_in.func = func;
-
-    return doFit(fit_in);    
-}
-
-
-FitOutputInfo Fitter::Fit_10paras_cbo_lost(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
-    TString tag;
-    tag.Form("10paras_cbo_lost_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 10;
-    string name_vars[] = {"N","#tau","A","R","#phi","#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}","k_{loss}"};
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_10paras_cbo_lost;
-    fit_in.func = func;
-    fit_in.lost_muon = lm;
-
-    return doFit(fit_in);
-}
-
-FitOutputInfo Fitter::Fit_14paras_cbo_lost_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
-    TString tag;
-    tag.Form("14paras_cbo_lost_vw_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 14;
-    string name_vars[] = {
-        "N","#tau","A","R","#phi",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
-        "k_{loss}",
-        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}"
-    };
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_14paras_cbo_lost_vw;
-
-    fit_in.func = func;
-    fit_in.lost_muon = lm;
-
-    return doFit(fit_in);
-}
-
-FitOutputInfo Fitter::Fit_14paras_cbo_lost_vo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
-    TString tag;
-    tag.Form("14paras_cbo_lost_vo_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 14;
-    string name_vars[] = {
-        "N","#tau","A","R","#phi",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
-        "k_{loss}",
-        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
-    };
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_14paras_cbo_lost_vo;
-
-    fit_in.func = func;
-    fit_in.lost_muon = lm;
-
-    return doFit(fit_in);
-}
-
-
-FitOutputInfo Fitter::Fit_18paras_cbo_lost_vo_vw(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
-    TString tag;
-    tag.Form("18paras_cbo_lost_vo_vw_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 18;
-    string name_vars[] = {
-        "N","#tau","A","R","#phi",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
-        "k_{loss}",
-        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
-        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",        
-    };
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_18paras_cbo_lost_vo_vw;
-
-    fit_in.func = func;
-    fit_in.lost_muon = lm;
-
-    return doFit(fit_in);
-}
-
-
-FitOutputInfo Fitter::Fit_28paras_cbo_lost_vw_expansion(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
-    TString tag;
-    tag.Form("28paras_cbo_lost_vw_expansion_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 28;
-    string name_vars[] = {
-        "N_{0}","#tau","A","R","#phi_{0}",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
-        "k_{loss}",
-        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
-        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
-        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
-        "A_{VW-cbo}","#phi_{VW-cbo}","A_{VW+cbo}","#phi_{VW+cbo}"
-    };
-
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_28paras_cbo_lost_vw_expansion;
-
-    fit_in.func = func;
-    fit_in.lost_muon = lm;
-
-    return doFit(fit_in);
-}
-
-FitOutputInfo Fitter::Fit_22paras_cbo_lost_vw_expansion_lite(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm) {
-    TString tag;
-    tag.Form("22paras_cbo_lost_vw_expansion_lite_%s",name.c_str());
-
-    FitInput fit_in;
-    fit_in.tag = tag;
-    fit_in.wiggle = wiggle;
-    fit_in.t_start = t_start;
-    fit_in.t_end = t_end;
-    fit_in.init_values = init_values;
-    fit_in.nvars = 22;
-    string name_vars[] = {
-        "N_{0}","#tau","A","R","#phi_{0}",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
-        "k_{loss}",
-        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
-        "A_{VW+cbo}","#phi_{VW+cbo}",
-        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
-        "A_{cbo,A}","#phi_{cbo,A}",        
-    };
-
-    fit_in.name_vars = name_vars;
-    std::function<double(double*,double*)> func = func_22paras_cbo_lost_vw_expansion_lite;
-
-    fit_in.func = func;
-    fit_in.lost_muon = lm;
-
-    return doFit(fit_in);
-}
-
-// fft implement
 
 void FillData(TH1* th1,std::vector<double> & data) {  
   int nbins = th1->GetNbinsX();
@@ -398,10 +255,6 @@ void FFT(TH1* hist, TH1* hist_fft, bool isAbs) {
   r2r_separable_hartley(shape, strided, strided, axes, data_in.data(), data_out.data(), 1.);
   FillHist(hist_fft,data_out,isAbs);
 }  
-
-
-
-
 
 //fit functions
 
@@ -544,6 +397,7 @@ double func_14paras_cbo_lost_vo(double *x, double *p) {
 
 
 
+
 double func_18paras_cbo_lost_vo_vw(double *x, double *p) {
     double time = x[0] / time_scale;
     // 5-par
@@ -587,7 +441,6 @@ double func_18paras_cbo_lost_vo_vw(double *x, double *p) {
 
     return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*cos(omega*time + phi)) * cbo * vw * vo;
 }
-
 
 //1.9MHz func, 28 paras
 double func_28paras_cbo_lost_vw_expansion(double *x, double *p) {
@@ -713,4 +566,113 @@ double func_22paras_cbo_lost_vw_expansion_lite(double *x, double *p) {
     double phit = 1; //- A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
 
     return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
+}
+
+
+//frequency changing cbo per calo fit
+// 5 + 4 cbo + 2 exp + 1 kloss
+double func_12paras_changing_cbo(double *x, double *p) {
+    double time = x[0] / time_scale;
+
+    int nvar = 0;
+    // 5-par
+    double norm = p[nvar++];
+    double life = p[nvar++];
+    double asym = p[nvar++];
+    double R = p[nvar++];
+    double phi = p[nvar++];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[nvar++];
+    double asym_cbo = p[nvar++];
+    double omega_cbo = p[nvar++];
+    double phi_cbo = p[nvar++];
+    
+
+    // k_loss
+    double k = p[nvar++]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // time chaging cbo terms
+    double a1 = p[nvar++];
+    double tau1 = p[nvar++];
+
+    // double fcbo = 2.32657;
+    // double fc = 2*M_PI/0.1492;
+    // double fvo = sqrt(fcbo*(2*fc - fcbo));
+    // double fvw = fc - 2*fvo;
+    double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + a1*exp(-time/tau1)+ phi_cbo);
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*cos(omega*time + phi)) *cbo;
+}
+
+double func_11paras_changing_cbo(double *x, double *p) {
+    double time = x[0] / time_scale;
+
+    int nvar = 0;
+    // 5-par
+    double norm = p[nvar++];
+    double life = p[nvar++];
+    double asym = p[nvar++];
+    double R = p[nvar++];
+    double phi = p[nvar++];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[nvar++];
+    double asym_cbo = p[nvar++];
+    double omega_cbo = p[nvar++];
+    double phi_cbo = p[nvar++];
+    
+
+    // k_loss
+    // double k = p[nvar++]*1e-9;
+    // double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // time chaging cbo terms
+    double a1 = p[nvar++];
+    double tau1 = p[nvar++];
+
+    // double fcbo = 2.32657;
+    // double fc = 2*M_PI/0.1492;
+    // double fvo = sqrt(fcbo*(2*fc - fcbo));
+    // double fvw = fc - 2*fvo;
+    double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + a1*exp(-time/tau1)+ phi_cbo);
+    return norm * exp(-time/life) * (1 - asym*cos(omega*time + phi)) *cbo;
+}
+
+double func_13paras_cbo_vo(double *x, double *p) {
+    double time = x[0] / time_scale;
+    
+    // 5 paras
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];  
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // 4 paras: cbo
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+
+    // // k_loss
+    // double k = p[9]*1e-9;
+    // double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // 4 paras: vw
+    double fcbo = 2.34;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+
+    double tau_vo = p[9];
+    double asym_vo = p[10];
+    double omega_vo = p[11]*fvo;
+    double phi_vo = p[12];
+
+    double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + phi_cbo);
+    double vo  = vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    return  norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) *  cbo * vo;
 }
