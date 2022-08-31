@@ -45,6 +45,9 @@ double func_18paras_cbo_lost_vo_vw(double *x, double *p);
 double func_22paras_cbo_lost_vw_expansion_lite(double *x, double *p);
 double func_28paras_cbo_lost_vw_expansion(double *x, double *p);
 
+double func_11paras_changing_cbo(double *x,double *p);
+double func_12paras_changing_cbo(double *x,double *p);
+
 
 
 struct FitInput {
@@ -94,7 +97,10 @@ class Fitter {
     FitOutputInfo Fit_22paras_cbo_lost_vw_expansion_lite(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
     FitOutputInfo Fit_28paras_cbo_lost_vw_expansion(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
 
-
+    // frequency changing cbo
+    FitOutputInfo Fit_11paras_changing_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values);
+    FitOutputInfo Fit_12paras_changing_cbo(string name, TH1* wiggle, double t_start, double t_end, vector<double> init_values,TH1* lm);
+    
 
   private:    
     FitOutputInfo doFit(const FitInput & fit_in);
