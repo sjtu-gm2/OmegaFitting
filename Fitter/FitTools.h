@@ -32,6 +32,7 @@ void FillData(TH1* th1,std::vector<double> & data);
 void FillHist(TH1* th1,const std::vector<double> & data,bool isAbs=true);
 void FFT(TH1* hist, TH1* hist_fft, bool isAbs=true);
 vector<double> GetInitialValuesD(string file_path, string index);
+
 struct FitInput {
     TString tag;    
     TH1 * wiggle;

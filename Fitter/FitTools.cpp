@@ -224,7 +224,6 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     return info;
 }
 
-
 void FillData(TH1* th1,std::vector<double> & data) {  
   int nbins = th1->GetNbinsX();
   for(int n=0;n<nbins;n++) {

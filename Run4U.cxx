@@ -102,8 +102,6 @@ int main(int argc,char **argv) {
     if(mode==9) fit_chain = {5,9,11};
     if(mode==10) fit_chain = {5,9,13};
 
-
-
     int attempts = 1;
     int time_shift = 0;
     if(argc>10) {
