@@ -1,0 +1,27 @@
+Universe   = vanilla
+Executable = run_scan.sh
+Log        = submit.log
+
+# run2all
+Output     = logs/pielup_scan_sean_formula.$(Process).out
+Error      = logs/pielup_scan_sean_formula.$(Process).error
+Arguments  = shadow run2all $(Process) pileup_scan
+Queue 20
+
+# run2B
+Output     = logs/pielup_scan_sean_formula.$(Process).out
+Error      = logs/pielup_scan_sean_formula.$(Process).error
+Arguments  = shadow run2B $(Process) pileup_scan
+Queue 20
+
+# run2C
+Output     = logs/pielup_scan_sean_formula.$(Process).out
+Error      = logs/pielup_scan_sean_formula.$(Process).error
+Arguments  = shadow run2C $(Process) pileup_scan
+Queue 20
+
+# run2D
+Output     = logs/pielup_scan_sean_formula.$(Process).out
+Error      = logs/pielup_scan_sean_formula.$(Process).error
+Arguments  = shadow run2D $(Process) pileup_scan
+Queue 20
