@@ -3,7 +3,7 @@ import os
 import json
 import sys
 
-sys.path.append('../OmegaFitting')
+sys.path.append('%s/../OmegaFitting'%(os.environ['PWD']))
 import trans
 
 default_config = {
