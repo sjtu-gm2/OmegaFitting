@@ -1,9 +1,8 @@
 # setup root and c++
-run=2.0
-main=Run2
+run=${1}
+main=Main
 
 echo -e "initialize framework for Run-${run} analysis"
-
 
 source  /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh
 
