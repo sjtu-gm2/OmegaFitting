@@ -103,6 +103,13 @@ Fitter::Fitter() : max_attempts(1) {
         "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
     };
+
+    name_vars["15paras_changing_cbo_vo"] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{1}", "#tau_{1}",
+    };
 }
 
 void Fitter::SetTimeUnit(TimeUnit t_unit) {
@@ -129,7 +136,9 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
 
     TH1 * fit_hist = (TH1*)fit_in.wiggle->Clone(wiggle_name.Data());
     TF1 * fit_func = new TF1(func_name,fit_in.func, fit_in.t_start, fit_in.t_end, fit_in.nvars);
-    for(int n=0;n<fit_in.nvars;n++){
+    
+
+    for(int n=0;n<fit_in.nvars;n++){        
         fit_func->SetParName(n,fit_in.name_vars[n].c_str());
         fit_func->SetParameter(n,fit_in.init_values[n]);
     }
@@ -672,6 +681,46 @@ double func_13paras_cbo_vo(double *x, double *p) {
     double phi_vo = p[12];
 
     double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + phi_cbo);
+    double vo  = vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    return  norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) *  cbo * vo;
+}
+
+double func_15paras_changing_cbo_vo(double *x, double *p) {
+    double time = x[0] / time_scale;
+    
+    // 5 paras
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];  
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // 4 paras: cbo
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+
+    // // k_loss
+    // double k = p[9]*1e-9;
+    // double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // 4 paras: vw
+    double fcbo = 2.34;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+
+    double tau_vo = p[9];
+    double asym_vo = p[10];
+    double omega_vo = p[11]*fvo;
+    double phi_vo = p[12];
+
+    // double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + a1*exp(-time/tau1)+ phi_cbo);
+    double cbo_a1 = p[13];
+    double cbo_tau1 = p[14];
+
+    double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time + cbo_a1*exp(-time/cbo_tau1)+ phi_cbo);
     double vo  = vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
     return  norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) *  cbo * vo;
 }

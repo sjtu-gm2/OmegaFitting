@@ -66,6 +66,7 @@ DECLARE_FUNC(_22paras_cbo_lost_vw_expansion_lite)
 DECLARE_FUNC(_28paras_cbo_lost_vw_expansion)
 DECLARE_FUNC(_11paras_changing_cbo)
 DECLARE_FUNC(_12paras_changing_cbo)
+DECLARE_FUNC(_15paras_changing_cbo_vo)
 
 
 class Fitter {
@@ -95,6 +96,9 @@ class Fitter {
     REGISTER_FUNC(_11paras_changing_cbo,11)
     REGISTER_FUNC(_12paras_changing_cbo,12)
     REGISTER_FUNC(_13paras_cbo_vo,13)
+
+    REGISTER_FUNC(_15paras_changing_cbo_vo,15)
+    
 
   private:    
     map<string,vector<string>> name_vars;

@@ -11,41 +11,48 @@ default_config = {
     'lm_name' : 'topDir/Iter0/LostMuons/BaseCuts/Triples/Losses/triple_losses_spectra_integral',
 }
 
-def fit_random_type_calo(method,random_type,calo):
-
-    tag = 'T1650_calo{2:}_{0:}_{1:}'.format(method,random_type,calo)
+def fit_random_type_calo(method,random_type,calo,time_offset):
 
     wiggle_file = './data_random_type/wiggles_T.root'
-    wiggle_name = 'wiggle_{0:}'.format(tag)
+    wiggle_name = 'wiggle_T1650_calo{0:}_{1:}_{2:}'.format(calo,method,random_type)
+
 
     lm_file = default_config['lm_file']
     lm_name = default_config['lm_name']
     
-    output_dir = './output/{0:}'.format(tag)
-    output_val = './values/{0:}'.format(tag)
-
-    mode = 10
-
-    # initial_json = '/home/chencheng/Fitter_Wa/run/values_calofit/tmethod_calo_fit.json'
-    initial_json = '/home/chencheng/Fitter_Wa/run/values_calofit/tmethod_calo_fit_cbo_vo.json'
-    initial_file = '/home/chencheng/Fitter_Wa/run/values_calofit/tmethod_calo_fit_cbo_vo.root'
-    initial_name = 'initial_values'
-
-    trans.main(initial_json,initial_file,initial_name)
-
-    max_try = 5
-
+    output_dir = './output/start_time_T1650_calo{0:}_{1:}_{2:}'.format(calo,method,random_type)
+    output_val = './values/start_time_T1650_calo{0:}_{1:}_{2:}'.format(calo,method,random_type)
     os.system('mkdir -p %s'%(output_dir))
     os.system('mkdir -p %s'%(output_val))
 
-    os.system('../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:}'.format(
-        wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag,mode,max_try))
+    mode = 10
 
-    # os.wait()
-    os.system('hadd -f {0:}/result_{1:}.root {0:}/result_*{1:}.root'.format(output_dir,tag))
+    func_name = '13paras_cbo_vo'
+    initial_file = '{0:}/time_{1:}.root'.format(output_val,time_offset-5)
+    initial_name = 'T1650_calo{0:}_{1:}_{2:}_time{3:}_{4:}'.format(calo,method,random_type,time_offset-5,func_name)
 
-method = 'shadow'
-random_type = 'PerFill'
-calo = 1
+    output_file = '{0:}/time_{1:}.root'.format(output_val,time_offset)
+    output_name = 'T1650_calo{0:}_{1:}_{2:}_time{3:}_{4:}'.format(calo,method,random_type,time_offset,func_name)
 
-fit_random_type_calo(method, random_type,calo)
+    tag_out = 'T1650_calo{0:}_{1:}_{2:}_time{3:}'.format(calo,method,random_type,time_offset)
+
+    max_try = 5
+
+    os.system('../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:}'.format(
+        wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,time_offset))
+    
+    res_name = '{0:}/result_{1:}_{2:}.root'.format(output_dir,func_name,tag_out)
+    res_func_name = 'func_{0:}_{1:}'.format(func_name,tag_out)
+
+
+    trans.extract(res_name,res_func_name,output_file,output_name)
+    
+    # os.system('hadd -f {0:}/result_{1:}.root {0:}/result_*{1:}.root'.format(output_dir,tag_out))
+
+
+if __name__ == '__main__':
+    n = int(sys.argv[1])+1
+    method = 'shadow'
+    random_type = 'PerFill'
+    calo = 1    
+    fit_random_type_calo(method, random_type,calo,n*5)

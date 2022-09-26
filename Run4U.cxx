@@ -48,6 +48,9 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double
         if(fit_mode == 11) info = fitter.Fit_11paras_changing_cbo(method,wiggle,start_time,end_time,info.fit_values);
         if(fit_mode == 12) info = fitter.Fit_12paras_changing_cbo(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 13) info = fitter.Fit_13paras_cbo_vo(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 15) info = fitter.Fit_15paras_changing_cbo_vo(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+
 
         if(fit_mode == 14) info = fitter.Fit_14paras_cbo_lost_vo(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 18) info = fitter.Fit_18paras_cbo_lost_vo_vw(method,wiggle,start_time,end_time,info.fit_values,lm);
@@ -101,6 +104,7 @@ int main(int argc,char **argv) {
     if(mode==8) fit_chain = {5,9,10,12};
     if(mode==9) fit_chain = {5,9,11};
     if(mode==10) fit_chain = {5,9,13};
+    if(mode==11) fit_chain = {5,9,13,15};
 
     int attempts = 1;
     int time_shift = 0;
