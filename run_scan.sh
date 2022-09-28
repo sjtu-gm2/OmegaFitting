@@ -6,5 +6,5 @@ random_type=${2}
 seed_num=${3}
 scan_type=${4}
 
-cd /home/chencheng/Fitter_Wa_run2/run
+# cd /home/chencheng/Fitter_Wa_run2/run
 python ./launch_fitter_run2.py ${method} ${random_type} ${seed_num} ${scan_type}
