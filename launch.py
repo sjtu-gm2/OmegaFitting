@@ -87,7 +87,7 @@ def run(args):
     os.system('mkdir -p {0:}'.format(value_dir))
 
     fix = "None"
-    if 'fix' in config['fix']:
+    if 'fix' in config:
         fix = ''
         for key,value in config['fix'].iteritems():
             fix += '{0:} {1:}'.format(key,value)
