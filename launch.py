@@ -89,7 +89,7 @@ def run(args):
     fix = "None"
     if 'fix' in config:
         fix = ''
-        for key,value in config['fix'].iteritems():
+        for key,value in config['fix'].items():
             fix += '{0:} {1:}'.format(key,value)
     os.system('../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:} --fix {11:}'.format(
         wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,time_offset,fix))
