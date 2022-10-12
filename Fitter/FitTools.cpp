@@ -82,7 +82,7 @@ Fitter::Fitter() : max_attempts(1) {
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "A_{VW+cbo}","#phi_{VW+cbo}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
-        "A_{cbo,A}","#phi_{cbo,A}",        
+        "A_{cbo,A}","#phi_{cbo,A}",
     };
 
     name_vars["12paras_changing_cbo"] = {
@@ -143,6 +143,11 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
         fit_func->SetParameter(n,fit_in.init_values[n]);
     }
     
+    for(auto fix : fix_parameters) {
+        if(fix.first<fit_in.nvars) {
+            fit_func->FixParameter(fix.first,fix.second);
+        }
+    }
     fit_func->SetNpx(4500);
 
         

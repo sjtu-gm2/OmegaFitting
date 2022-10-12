@@ -29,13 +29,14 @@ void fill_parameters_chain(const FitOutputInfo &info, vector<double> & init_valu
 }
 
 
-void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain,int attempts) {
+void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain,int attempts,map<int,double> fix_parameters) {
     int status = mkdir(outputDir.c_str(),0777);
 
     Fitter fitter;
     fitter.SetMaxAttempts(attempts);
     fitter.SetOutputDir(outputDir);
     fitter.SetTimeUnit(Fitter::nano_second);
+    fitter.SetFixParameters(fix_parameters);
 
     FitOutputInfo info;
     info.fit_values = init_values;
@@ -116,10 +117,20 @@ int main(int argc,char **argv) {
         time_shift = atoi(argv[11]);
         start_time += 0.1492e3 * time_shift;
     }
-
+    map<int,double> fix_parameters;
+    if(argc>13) {
+        string fix = Form("%s",argv[13]);
+        if(fix!=string("None")) {
+            for(int start=13;start<argc;start+=2) {
+                int npar = atoi(argv[start]);
+                double fix_value = atof(argv[start+1]);
+                fix_parameters[npar] = fix_value;
+            }
+        }
+    }
 
     cout << " Time range from " << start_time << " to " << end_time << endl;
-    FullFit(wiggle,lm,outputDir,name,init_values,fit_chain,attempts);
+    FullFit(wiggle,lm,outputDir,name,init_values,fit_chain,attempts,fix_parameters);
 
     return 0;
 }

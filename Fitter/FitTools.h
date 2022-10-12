@@ -79,6 +79,7 @@ class Fitter {
     void SetOutputDir(string output_dir);
     void SetTimeUnit(TimeUnit t_unit);
     void SetMaxAttempts(int attempts) {max_attempts = attempts;};
+    void SetFixParameters(map<int,double> _fix_parameters) {fix_parameters=_fix_parameters;};
 
 
     REGISTER_FUNC(_5paras,5)
@@ -104,6 +105,7 @@ class Fitter {
     map<string,vector<string>> name_vars;
     FitOutputInfo doFit(const FitInput & fit_in);
     string m_output_dir;
+    map<int,double> fix_parameters;
 };
 
 #endif
