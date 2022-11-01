@@ -59,7 +59,7 @@ Fitter::Fitter() : max_attempts(1) {
 
     name_vars["18paras_cbo_lost_vo_vw"] = {
         "N","#tau","A","R","#phi",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",
         "k_{loss}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",        
@@ -67,7 +67,7 @@ Fitter::Fitter() : max_attempts(1) {
 
     name_vars["28paras_cbo_lost_vw_expansion"] = {
         "N_{0}","#tau","A","R","#phi_{0}",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
         "k_{loss}",
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
@@ -77,7 +77,7 @@ Fitter::Fitter() : max_attempts(1) {
 
     name_vars["22paras_cbo_lost_vw_expansion_lite"] = {
         "N_{0}","#tau","A","R","#phi_{0}",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
         "k_{loss}",
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "A_{VW+cbo}","#phi_{VW+cbo}",
@@ -115,7 +115,13 @@ Fitter::Fitter() : max_attempts(1) {
 void Fitter::SetTimeUnit(TimeUnit t_unit) {
     if(t_unit == Fitter::nano_second) {
         time_scale = 1e3;
+    } else if(t_unit == Fitter::micro_second){
+        time_scale = 1.0;
+    } else {
+        cout <<"unknown time unit" << endl;
+        exit(1);
     }
+    cout << "time scale = " << time_scale << endl;
 }
 
 void Fitter::SetOutputDir(string output_dir) {

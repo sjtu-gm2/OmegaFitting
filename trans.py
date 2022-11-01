@@ -4,12 +4,8 @@ import sys
 from array import array
 
 
-def main(json_path,root_path,array_name):
-    # root_path = json_path.rstrip('json') + 'root'
-
-    with open(json_path) as fp:
-        res = json.load(fp)['0']
-
+def main(res,root_path,array_name):
+    
     ar = array('d',res)
     f = R.TFile(root_path,'recreate')
     ad = R.TArrayD(len(res),ar)
@@ -34,12 +30,80 @@ def extract(in_file,in_tag,out_file,out_tag):
 
 
 if __name__ == '__main__':
-    extract('./output/T1650_calo1_shadow_PerFill/result_13paras_cbo_vo_T1650_calo1_shadow_PerFill.root','func_13paras_cbo_vo_T1650_calo1_shadow_PerFill', './values/start_time_T1650_calo1_shadow_PerFill/time_0.root','T1650_calo1_shadow_PerFill_time0_13paras_cbo_vo')
-    # main(sys.argv[1], sys.argv[2])
-    # for n in range(1000,3000,100):
-    #     slice_name = '%s_%s'%(n,n+100)
-    #     json_name = '/Users/cheng/workspace/TestCMake_fitter/run/output_slices_values/Vals_E%s_10paras_cbo_lost.json'%(slice_name)
-    #     root_name = './values/empirical_normal_slice%s.root'%(slice_name)
-    #     array_name = 'empirical_normal_slice%s'%(slice_name)
-    #     main(json_name,root_name,array_name)
-    # main('./jsons/run4_baseline_T.json', './values/empirical_normal_A_nominal_22paras.root' ,'empirical_normal_A_nominal_22paras')
+    # vals = [
+    #     41755687.267527215,
+    #     64.43076230477948,
+    #     0.3759022601235838,
+    #     -69.75065097977392,
+    #     5.307510390424583,
+    #     # cbo
+    #     256.63967777633246,
+    #     -0.0035765901600223952,
+    #     2.340495730847803,
+    #     19.214191355386674,
+    #     # kloss
+    #     0.06434482798956877,        
+    #     # vw
+    #     9814731.146417117,
+    #     -2.67113632082343e-05,
+    #     5.007750648543958,        
+    #     -0.44083343794917906,
+    #     # double-cbo
+    #     0.000199152499635221,
+    #     0.06597656689032932,
+    #     # A-phi
+    #     -0.0001775494589560454,
+    #     0.733954495511215,        
+    #     -2.0031386698989306e-05,
+    #     -16.86565373441572,
+    #     # vo
+    #     38.08986611917626,
+    #     -0.0010865204449305528,        
+    #     1.0331910917923433,
+    #     -27.258885264058172,
+    #     # vw-cbo
+    #     2.0773394168497188e-05,
+    #     23.204437023257356,
+    #     -0.0001620785766340185,
+    #     9.833249299197329,
+    # ]
+    vals = [
+        41755679.53918229,
+        64.43077502531082,
+        0.37590106965019743,
+        -69.80434730830636,
+        5.3075184573897145,
+        #cbo
+        256.1742727533705,
+        -0.0035818055576323266,
+        2.3404739197349684,
+        19.216104918195175,
+        #kloss
+        0.06437135194474429,
+        #vw
+        26.74856112300246,
+        0.0018538729005055515,
+        0.9836920412375928,
+        13.32279758806431,
+        #dcbo
+        0.00018944160990633222,
+        0.16046788893044772,
+        #A-phi
+        -0.0001937312627423803,
+        0.7679443757490649,
+        -1.748495677246477e-05,
+        -16.858815535019758,
+        #vy
+        113.89682492357069,
+        -0.00022528692483361466,
+        1.0085989300999,
+        -12.63722304309699,
+        #vw-cbo
+        0.00012000708764433906,
+        33.15206307643027,
+        -0.0006004915697415999,
+        18.47359159059509,
+    ]
+    main(vals, './values/run2_corr.root' ,'run2_corr')
+    
+

@@ -32,11 +32,29 @@ void fill_parameters_chain(const FitOutputInfo &info, vector<double> & init_valu
 void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain,int attempts,map<int,double> fix_parameters) {
     int status = mkdir(outputDir.c_str(),0777);
 
-    Fitter fitter;
+
+    
+
+    Fitter fitter;    
     fitter.SetMaxAttempts(attempts);
-    fitter.SetOutputDir(outputDir);
-    fitter.SetTimeUnit(Fitter::nano_second);
+    fitter.SetOutputDir(outputDir);    
     fitter.SetFixParameters(fix_parameters);
+
+    double binW = wiggle->GetBinWidth(1);
+    if(binW==0.1492) {           
+        fitter.SetTimeUnit(Fitter::micro_second);
+        start_time *= 1e-3;
+        end_time *= 1e-3;
+        cout << "wiggle time unit: micro second"<<endl;
+    }
+    else if(binW==149.2) {
+        fitter.SetTimeUnit(Fitter::nano_second);
+        cout << "wiggle time unit: nano second"<<endl;
+    }
+    else {
+        cout <<"unknown bin width = " << binW << endl;
+        exit(1);
+    }
 
     FitOutputInfo info;
     info.fit_values = init_values;
@@ -122,8 +140,14 @@ int main(int argc,char **argv) {
         string fix = Form("%s",argv[13]);
         if(fix!=string("None")) {
             for(int start=13;start<argc;start+=2) {
-                int npar = atoi(argv[start]);
-                double fix_value = atof(argv[start+1]);
+                int npar = atoi(argv[start]);                
+                double fix_value;
+                if(string(argv[start+1])==string("nan")) {
+                    fix_value = init_values[npar];
+                }
+                else {
+                    fix_value = atof(argv[start+1]);
+                }
                 fix_parameters[npar] = fix_value;
             }
         }
