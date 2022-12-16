@@ -4,8 +4,6 @@
 #include "TH1D.h"
 #include "FitTools.h"
 
-float start_time = 30.1384e3;
-float end_time = 650e3;
 
 using namespace std;
 
@@ -19,17 +17,7 @@ vector<double> read_parameters(string file_name, string func_name, int nvars) {
     return vals;
 }
 
-void fill_parameters_chain(const FitOutputInfo &info, vector<double> & init_values_run, int nvars) {
-    string file_name = info.file_name;
-    string func_name = info.function_name;
-    auto vals = read_parameters(file_name,func_name,nvars);
-    for(int n=0;n<nvars;n++) {
-        init_values_run[n] = vals[n];
-    }
-}
-
-
-void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain,int attempts,map<int,double> fix_parameters) {
+void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain,int attempts,map<int,double> fix_parameters) {
     int status = mkdir(outputDir.c_str(),0777);
 
 
@@ -41,10 +29,13 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double
     fitter.SetFixParameters(fix_parameters);
 
     double binW = wiggle->GetBinWidth(1);
+    double start_time = start_bin * binW;
+    double end_time   = end_bin * binW;
+
+    cout << " Time range from " << start_time << " to " << end_time << endl;
+
     if(binW==0.1492) {           
-        fitter.SetTimeUnit(Fitter::micro_second);
-        start_time *= 1e-3;
-        end_time *= 1e-3;
+        fitter.SetTimeUnit(Fitter::micro_second);        
         cout << "wiggle time unit: micro second"<<endl;
     }
     else if(binW==149.2) {
@@ -75,6 +66,16 @@ void FullFit(TH1* wiggle, TH1 *lm, string outputDir, string method,vector<double
         if(fit_mode == 18) info = fitter.Fit_18paras_cbo_lost_vo_vw(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 22) info = fitter.Fit_22paras_cbo_lost_vw_expansion_lite(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 28) info = fitter.Fit_28paras_cbo_lost_vw_expansion(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+        //cbo syst
+        if(fit_mode == 29) info = fitter.Fit_29paras_cbo_envelope_C(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 30) info = fitter.Fit_30paras_cbo_freq(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 31) info = fitter.Fit_31paras_cbo_time(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+
+        //simplified
+        if(fit_mode == 1024) info = fitter.Fit_run1_24paras(method,wiggle,start_time,end_time,info.fit_values,lm);
+
     }
 }
 
@@ -109,6 +110,7 @@ int main(int argc,char **argv) {
     string name = Form("%s",argv[8]);
 
     int mode = atoi(argv[9]);
+    cout << "mode " << mode << endl;
     vector<int> fit_chain;
     if(mode==0) fit_chain = {28};
     if(mode==1) fit_chain = {5,28};
@@ -125,36 +127,40 @@ int main(int argc,char **argv) {
     if(mode==10) fit_chain = {5,9,13};
     if(mode==11) fit_chain = {5,9,13,15};
 
-    int attempts = 1;
-    int time_shift = 0;
-    if(argc>10) {
-        attempts = atoi(argv[10]);
-    }
+    if(mode==12) fit_chain = {29}; //envelope
+    if(mode==13) fit_chain = {30}; //freq
+    if(mode==14) fit_chain = {31}; //timing    
 
-    if(argc>11) {
-        time_shift = atoi(argv[11]);
-        start_time += 0.1492e3 * time_shift;
-    }
+    //simplified functions
+    if(mode==1000) fit_chain = {1024}; //Run-1, no expansion for 1.9 MHz
+
+    int attempts;
+    attempts = atoi(argv[10]);
+
+    int start_bin,end_bin;
+        
+    start_bin = atoi(argv[11]);
+    end_bin   = atoi(argv[12]);
+    
     map<int,double> fix_parameters;
-    if(argc>13) {
-        string fix = Form("%s",argv[13]);
-        if(fix!=string("None")) {
-            for(int start=13;start<argc;start+=2) {
-                int npar = atoi(argv[start]);                
-                double fix_value;
-                if(string(argv[start+1])==string("nan")) {
-                    fix_value = init_values[npar];
-                }
-                else {
-                    fix_value = atof(argv[start+1]);
-                }
-                fix_parameters[npar] = fix_value;
+    
+    string fix = Form("%s",argv[14]);
+    if(fix!=string("None")) {
+        for(int start=14;start<argc;start+=2) {
+            int npar = atoi(argv[start]);                
+            double fix_value;
+            if(string(argv[start+1])==string("nan")) {
+                fix_value = init_values[npar];
             }
+            else {
+                fix_value = atof(argv[start+1]);
+            }
+            fix_parameters[npar] = fix_value;
         }
     }
-
-    cout << " Time range from " << start_time << " to " << end_time << endl;
-    FullFit(wiggle,lm,outputDir,name,init_values,fit_chain,attempts,fix_parameters);
+    
+    
+    FullFit(wiggle,start_bin,end_bin,lm,outputDir,name,init_values,fit_chain,attempts,fix_parameters);
 
     return 0;
 }

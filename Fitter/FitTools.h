@@ -68,6 +68,13 @@ DECLARE_FUNC(_11paras_changing_cbo)
 DECLARE_FUNC(_12paras_changing_cbo)
 DECLARE_FUNC(_15paras_changing_cbo_vo)
 
+DECLARE_FUNC(_29paras_cbo_envelope_C)
+DECLARE_FUNC(_30paras_cbo_freq)
+DECLARE_FUNC(_31paras_cbo_time)
+DECLARE_FUNC(_simplified_22paras_calos)
+
+DECLARE_FUNC(_run1_24paras)
+
 
 class Fitter {
   public:
@@ -99,6 +106,14 @@ class Fitter {
     REGISTER_FUNC(_13paras_cbo_vo,13)
 
     REGISTER_FUNC(_15paras_changing_cbo_vo,15)
+
+    
+    REGISTER_FUNC(_simplified_22paras_calos,22)
+    REGISTER_FUNC(_29paras_cbo_envelope_C,29)
+    REGISTER_FUNC(_30paras_cbo_freq,30)
+    REGISTER_FUNC(_31paras_cbo_time,31)
+
+    REGISTER_FUNC(_run1_24paras,24)
     
 
   private:    

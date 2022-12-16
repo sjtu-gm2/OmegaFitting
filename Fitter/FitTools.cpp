@@ -72,7 +72,7 @@ Fitter::Fitter() : max_attempts(1) {
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
-        "A_{VW-cbo}","#phi_{VW-cbo}","A_{VW+cbo}","#phi_{VW+cbo}"
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
     };
 
     name_vars["22paras_cbo_lost_vw_expansion_lite"] = {
@@ -80,7 +80,7 @@ Fitter::Fitter() : max_attempts(1) {
         "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
         "k_{loss}",
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
-        "A_{VW+cbo}","#phi_{VW+cbo}",
+        "A_{VW-cbo}","#phi_{VW-cbo}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "A_{cbo,A}","#phi_{cbo,A}",
     };
@@ -109,6 +109,55 @@ Fitter::Fitter() : max_attempts(1) {
         "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "A_{1}", "#tau_{1}",
+    };
+    name_vars["29paras_cbo_envelope_C"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+    };
+    name_vars["30paras_cbo_freq"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "A_{cbo}^{residual}","#tau_{cbo}^{residual}"
+    };
+    name_vars["31paras_cbo_time"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "#tau_{cbo}^{a}","#tau_{cbo}^{phi}", "#tau_{cbo}^{2a}",
+    };
+
+    name_vars["simplified_22paras_calos"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW-cbo}","#phi_{VW-cbo}",
+    };
+    
+    name_vars["run1_24paras"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",        
     };
 }
 
@@ -167,7 +216,7 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
 
 
     fitStatus = fit_res;
-    isValid = fit_res->IsValid() && (fitStatus%100==0);
+    isValid = fit_res->IsValid();// && (fitStatus%100==0);
     chi2 = fit_func->GetChisquare();
     ndf = fit_func->GetNDF();
 
@@ -179,8 +228,8 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
      cout << "Invalid fitting!!! Retry " << refit++ << endl;
      fit_res = fit_hist->Fit(fit_func,"QREMS");
 
-     fitStatus = fit_res;
-     isValid = fit_res->IsValid() && (fitStatus%100==0);
+     fitStatus = fit_res;     
+     isValid = fit_res->IsValid();// && (fitStatus%100==0);
      chi2 = fit_func->GetChisquare();
      ndf = fit_func->GetNDF();
 
@@ -299,7 +348,7 @@ double func_9paras_cbo(double *x, double *p) {
     double phi = p[4];
 
     // 4 paras: cbo
-    double tau_cbo = p[5];
+    double tau_cbo = p[5]; //fix to infinity
     double asym_cbo = p[6];
     double omega_cbo = p[7];
     double phi_cbo = p[8];
@@ -522,7 +571,7 @@ double func_28paras_cbo_lost_vw_expansion(double *x, double *p) {
     return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
 }
 
-//1.9MHz func, 28 paras
+//1.9MHz func, 22 paras
 double func_22paras_cbo_lost_vw_expansion_lite(double *x, double *p) {
     
     double time = x[0] / time_scale;
@@ -735,3 +784,325 @@ double func_15paras_changing_cbo_vo(double *x, double *p) {
     double vo  = vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
     return  norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) *  cbo * vo;
 }
+
+//1.9MHz func, 29 paras
+double func_29paras_cbo_envelope_C(double *x, double *p) {
+    double time = x[0] / time_scale;
+    // 5-par
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double R = p[3];
+    double phi = p[4];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+    
+    double fcbo = 2.32657;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+    
+    // k_loss
+    double k = p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // vw-par
+    double tau_vw = p[10];
+    double asym_vw = p[11];
+    double omega_vw = p[12]*fvw;
+    double phi_vw = p[13];
+
+    // expansion-par
+    double asym_vwcbo = p[24];
+    double phi_vwcbo = p[25];
+    double asym_vw_cbo = p[26];
+    double phi_vw_cbo = p[27];
+    double cbo_constant = p[28];
+
+    double expan = (1 - (exp(-time/tau_cbo) + cbo_constant)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
+    
+    // dcbo-par
+    double asym_dcbo = p[14];
+    double phi_dcbo = p[15];
+    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
+    
+    // vo-par
+    double tau_vo = p[20];
+    double asym_vo = p[21];
+    double omega_vo = p[22]*fvo;
+    double phi_vo = p[23];
+    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    
+    // modification of A and phi
+    double A1_cbo = p[16];
+    double phi1_cbo = p[17];
+    double A2_cbo = p[18];
+    double phi2_cbo = p[19];
+    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
+    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
+}
+
+//1.9MHz func, 30 paras
+double func_30paras_cbo_freq(double *x, double *p) {
+    double time = x[0] / time_scale;
+    // 5-par
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double R = p[3];
+    double phi = p[4];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+    
+    double fcbo = 2.32657;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+    
+    // k_loss
+    double k = p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // vw-par
+    double tau_vw = p[10];
+    double asym_vw = p[11];
+    double omega_vw = p[12]*fvw;
+    double phi_vw = p[13];
+
+    // expansion-par
+    double asym_vwcbo = p[24];
+    double phi_vwcbo = p[25];
+    double asym_vw_cbo = p[26];
+    double phi_vw_cbo = p[27];
+    double a_cbo_residual = p[28];
+    double tau_cbo_residual = p[29];
+
+    double expan = (1 - exp(-time/tau_cbo)*asym_cbo*cos(omega_cbo*time + phi_cbo + a_cbo_residual*exp(-time/tau_cbo_residual)) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
+    
+    // dcbo-par
+    double asym_dcbo = p[14];
+    double phi_dcbo = p[15];
+    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
+    
+    // vo-par
+    double tau_vo = p[20];
+    double asym_vo = p[21];
+    double omega_vo = p[22]*fvo;
+    double phi_vo = p[23];
+    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    
+    // modification of A and phi
+    double A1_cbo = p[16];
+    double phi1_cbo = p[17];
+    double A2_cbo = p[18];
+    double phi2_cbo = p[19];
+    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
+    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
+}
+
+//1.9MHz func, 31 paras
+double func_31paras_cbo_time(double *x, double *p) {
+    double time = x[0] / time_scale;
+    // 5-par
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double R = p[3];
+    double phi = p[4];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+    
+    double fcbo = 2.32657;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+    
+    // k_loss
+    double k = p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // vw-par
+    double tau_vw = p[10];
+    double asym_vw = p[11];
+    double omega_vw = p[12]*fvw;
+    double phi_vw = p[13];
+
+    // expansion-par
+    double asym_vwcbo = p[24];
+    double phi_vwcbo = p[25];
+    double asym_vw_cbo = p[26];
+    double phi_vw_cbo = p[27];
+
+    //cbo time constants
+    double tau_cbo_a = p[28];
+    double tau_cbo_phi = p[29];
+    double tau_cbo_2a = p[30];
+    
+
+    double expan = (1 - exp(-time/tau_cbo)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
+    
+    // dcbo-par
+    double asym_dcbo = p[14];
+    double phi_dcbo = p[15];
+    double dcbo = 1 - exp(-2*time/tau_cbo_2a)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
+    
+    // vo-par
+    double tau_vo = p[20];
+    double asym_vo = p[21];
+    double omega_vo = p[22]*fvo;
+    double phi_vo = p[23];
+    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    
+    // modification of A and phi
+    double A1_cbo = p[16];
+    double phi1_cbo = p[17];
+    double A2_cbo = p[18];
+    double phi2_cbo = p[19];
+    
+    
+    double At = 1 - A1_cbo*exp(-time/tau_cbo_a)*cos(omega_cbo*time + phi1_cbo);
+    double phit = 1 - A2_cbo*exp(-time/tau_cbo_phi)*cos(omega_cbo*time + phi2_cbo);
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
+}
+
+
+//simplified func for calorimeter fit
+//1.9MHz func, 22 paras
+double func_simplified_22paras_calos(double *x, double *p) {
+    double time = x[0] / time_scale;
+    // 5-par
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double R = p[3];
+    double phi = p[4];
+    double omega = getBlinded->paramToFreq(R);
+    
+    // cbo-par
+    double tau_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+    
+    double fcbo = 2.32657;
+    double fc = 2*M_PI/0.1492;
+    double fvo = sqrt(fcbo*(2*fc - fcbo));
+    double fvw = fc - 2*fvo;
+
+    // k_loss
+    double k = p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // vw-par
+    double tau_vw = p[10];
+    double asym_vw = p[11];
+    double omega_vw = p[12]*fvw;
+    double phi_vw = p[13];
+
+    // dcbo-par
+    double asym_dcbo = p[14];
+    double phi_dcbo = p[15];
+
+    // vo-par
+    double tau_vo = p[16];
+    double asym_vo = p[17];
+    double omega_vo = p[18]*fvo;
+    double phi_vo = p[19];
+
+    // expansion-par        
+    //cbo+vw, consistent with 0
+    // double asym_vwcbo = p[24];
+    // double phi_vwcbo = p[25];
+    //cbo-vw,
+
+    double asym_vw_cbo = p[20];
+    double phi_vw_cbo = p[21];
+    
+    double expan = (1 - exp(-time/tau_cbo)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*( asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
+    
+    
+    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
+    
+    
+    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
+    
+    // modification of A and phi
+    // double A1_cbo = p[16];
+    // double phi1_cbo = p[17];
+    // double A2_cbo = p[18];
+    // double phi2_cbo = p[19];
+
+    // double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
+    // double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
+    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*cos(omega*time + phi)) * expan * dcbo * vo;
+}
+
+double func_run1_24paras(double *x, double *p){
+    double time = x[0] / time_scale;
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double R = p[3];
+    double phi = p[4];
+    double omega = getBlinded->paramToFreq(R);
+    double life_cbo = p[5];
+    double asym_cbo = p[6];
+    double omega_cbo = p[7];
+    double phi_cbo = p[8];
+    double cbo=1-exp(-time/life_cbo)*asym_cbo*cos(omega_cbo*time + phi_cbo);
+
+    double k=p[9]*1e-9;
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    //reference value of omega_vw and omega_vo
+    double fcbo= 2.34;
+    double fc=2*M_PI/0.1492;
+    double fy=sqrt(fcbo*(2*fc-fcbo));
+    double fvw=fc-2*fy;
+
+
+    double tau_VW = p[10];
+    double A_VW = p[11];
+    double omega_VW = p[12] * fvw; //can also use fvw to replace
+    double phi_VW = p[13];
+    double vw=1-exp(-time/tau_VW)*A_VW*cos(omega_VW*time + phi_VW);
+
+    // double cbo
+    double A2=p[14];
+    double p2=p[15];
+    double dcbo=1-exp(-2*time/life_cbo)*(A2*cos(2*omega_cbo*time+p2));
+
+
+    double A1_cbo=p[16];
+    double phi1_cbo=p[17];
+    double A2_cbo=p[18];
+    double phi2_cbo=p[19];
+    double At=1-A1_cbo*exp(-time/life_cbo)*cos(omega_cbo*time+phi1_cbo);
+    double phit=1-A2_cbo*exp(-time/life_cbo)*cos(omega_cbo*time+phi2_cbo);
+
+    double tau_vo = p[20];
+    double A_vo = p[21];
+    double omega_vo = p[22] * fy; //can also use fy to replace
+    double phi_vo = p[23];
+    double vo = 1-exp(-time/tau_vo)*A_vo*cos(omega_vo*time+phi_vo);
+    
+    return (1-k*aloss)*norm*exp(-time/life)*(1-asym*At*cos(omega*time+phi*phit))*cbo*vw*vo*dcbo;
+}    
+ 

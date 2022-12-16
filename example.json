@@ -1,0 +1,40 @@
+{
+    "run2_seed_scan" : {
+        "job" : ["T1700","A"],        
+        "dataset" : ["run2all_skipCalo18","run2C"],
+        "scan" : [0, 200, 1],
+        "wiggle_file" : "/home/chencheng/data/Run23_full_ana/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "/home/chencheng/Fitter_wa/run_old/values/old/run2_seed2.root",
+        "initial_name" : "{job:}_shadow_run2all_skip_calo18_28paras_cbo_lost_vw_expansion_2",
+        "output_dir" : "./output/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/condor_{dataset:}_{job:}",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "logDir" : "./logs/seed_scan",
+        "mode" : 1,
+        "max_try" : 3
+    },
+    "run2_calorimeter_scan" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run2all_skip_calo18"],
+        "scan" : [0,25,1],
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "def f(scan,job):\n\tif scan==0 or scan=='0' :return 'wiggle_%s_seed0'%(job)\n\telse: return 'wiggle_%s_seed0_calo%s'%(job,scan)",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "./values/run2_cbo/calos_default/condor_{dataset:}_{job:}/calos_default_{job:}_{dataset:}_{scan:}.root",
+        "initial_name" : "calos_default_{job:}_{dataset:}_{scan:}",
+        "output_dir" : "./output/calo_fit/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/calo_fit/condor_{dataset:}_{job:}",
+        "//value_of_func" : "run1_24paras",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "default_{job:}_{dataset:}_{scan:}",
+        "mode" : 0,
+        "logDir" : "./logs/calorimeter_scan/",
+        "max_try" : 3        
+    }
+
+}

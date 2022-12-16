@@ -4,7 +4,7 @@ import trans
 
 condor = '''\
 Universe   = vanilla
-Executable = run_temp.sh
+Executable = run_{1:}.sh
 Log        = submit.log
 {0:}
 '''
@@ -31,16 +31,21 @@ def submit(args):
 
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
-    logDir = config['logDir']
+
+    
+    logDir = config['logDir'].format(key=args[1])
     os.system('mkdir -p %s'%(logDir))
     scan = config['scan']
-    N = int((scan[1]-scan[0])/scan[2])
+    if isinstance(scan[0], str):
+        N = len(scan)
+    else:
+        N = int((scan[1]-scan[0])/scan[2])
     Queues = []
     for job in config['job']:
         for dataset in config['dataset']:
             q = queue.format(args[0],args[1],job,dataset,N,logDir)
             Queues.append(q)
-    condor_str = condor.format('\n'.join(Queues))
+    condor_str = condor.format('\n'.join(Queues),args[1])
     condor_file = 'submit_{0:}.condor'.format(args[1])
     with open(condor_file,'w') as fp:
         fp.write(condor_str)
@@ -53,46 +58,57 @@ def submit(args):
 def run(args):
     config = {
         'max_try' : 3,
-        'time_offset' : 0,
-        'white_list' : None
+        'start_bin' : 202,
+        'end_bin' : 4357,
+        'use_list' : 0,
     }
-
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
+
     
-    white_list = []
-    if config['white_list']!=None:
-        with open(config['white_list'],'r') as f:
-            lines = f.readlines()
-            for l in lines:
-                l = l[:-1]
-                white_list.append(l)
+    
 
     job = args[2]
     dataset = args[3]
-    N = int((config['scan'][1]-config['scan'][0])/config['scan'][2])
-    
-    process = int(args[4]) % N
-    step = config['scan'][2]
-    scan = process * step
+    if isinstance(config['scan'][0], str):
+        N = len(config['scan'])
+        process = int(args[4]) % N
+        scan = config['scan'][process]
+    else:
+        N = int((config['scan'][1]-config['scan'][0])/config['scan'][2])    
+        process = int(args[4]) % N
+        step = config['scan'][2]
+        scan = process * step + config['scan'][0]
+
+    tag = '{0:}_{1:}'.format(job,dataset)
+    # print (tag)
+    if config['use_list']:
+        if (not tag in config) or (not scan in config[tag]):
+            print ('skip {0:} {1:}'.format(tag,scan))
+            return
+            
+                
+
+
+
+
+
 
     kw = {
         'job' : job,
         'dataset' : dataset,
         'scan' : scan,
-        'process' : process,        
+        'process' : process,
+        'key' : args[1]
     }
 
     def f(key):
-
         str_key = str(config[key])
-        # print (key,str_key)
         if str_key[:4] == 'def ':
             space = {}
             fname = re.split('def\ |\(',str_key)[1]
             exec(str_key,space)
-            var_dict = dict.fromkeys(inspect.getfullargspec(space[fname])[0]) 
-            # var_dict = dict.fromkeys(space[fname].__code__.co_varnames) 
+            var_dict = dict.fromkeys(inspect.getfullargspec(space[fname])[0])
             for key in var_dict:                
                 var_dict[key] = kw[key]
             return space[fname](**var_dict)
@@ -109,9 +125,7 @@ def run(args):
     value_dir = f('value_dir')
     tag_out = f('tag')
 
-    if tag_out in white_list:
-        print ('%s is in white list, skip this job!'%(tag_out))
-        return
+    
 
     mode = config['mode']
     max_try = config['max_try']
@@ -124,10 +138,12 @@ def run(args):
     if 'fix' in config:
         fix = ''
         for key,value in config['fix'].items():
-            fix += '{0:} {1:}'.format(key,value)
+            fix += '{0:} {1:} '.format(key,value)
     cmd = '../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:} --fix {11:}'.format(
         wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,time_offset,fix)
+
     print (cmd)
+
     os.system(cmd)
 
     res_name = '{0:}/result_{1:}_{2:}.root'.format(output_dir,value_of_func,tag_out)
@@ -151,7 +167,7 @@ def fetch(args):
 
     for job in config['job']:
         for dataset in config['dataset']:
-            input_dir = config['output_dir'].format(job=job,dataset=dataset)
+            input_dir = config['output_dir'].format(job=job,dataset=dataset,key=args[1])
             basename = os.path.basename(input_dir.rstrip('/'))            
             cmd = 'hadd -f {0:}/{1}.root {2:}/{3:}.root'.format(fetch_dir,basename,input_dir,filter_str)
             os.system(cmd)
