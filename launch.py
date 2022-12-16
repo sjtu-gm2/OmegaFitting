@@ -109,7 +109,7 @@ def run(args):
             fname = re.split('def\ |\(',str_key)[1]
             exec(str_key,space)
             var_dict = dict.fromkeys(inspect.getfullargspec(space[fname])[0])
-            for key in var_dict:                
+            for key in var_dict:
                 var_dict[key] = kw[key]
             return space[fname](**var_dict)
         else:
