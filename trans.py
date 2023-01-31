@@ -2,6 +2,7 @@ import ROOT as R
 import json
 import sys
 from array import array
+from copy import deepcopy
 
 
 def main(res,root_path,array_name):
@@ -28,82 +29,75 @@ def extract(in_file,in_tag,out_file,out_tag):
     fout.Close()
 
 
-
 if __name__ == '__main__':
-    # vals = [
-    #     41755687.267527215,
-    #     64.43076230477948,
-    #     0.3759022601235838,
-    #     -69.75065097977392,
-    #     5.307510390424583,
-    #     # cbo
-    #     256.63967777633246,
-    #     -0.0035765901600223952,
-    #     2.340495730847803,
-    #     19.214191355386674,
-    #     # kloss
-    #     0.06434482798956877,        
-    #     # vw
-    #     9814731.146417117,
-    #     -2.67113632082343e-05,
-    #     5.007750648543958,        
-    #     -0.44083343794917906,
-    #     # double-cbo
-    #     0.000199152499635221,
-    #     0.06597656689032932,
-    #     # A-phi
-    #     -0.0001775494589560454,
-    #     0.733954495511215,        
-    #     -2.0031386698989306e-05,
-    #     -16.86565373441572,
-    #     # vo
-    #     38.08986611917626,
-    #     -0.0010865204449305528,        
-    #     1.0331910917923433,
-    #     -27.258885264058172,
-    #     # vw-cbo
-    #     2.0773394168497188e-05,
-    #     23.204437023257356,
-    #     -0.0001620785766340185,
-    #     9.833249299197329,
-    # ]
-    vals = [
-        41755679.53918229,
-        64.43077502531082,
-        0.37590106965019743,
-        -69.80434730830636,
-        5.3075184573897145,
-        #cbo
-        256.1742727533705,
-        -0.0035818055576323266,
-        2.3404739197349684,
-        19.216104918195175,
-        #kloss
-        0.06437135194474429,
-        #vw
-        26.74856112300246,
-        0.0018538729005055515,
-        0.9836920412375928,
-        13.32279758806431,
-        #dcbo
-        0.00018944160990633222,
-        0.16046788893044772,
-        #A-phi
-        -0.0001937312627423803,
-        0.7679443757490649,
-        -1.748495677246477e-05,
-        -16.858815535019758,
-        #vy
-        113.89682492357069,
-        -0.00022528692483361466,
-        1.0085989300999,
-        -12.63722304309699,
-        #vw-cbo
-        0.00012000708764433906,
-        33.15206307643027,
-        -0.0006004915697415999,
-        18.47359159059509,
-    ]
-    main(vals, './values/run2_corr.root' ,'run2_corr')
-    
+    cbo_init = {
+        'envelope' : [0.],
+        'freq' : [6.86,6.2],
+        'timing' : ['5','5','5'],
+        
+    }
 
+    fout = R.TFile('./values/cbo_syst_init.root','recreate')
+    res = {}
+    for d in ['run2all_skip_calo18','run3a','run3b']:
+        res[d] = {}
+        for m in ['T1700','A']:
+            res[d][m] = []
+            fname = '/home/chencheng/Fitter_wa/run/fetch_note/run23_seed0_calos/condor_{0:}_{1:}.root'.format(d,m)
+            f = R.TFile(fname)
+            for n in range(25):
+                func = f.Get('func_28paras_cbo_lost_vw_expansion_calos_default_{0:}_{1:}_{2:}'.format(m,d,n))
+                vs = []
+                for nvar in range(28):
+                    v = func.GetParameter(nvar)
+                    vs.append(v)
+                for k,v in cbo_init.items():
+                    vs_ = deepcopy(vs)
+                    for p in v:
+                        if isinstance(p, str):
+                            vs_.append(vs[int(p)])
+                        else:
+                            vs_.append(p)
+                    N = len(vs_)
+                    ar = array('d',vs_)
+                    ad = R.TArrayD(N,ar)
+                    name = 'vals_{3:}_{0:}_{1:}_{2:}'.format(d,m,n,k)
+                    fout.WriteObject(ad,name)
+                    print(name,vs_)
+    fout.Close()
+
+                
+                
+    
+    # for m in ['A','T1700']:
+    #     intf = '/home/chencheng/Fitter_wa/run/values/run2_cbo/run2cbo_timing/condor_run2all_skip_calo18_{0:}/run2cbo_timing_{0:}_run2all_skip_calo18_10.root'.format(m)
+    #     f = R.TFile(intf)
+    #     ad = f.Get('run2cbo_timing_{0:}_run2all_skip_calo18_10'.format(m))
+    #     pars = []
+    #     for p in ad:
+    #         pars.append(p)
+
+    #     for k in cbo_init:
+    #         appendix = cbo_init[k]
+    #         res = deepcopy(pars)
+    #         for v in appendix:
+    #             if isinstance(v, str):
+    #                 res.append(pars[int(v)]) 
+    #             else:
+    #                 res.append(v)
+    #         print (k,res)
+
+    #         ar = array('d',res)
+
+    #         fout = R.TFile('./values/cbo_syst/vals_{0:}_{1:}_calo.root'.format(m,k),'recreate')
+    #         N = len(res)
+    #         ad = R.TArrayD(N,ar)
+    #         fout.WriteObject(ad,'vals_{0:}_{1:}'.format(m,k))
+    #         fout.Close()
+
+
+
+
+
+
+    

@@ -26,25 +26,26 @@ echo -e "END - ${1} ${2} ${3} ${4} ${5}"
 def submit(args):
     #default setup
     config = {
-        'logDir' : './logs'
+        'logDir' : './logs',
+        'scan_per_queue' : 1,
     }
 
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
 
-    
     logDir = config['logDir'].format(key=args[1])
     os.system('mkdir -p %s'%(logDir))
     scan = config['scan']
     if isinstance(scan[0], str):
-        N = len(scan)
+        N = int(len(scan) / config['scan_per_queue'])
     else:
-        N = int((scan[1]-scan[0])/scan[2])
+        N = int(int((scan[1]-scan[0])/scan[2])  / config['scan_per_queue'])
     Queues = []
     for job in config['job']:
         for dataset in config['dataset']:
             q = queue.format(args[0],args[1],job,dataset,N,logDir)
             Queues.append(q)
+
     condor_str = condor.format('\n'.join(Queues),args[1])
     condor_file = 'submit_{0:}.condor'.format(args[1])
     with open(condor_file,'w') as fp:
@@ -55,28 +56,48 @@ def submit(args):
     os.system('chmod 777 {0:}'.format(run_file))
     os.system('condor_submit {0:}'.format(condor_file))
 
-def run(args):
+def run_queue(args):
+    config = {
+        'scan_per_queue' : 1,
+    }
+    with open(args[0],'r') as fp:
+        config.update(json.load(fp)[args[1]])
+    
+    if config['scan_per_queue']==1:
+        run(args, 0)
+    else:
+        job = args[2]
+        dataset = args[3]
+        process = args[4]
+        for sub_num in range(config['scan_per_queue']):            
+            print("\n",'='*20,'\n','Runing on {0:} {1:} process {2:} sub-{3:}'.format(dataset,job,process,sub_num),'\n','='*20,"\n")
+            run(args,sub_num)
+            
+
+def run(args,sub_num):
     config = {
         'max_try' : 3,
         'start_bin' : 202,
         'end_bin' : 4357,
         'use_list' : 0,
+        'scan_per_queue' : 1,
     }
+
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
 
-    
-    
-
     job = args[2]
     dataset = args[3]
+    scan_per_queue = config['scan_per_queue']
+    q_num = int(args[4])
+
     if isinstance(config['scan'][0], str):
         N = len(config['scan'])
-        process = int(args[4]) % N
+        process = (q_num % int(N/scan_per_queue))*scan_per_queue+sub_num
         scan = config['scan'][process]
     else:
         N = int((config['scan'][1]-config['scan'][0])/config['scan'][2])    
-        process = int(args[4]) % N
+        process = (q_num % int(N/scan_per_queue))*scan_per_queue+sub_num
         step = config['scan'][2]
         scan = process * step + config['scan'][0]
 
@@ -86,13 +107,6 @@ def run(args):
         if (not tag in config) or (not scan in config[tag]):
             print ('skip {0:} {1:}'.format(tag,scan))
             return
-            
-                
-
-
-
-
-
 
     kw = {
         'job' : job,
@@ -101,35 +115,43 @@ def run(args):
         'process' : process,
         'key' : args[1]
     }
+    
+    kw_extra = {}
+    
+    if 'keys' in config:
+        for k,str_key in config['keys'].items():
+            if str_key[:4] == 'def ':
+                space = {}
+                fname = re.split('def\ |\(',str_key)[1]
+                exec(str_key,space)
+                var_dict = dict.fromkeys(inspect.getfullargspec(space[fname])[0])
+                for key in var_dict:
+                    var_dict[key] = kw[key]
+                kw_extra[k] = space[fname](**var_dict)                
+            else:
+                kw_extra[k] = str(str_key).format(**kw)
 
-    def f(key):
-        str_key = str(config[key])
-        if str_key[:4] == 'def ':
-            space = {}
-            fname = re.split('def\ |\(',str_key)[1]
-            exec(str_key,space)
-            var_dict = dict.fromkeys(inspect.getfullargspec(space[fname])[0])
-            for key in var_dict:
-                var_dict[key] = kw[key]
-            return space[fname](**var_dict)
-        else:
-            return str(str_key).format(**kw)
+    kw.update(kw_extra)
 
-    wiggle_file = f('wiggle_file')
-    wiggle_name = f('wiggle_name')
-    lm_file = f('lm_file')
-    lm_name = f('lm_name')
+    f = lambda key:str(config[key]).format(**kw)
+
+    wiggle_file  = f('wiggle_file')
+    wiggle_name  = f('wiggle_name')
+    lm_file      = f('lm_file')
+    lm_name      = f('lm_name')
     initial_file = f('initial_file')
     initial_name = f('initial_name')
-    output_dir = f('output_dir')
-    value_dir = f('value_dir')
-    tag_out = f('tag')
-
     
+    start_bin    = f('start_bin')
+    end_bin      = f('end_bin')
+
+    output_dir   = f('output_dir')
+    value_dir    = f('value_dir')
+    tag_out      = f('tag')
 
     mode = config['mode']
     max_try = config['max_try']
-    time_offset = f('time_offset')
+    
     value_of_func = config['value_of_func']    
     os.system('mkdir -p {0:}'.format(output_dir))    
     os.system('mkdir -p {0:}'.format(value_dir))
@@ -139,8 +161,8 @@ def run(args):
         fix = ''
         for key,value in config['fix'].items():
             fix += '{0:} {1:} '.format(key,value)
-    cmd = '../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:} --fix {11:}'.format(
-        wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,time_offset,fix)
+    cmd = '../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:} {11:} --fix {12:}'.format(
+        wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,start_bin,end_bin,fix)
 
     print (cmd)
 
@@ -169,7 +191,7 @@ def fetch(args):
         for dataset in config['dataset']:
             input_dir = config['output_dir'].format(job=job,dataset=dataset,key=args[1])
             basename = os.path.basename(input_dir.rstrip('/'))            
-            cmd = 'hadd -f {0:}/{1}.root {2:}/{3:}.root'.format(fetch_dir,basename,input_dir,filter_str)
+            cmd = 'hadd -j 8 -f {0:}/{1}.root {2:}/{3:}.root'.format(fetch_dir,basename,input_dir,filter_str)
             os.system(cmd)
 
 if __name__ == '__main__':
@@ -184,6 +206,6 @@ if __name__ == '__main__':
     elif args.submit!=None and args.run==None:
         submit(args.submit)
     elif args.submit==None and args.run!=None:
-        run(args.run)
+        run_queue(args.run)
     else:
         raise ValueError('use "python ./launch.py --submit/run/fetch ... "')

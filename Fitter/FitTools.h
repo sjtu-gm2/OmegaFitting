@@ -73,7 +73,13 @@ DECLARE_FUNC(_30paras_cbo_freq)
 DECLARE_FUNC(_31paras_cbo_time)
 DECLARE_FUNC(_simplified_22paras_calos)
 
-DECLARE_FUNC(_run1_24paras)
+
+//calorimeter fit
+DECLARE_FUNC(_calos_cbo)
+DECLARE_FUNC(_31paras_calos_1)
+DECLARE_FUNC(_31paras_calos_2)
+
+
 
 
 class Fitter {
@@ -113,7 +119,12 @@ class Fitter {
     REGISTER_FUNC(_30paras_cbo_freq,30)
     REGISTER_FUNC(_31paras_cbo_time,31)
 
-    REGISTER_FUNC(_run1_24paras,24)
+    // REGISTER_FUNC(_run1_24paras,24)
+
+    REGISTER_FUNC(_calos_cbo,15)
+    REGISTER_FUNC(_31paras_calos_1,31)
+    REGISTER_FUNC(_31paras_calos_2,31)
+    
     
 
   private:    

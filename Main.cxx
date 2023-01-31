@@ -74,7 +74,15 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
 
 
         //simplified
-        if(fit_mode == 1024) info = fitter.Fit_run1_24paras(method,wiggle,start_time,end_time,info.fit_values,lm);
+        // if(fit_mode == 1024) info = fitter.Fit_run1_24paras(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+        //24 calorimeter fit
+        if(fit_mode == 2400) info = fitter.Fit_calos_cbo(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+        if(fit_mode == 2401) info = fitter.Fit_31paras_calos_1(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 2402) info = fitter.Fit_31paras_calos_2(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+
 
     }
 }
@@ -83,14 +91,20 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
 // argv[2]: wiggle name
 // argv[3]: lm file
 // argv[4]: lm name
+
 // argv[5]: initial values json/root file
 // argv[6]: initial values name
+
 // argv[7]: output directory
 // argv[8]: version
 // argv[9]: fit mode
 
-// argv[10]: maximum attempts (optional)
-// argv[11]: time bin shift (optional)
+// argv[10]: maximum attempts
+
+// argv[11]: time bin start
+// argv[12]: time bin end
+
+// argv[14] -> argv[argc]: fix parameters
 int main(int argc,char **argv) {
     cout << "file " << argv[1] << endl;
     TFile * file = TFile::Open(argv[1]);
@@ -129,25 +143,33 @@ int main(int argc,char **argv) {
 
     if(mode==12) fit_chain = {29}; //envelope
     if(mode==13) fit_chain = {30}; //freq
-    if(mode==14) fit_chain = {31}; //timing    
+    if(mode==14) fit_chain = {31}; //timing
 
-    //simplified functions
-    if(mode==1000) fit_chain = {1024}; //Run-1, no expansion for 1.9 MHz
+    //cbo envelope mode exp+C for run3b
+    if(mode==1000) fit_chain = {29}; 
+    if(mode==1001) fit_chain = {5,29};
+
+    //24 calorimeter fit
+
+    if(mode==24) fit_chain = {2400};
+    if(mode==2401) fit_chain = {28,2401};
+    if(mode==2402) fit_chain = {28,2402};
+
 
     int attempts;
     attempts = atoi(argv[10]);
 
     int start_bin,end_bin;
-        
+
     start_bin = atoi(argv[11]);
     end_bin   = atoi(argv[12]);
-    
+
     map<int,double> fix_parameters;
-    
+
     string fix = Form("%s",argv[14]);
     if(fix!=string("None")) {
         for(int start=14;start<argc;start+=2) {
-            int npar = atoi(argv[start]);                
+            int npar = atoi(argv[start]);
             double fix_value;
             if(string(argv[start+1])==string("nan")) {
                 fix_value = init_values[npar];
@@ -158,8 +180,7 @@ int main(int argc,char **argv) {
             fix_parameters[npar] = fix_value;
         }
     }
-    
-    
+
     FullFit(wiggle,start_bin,end_bin,lm,outputDir,name,init_values,fit_chain,attempts,fix_parameters);
 
     return 0;
