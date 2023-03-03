@@ -17,8 +17,6 @@ target_link_directories(BLINDERS2 PUBLIC /usr/local/opt/openssl/lib)
 target_link_libraries(BLINDERS2 PUBLIC RLIB crypto)
 
 
-
-
 # install blinder
 # RLIB headers
 file (GLOB HEADERSRLIB include/RandomLib/*.h*)
@@ -31,4 +29,4 @@ install (FILES ${HEADERSRLIB} DESTINATION include/RandomLib)
 install (FILES ${HEADERSBLINDER} DESTINATION include/)
 
 # install libraries
-install(TARGETS BLINDERS RLIB)
+install(TARGETS BLINDERS BLINDERS2 RLIB)

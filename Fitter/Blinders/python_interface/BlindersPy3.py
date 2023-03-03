@@ -1,6 +1,6 @@
 from ctypes import cdll
 import ctypes
-lib = cdll.LoadLibrary('/Users/eroica/Test/blinder_make/build/libBlinders2.dylib')
+lib = cdll.LoadLibrary('/usr/local/cc_install/blinders/lib/libBlinders2.dylib')
 
 class FitType:
     Omega_a, Omega_p = range(0, 2)
