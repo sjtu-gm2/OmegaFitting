@@ -1,5 +1,6 @@
 #include <string>
 #include <sys/stat.h>
+#include <ctype.h>
 #include "TFile.h"
 #include "TH1D.h"
 #include "FitTools.h"
@@ -17,7 +18,7 @@ vector<double> read_parameters(string file_name, string func_name, int nvars) {
     return vals;
 }
 
-void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain,int attempts,map<int,double> fix_parameters) {
+void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain, int attempts, map<int,double> fix_parameters, map<int,pair<double,double>> range_parameters) {
     int status = mkdir(outputDir.c_str(),0777);
 
 
@@ -27,6 +28,7 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
     fitter.SetMaxAttempts(attempts);
     fitter.SetOutputDir(outputDir);    
     fitter.SetFixParameters(fix_parameters);
+    fitter.SetRangeParameters(range_parameters);
 
     double binW = wiggle->GetBinWidth(1);
     double start_time = start_bin * binW;
@@ -104,7 +106,8 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
 // argv[11]: time bin start
 // argv[12]: time bin end
 
-// argv[14] -> argv[argc]: fix parameters
+// argv[i] start with '--fix': fix parameters
+// argv[i] start with '--range': range parameters
 int main(int argc,char **argv) {
     cout << "file " << argv[1] << endl;
     TFile * file = TFile::Open(argv[1]);
@@ -165,23 +168,42 @@ int main(int argc,char **argv) {
     end_bin   = atoi(argv[12]);
 
     map<int,double> fix_parameters;
+    map<int,pair<double,double>> range_parameters;
 
-    string fix = Form("%s",argv[14]);
-    if(fix!=string("None")) {
-        for(int start=14;start<argc;start+=2) {
-            int npar = atoi(argv[start]);
-            double fix_value;
-            if(string(argv[start+1])==string("nan")) {
-                fix_value = init_values[npar];
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "--fix") == 0) {
+            i++;
+            while (i < argc && isdigit(argv[i][0])) {
+                int npar = atoi(argv[i]);
+                double fix_value;
+                i++;
+                if(strcmp(argv[i], "nan") == 0) {
+                    fix_value = init_values[npar];
+                } else {
+                    fix_value = atof(argv[i]);
+                }
+                fix_parameters[npar] = fix_value;
+                cout << "Fix parameter " << npar << " to " << fix_value << endl;
             }
-            else {
-                fix_value = atof(argv[start+1]);
+        }
+        if (strcmp(argv[i], "--range") == 0) {
+            i++;
+            while (i < argc && isdigit(argv[i][0])) {
+                int npar = atoi(argv[i]);
+                auto range = make_pair<double, double>(0, 0);
+                i++;
+                range.first = atof(argv[i]);
+                i++;
+                range.second = atof(argv[i]);
+                range_parameters[npar] = range;
+                cout << "Set parameter " << npar << " range from " << range.first << " to " << range.second << endl;
+                i++;
             }
-            fix_parameters[npar] = fix_value;
+            break;
         }
     }
 
-    FullFit(wiggle,start_bin,end_bin,lm,outputDir,name,init_values,fit_chain,attempts,fix_parameters);
+    FullFit(wiggle,start_bin,end_bin,lm,outputDir,name,init_values,fit_chain,attempts,fix_parameters,range_parameters);
 
     return 0;
 }
