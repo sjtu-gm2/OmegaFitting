@@ -104,6 +104,13 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
             fit_func->FixParameter(fix.first,fix.second);
         }
     }
+
+    for(auto range : range_parameters) {
+        if(range.first<fit_in.nvars) {
+            fit_func->SetParLimits(range.first, range.second.first, range.second.second);
+        }
+    }
+
     fit_func->SetNpx(4500);
 
         
