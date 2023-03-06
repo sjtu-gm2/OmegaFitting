@@ -7,11 +7,14 @@ add_library(RLIB src/Random.cpp)
 # blinder static
 add_library(BLINDERS src/Blinders.cc)
 target_include_directories(BLINDERS PUBLIC /usr/local/opt/openssl/include)
+target_include_directories(BLINDERS PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include) 
+
 target_link_directories(BLINDERS PUBLIC /usr/local/opt/openssl/lib)
 target_link_libraries(BLINDERS PUBLIC RLIB crypto)
 
 # blinder shared
 add_library(BLINDERS2 SHARED src/Blinders.cc)
+target_include_directories(BLINDERS2 PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include) 
 target_include_directories(BLINDERS2 PUBLIC /usr/local/opt/openssl/include)
 target_link_directories(BLINDERS2 PUBLIC /usr/local/opt/openssl/lib)
 target_link_libraries(BLINDERS2 PUBLIC RLIB crypto)
