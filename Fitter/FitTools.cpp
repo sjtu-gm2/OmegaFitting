@@ -96,7 +96,9 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
 
     for(int n=0;n<fit_in.nvars;n++){        
         fit_func->SetParName(n,fit_in.name_vars[n].c_str());
-        fit_func->SetParameter(n,fit_in.init_values[n]);
+        if(n<fit_in.init_values.size()){
+            fit_func->SetParameter(n,fit_in.init_values[n]);
+        }
     }
     
     for(auto fix : fix_parameters) {
@@ -151,7 +153,12 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
 
     vector<double> fit_values = fit_in.init_values;
     for(int n=0;n<fit_in.nvars;n++){
-        fit_values[n] = fit_func->GetParameter(n);
+        if(n<fit_values.size()){
+            fit_values[n] = fit_func->GetParameter(n);
+        }
+        else{
+            fit_values.push_back(fit_func->GetParameter(n));
+        }
     }
 
     fit_res->SetName(res_name.Data());
@@ -348,5 +355,13 @@ Fitter::Fitter() : max_attempts(1) {
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
         "C_{cbo}","A_{cbo}^{residual}","#tau_{cbo}^{residual}"
-    };    
+    };
+    name_vars["pseudo_5pars"] = {
+        "N","#tau","A","R","#phi",
+    };
+    name_vars["pseudo_10pars"] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "C_{cbo}"
+    };
 }

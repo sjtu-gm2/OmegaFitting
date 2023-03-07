@@ -8,16 +8,6 @@
 
 using namespace std;
 
-vector<double> read_parameters(string file_name, string func_name, int nvars) {
-    TFile * f = TFile::Open(file_name.c_str());
-    TF1 * func = (TF1*)f->Get(func_name.c_str());
-    vector<double> vals;
-    for(int n=0;n<nvars;n++) {
-        vals.push_back(func->GetParameter(n));
-    }    
-    return vals;
-}
-
 void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir, string method,vector<double> init_values,vector<int> fit_chain, int attempts, map<int,double> fix_parameters, map<int,pair<double,double>> range_parameters) {
     int status = mkdir(outputDir.c_str(),0777);
 
@@ -84,8 +74,8 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
         if(fit_mode == 2401) info = fitter.Fit_31paras_calos_1(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 2402) info = fitter.Fit_31paras_calos_2(method,wiggle,start_time,end_time,info.fit_values,lm);
 
-
-
+        if(fit_mode == -5) info = fitter.Fit_pseudo_5pars(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == -10) info = fitter.Fit_pseudo_10pars(method,wiggle,start_time,end_time,info.fit_values,lm);
     }
 }
 
@@ -158,6 +148,8 @@ int main(int argc,char **argv) {
     if(mode==2401) fit_chain = {28,2401};
     if(mode==2402) fit_chain = {28,2402};
 
+    //pseudo data fit cbo syst
+    if(mode==-2400) fit_chain = {-5,-10};
 
     int attempts;
     attempts = atoi(argv[10]);

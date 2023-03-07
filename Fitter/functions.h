@@ -2,6 +2,7 @@ using namespace std;
 using namespace blinding;
 
 const double Pi = 3.14159265358979323846264338327950288419716939937510582;
+const double pipy = 3.141592653589793;
 
 double time_scale = 1.0;
 Blinders::fitType ftype = Blinders::kOmega_a;
@@ -919,4 +920,37 @@ double func_31paras_calos_2(double *x, double *p) {
     double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
     return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
 
+}
+
+//fit pseudo data
+//5pars
+double func_pseudo_5pars(double *x,double *p) {
+  double time = x[0] / time_scale;
+  double norm = p[0];
+  double life = p[1];
+  double asym = p[2];
+  double omega = 2*pipy*0.2291*(1+p[3]*1e-6);
+  double phi = p[4];
+
+  return norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi));
+}
+
+//5pars+cbo+c
+double func_pseudo_10pars(double *x,double *p) {
+  double time = x[0] / time_scale;
+  double norm = p[0];
+  double life = p[1];
+  double asym = p[2];
+  double omega = 2*pipy*0.2291*(1+p[3]*1e-6);
+  double phi = p[4];
+
+  double tau_cbo = p[5]; //fix to infinity
+  double asym_cbo = p[6];
+  double omega_cbo = p[7];
+  double phi_cbo = p[8];
+  double c_cbo = p[9];
+
+  double cbo = 1-(TMath::Exp(-time/tau_cbo)+c_cbo)*asym_cbo*TMath::Cos(omega_cbo*time - phi_cbo);
+
+  return norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) * cbo;
 }

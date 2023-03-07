@@ -80,6 +80,12 @@ DECLARE_FUNC(_31paras_calos_1)
 DECLARE_FUNC(_31paras_calos_2)
 
 
+//fit pseudo data: cbo envelope study
+DECLARE_FUNC(_pseudo_5pars)
+DECLARE_FUNC(_pseudo_10pars)
+
+
+
 
 
 class Fitter {
@@ -125,8 +131,11 @@ class Fitter {
     REGISTER_FUNC(_calos_cbo,15)
     REGISTER_FUNC(_31paras_calos_1,31)
     REGISTER_FUNC(_31paras_calos_2,31)
-    
-    
+
+
+    // pseudo data fit, envelope syst study
+    REGISTER_FUNC(_pseudo_5pars,5)
+    REGISTER_FUNC(_pseudo_10pars,10)
 
   private:    
     map<string,vector<string>> name_vars;
