@@ -1,0 +1,78 @@
+{
+    "calo_fit_31pars_1" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run2all_skip_calo18"],
+        "scan" : [1,25,1],
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed0_calo{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/calo_fit/{key:}.root",
+        "initial_name" : "{job:}_{dataset:}_{scan:}",
+        "output_dir" : "./output/{key:}/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/{key:}/condor_{dataset:}_{job:}",        
+        "//value_of_func" : "31paras_calos_1",
+        "value_of_func" : "31paras_calos_1",
+        "tag" : "{key:}_{job:}_{dataset:}_{scan:}",
+        "mode" : 2401,
+        "logDir" : "./calofig/logs_{key:}_resub/",
+        "max_try" : 3,
+        "fix" : {
+            "18" : "0",
+            "19" : "0",
+            "24" : "0",
+            "25" : "0",
+            "30" : "24.4"
+        },
+        "use_list" : 1,
+        "A_run2all_skip_calo18" : [2,4],
+        "scan_per_queue" : 24
+    },
+    "calo_fit_31pars_2" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run2all_skip_calo18","run3a","run3b"],
+        "scan" : [1,25,1],
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed0_calo{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/calo_fit/{key:}.root",
+        "initial_name" : "{job:}_{dataset:}_{scan:}",
+        "output_dir" : "./output/{key:}/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/{key:}/condor_{dataset:}_{job:}",
+        "value_of_func" : "31paras_calos_2",
+        "tag" : "{key:}_{job:}_{dataset:}_{scan:}",
+        "mode" : 2402,
+        "logDir" : "./calofig/logs_{key:}_all/",
+        "max_try" : 3,
+        "fix" : {
+            "30" : "24.4"
+        },
+        "use_list" : 0,
+        "A_run2all_skip_calo18" : [13],
+        "scan_per_queue" : 1
+
+    },
+    "calo_fit_14pars" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run2all_skip_calo18"],
+        "scan" : ["6","7","11","17","4","22","8","5","23","9","10"],
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed0_calo{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "./values/calo_fit_15pars.root",
+        "initial_name" : "calo_fit_15pars_{job:}_{dataset:}_{scan:}",
+        "output_dir" : "./output/{key:}/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/{key:}/condor_{dataset:}_{job:}",        
+        "value_of_func" : "calos_cbo",
+        "tag" : "{key:}_{job:}_{dataset:}_{scan:}",
+        "mode" : 24,
+        "logDir" : "./calofig/logs_{key:}/",
+        "max_try" : 3,
+        "13" : "0",
+        "fix" : {
+            "14" : "24.4"
+        }
+    }    
+}

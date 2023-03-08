@@ -3,3 +3,5 @@ Makefile
 __pycache__
 .vscode
 build
+sftp-config.json
+temp

@@ -1,0 +1,160 @@
+{
+    "run23" : {
+        "job" : ["energyScan"],
+        
+        "scan" : [1000, 3000, 100],
+        "scan_per_queue" : 1,
+        "dataset" : ["run2all_skip_calo18","run3a"],
+        
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_energy_bin/wiggles_Eslices_{dataset:}.root",
+        "wiggle_name" : "wiggle_E{scan:}_seed0",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_A/{dataset:}_A_seed0.root",
+        "initial_name" : "{dataset:}_A_seed0",
+
+        "output_dir" : "./output/run23_fullAna_note/energy_scan/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/energy_scan/condor_{dataset:}_{job:}",
+
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_E{scan:}",
+        "logDir" : "./logs/energy_scan",
+        "mode" : 1
+
+    },
+
+    "run3b" : {
+        "job" : ["energyScan"],
+        
+        "scan" : [1000, 3000, 100],
+        "scan_per_queue" : 1,
+        "dataset" : ["run3b"],
+        
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_energy_bin/wiggles_Eslices_{dataset:}.root",
+        "wiggle_name" : "wiggle_E{scan:}_seed0",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_A/{dataset:}_A_seed0.root",
+        "initial_name" : "{dataset:}_A_seed0",
+
+        "output_dir" : "./output/run23_fullAna_note/energy_scan/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/energy_scan/condor_{dataset:}_{job:}",
+
+
+        
+        
+        
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_E{scan:}",
+        "logDir" : "./logs/energy_scan_run3b",
+        "mode" : 1001
+    },
+    "run23_sim" : {
+        "job" : ["energyScan"],
+        
+        "scan" : [1000, 3000, 100],
+        "scan_per_queue" : 1,
+        "dataset" : ["run2all_skip_calo18","run3a"],
+        
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_energy_bin/wiggles_Eslices_{dataset:}.root",
+        "wiggle_name" : "wiggle_E{scan:}_seed0",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_A/{dataset:}_A_seed0.root",
+        "initial_name" : "{dataset:}_A_seed0",
+
+        "output_dir" : "./output/run23_fullAna_note/energy_scan_sim/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/energy_scan_sim/condor_{dataset:}_{job:}",
+
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_E{scan:}",
+        "logDir" : "./logs/energy_scan_sim",
+        "mode" : 1,
+        "fix" : {            
+            "10":"0",         
+            "11":"0",            
+            "12":"0",
+            "13":"0",
+
+            "14":"0",
+            "15":"0",
+
+            "18":"0",
+            "19":"0",
+
+            "20":"0",
+            "21":"0",
+            "22":"0",
+            "23":"0",        
+
+            "24":"0",
+            "25":"0",
+            "26":"0",
+            "27":"0"        
+        }
+    },
+    "run3b_sim" : {
+        "job" : ["energyScan"],
+        
+        "scan" : [1000, 3000, 100],
+        "scan_per_queue" : 1,
+        "dataset" : ["run3b"],
+        
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_energy_bin/wiggles_Eslices_{dataset:}.root",
+        "wiggle_name" : "wiggle_E{scan:}_seed0",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_A/{dataset:}_A_seed0.root",
+        "initial_name" : "{dataset:}_A_seed0",
+
+        "output_dir" : "./output/run23_fullAna_note/energy_scan_sim/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/energy_scan_sim/condor_{dataset:}_{job:}",
+
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_E{scan:}",
+        "logDir" : "./logs/energy_scan_sim",
+        "mode" : 1001,
+        "fix" : {            
+            "10":"0",         
+            "11":"0",            
+            "12":"0",
+            "13":"0",
+
+            "14":"0",
+            "15":"0",
+
+            "18":"0",
+            "19":"0",
+
+            "20":"0",
+            "21":"0",
+            "22":"0",
+            "23":"0",        
+
+            "24":"0",
+            "25":"0",
+            "26":"0",
+            "27":"0"        
+        }
+    }    
+}

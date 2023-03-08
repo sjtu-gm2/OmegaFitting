@@ -1,0 +1,173 @@
+{
+    "envelope_fullfit" : {
+        "job" : ["T1700"],
+        "dataset" : ["run2all_skip_calo18","run3a","run3b"],
+        "scan" : [0,150,1],
+        "scan_per_queue" : 5,
+        "keys" : {            
+            "time_start" : "def f(scan):return (scan % 150) * 10 + 202",
+            "time_end" : "def f(scan):return (scan % 150) * 10 + 202 + 2681",
+            "time_tag" : "def f(scan):return scan % 150"
+        },
+
+        "start_bin" : "{time_start:}",
+        "end_bin" : "{time_end:}",
+
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed0",
+
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "\\initial_file" : "/home/chencheng/Fitter_wa/run/values/run23_fullAna_note/condor_{dataset:}_{job:}/{dataset:}_{job:}_seed0.root",        
+        "\\initial_name" : "{dataset:}_{job:}_seed0",
+        "initial_file" : "./values/cbo_sliding_full/sliding_{job:}_{dataset:}_0_0.root",        
+        "initial_name" : "sliding_{job:}_{dataset:}_0_0",
+
+        "output_dir" : "./output/cbo_sliding_full/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/cbo_sliding_full/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "sliding_{job:}_{dataset:}_0_{time_tag:}",
+        "mode" : 0,
+        "logDir" : "./logs/CBOsliding",
+        "max_try" : 3,
+
+        "fix" : {
+            "5" : "1E+20",
+            "10":"nan",
+            "11":"nan",
+            "12":"nan",
+            "13":"nan",
+
+            "14":"nan",
+            "15":"nan",
+
+            "18":"nan",
+            "19":"nan",
+
+            "20":"nan",
+            "21":"nan",
+            "22":"nan",
+            "23":"nan",
+
+            "24":"nan",
+            "25":"nan",
+            "26":"nan",
+            "27":"nan"
+        }
+    },
+    "envelope" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run2all_skip_calo18","run3a","run3b"],
+        "scan" : [0,3600,1],
+        "scan_per_queue" : 150,
+        "keys" : {
+            "calo_num" : "def f(scan):return scan // 150 + 1",
+            "time_start" : "def f(scan):return (scan % 150) * 10 + 202",
+            "time_end" : "def f(scan):return (scan % 150) * 10 + 202 + 2681",
+            "time_tag" : "def f(scan):return scan % 150"
+        },
+
+        "start_bin" : "{time_start:}",
+        "end_bin" : "{time_end:}",
+
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed0_calo{calo_num:}",
+
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/calo_fit/condor_{dataset:}_{job:}/default_{job:}_{dataset:}_{calo_num}.root",        
+        "initial_name" : "default_{job:}_{dataset:}_{calo_num:}",
+
+        "output_dir" : "./output/cbo_sliding/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/cbo_sliding/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "sliding_{job:}_{dataset:}_{calo_num:}_{time_tag:}",
+        "mode" : 0,
+        "logDir" : "./logs/CBOsliding",
+        "max_try" : 3,
+
+        "fix" : {
+            "5" : "1E+10",
+            "10":"0",
+            "11":"0",
+            "12":"0",
+            "13":"0",
+
+            "14":"0",
+            "15":"0",
+
+            "18":"0",
+            "19":"0",
+
+            "20":"0",
+            "21":"0",
+            "22":"0",
+            "23":"0",
+
+            "24":"0",
+            "25":"0",
+            "26":"0",
+            "27":"0"
+        }
+    },
+    "envelope_all" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run2all_skip_calo18","run3a","run3b"],
+        "scan" : [0,150,1],
+        "scan_per_queue" : 1,
+        "keys" : {
+            "calo_num" : "0",
+            "time_start" : "def f(scan):return (scan % 150) * 10 + 202",
+            "time_end" : "def f(scan):return (scan % 150) * 10 + 202 + 2681",
+            "time_tag" : "def f(scan):return scan % 150"
+        },
+
+        "start_bin" : "{time_start:}",
+        "end_bin" : "{time_end:}",
+
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed0",
+
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/calo_fit/condor_{dataset:}_{job:}/default_{job:}_{dataset:}_{calo_num}.root",        
+        "initial_name" : "default_{job:}_{dataset:}_{calo_num:}",
+
+        "output_dir" : "./output/cbo_sliding_all/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/cbo_sliding_all/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "mode" : 0,
+        "logDir" : "./logs/CBOsliding_all",
+        "max_try" : 3,
+
+        "fix" : {
+            "5" : "1E+10",
+            "10":"0",
+            "11":"0",
+            "12":"0",
+            "13":"0",
+
+            "14":"0",
+            "15":"0",
+
+            "18":"0",
+            "19":"0",
+
+            "20":"0",
+            "21":"0",
+            "22":"0",
+            "23":"0",
+
+            "24":"0",
+            "25":"0",
+            "26":"0",
+            "27":"0"
+        }
+    }
+}

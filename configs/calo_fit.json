@@ -1,0 +1,84 @@
+{
+    "calos_default_run2" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run2all_skip_calo18"],
+        "scan" : [0,25,1],
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "def f(scan,job):\n\tif scan==0 or scan=='0' :return 'wiggle_%s_seed0'%(job)\n\telse: return 'wiggle_%s_seed0_calo%s'%(job,scan)",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "./values/run2_cbo/calos_default/condor_{dataset:}_{job:}/calos_default_{job:}_{dataset:}_{scan:}.root",
+        "initial_name" : "calos_default_{job:}_{dataset:}_{scan:}",
+        "output_dir" : "./output/calo_fit/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/calo_fit/condor_{dataset:}_{job:}",
+        "//value_of_func" : "run1_24paras",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "default_{job:}_{dataset:}_{scan:}",
+        "mode" : 0,
+        "logDir" : "./calofig/logs_calo_fig/",
+        "max_try" : 3,
+        "fix" : {            
+            "10":"0",         
+            "11":"0",            
+            "12":"0",
+            "13":"0",
+
+            "14":"0",
+            "15":"0",
+
+            "18":"0",
+            "19":"0",
+
+            "20":"0",
+            "21":"0",
+            "22":"0",
+            "23":"0",        
+
+            "24":"0",
+            "25":"0",
+            "26":"0",
+            "27":"0"        
+        }
+    },
+    "calos_default_run3" : {
+        "job" : ["T1700","A"],
+        "dataset" : ["run3a","run3b"],
+        "scan" : [0,25,1],
+        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "def f(scan,job):\n\tif scan==0 or scan=='0' :return 'wiggle_%s_seed0'%(job)\n\telse: return 'wiggle_%s_seed0_calo%s'%(job,scan)",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "./values//calos_default_run3/condor_{dataset:}_{job:}/calos_default_{job:}_{dataset:}_{scan:}.root",
+        "initial_name" : "calos_default_{job:}_{dataset:}_{scan:}",
+        "output_dir" : "./output/calo_fit/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/calo_fit/condor_{dataset:}_{job:}",
+        "//value_of_func" : "run1_24paras",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "default_{job:}_{dataset:}_{scan:}",
+        "mode" : 0,
+        "logDir" : "./calofig/logs_calo_fig/",
+        "max_try" : 3,
+        "fix" : {
+            "10":"0",         
+            "11":"0",            
+            "12":"0",
+            "13":"0",
+
+            "14":"0",
+            "15":"0",
+
+            "18":"0",
+            "19":"0",
+
+            "20":"0",
+            "21":"0",
+            "22":"0",
+            "23":"0",        
+
+            "24":"0",
+            "25":"0",
+            "26":"0",
+            "27":"0"        
+        }
+    }
+}

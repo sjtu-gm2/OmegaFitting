@@ -1,0 +1,92 @@
+{
+    "run2" : {
+        "job" : ["T"],
+        "//comment" : ["run2all_skip_calo18","run2all"],
+        "dataset" : ["run2all_skip_calo18"],
+        "keys" : {
+            "energy" : "def energy(scan):\n\treturn (scan // 20)*100 + 2000",
+            "PUM" : "def PUM(scan):\n\treturn (scan % 20)*0.1"
+        },
+        "scan" : [0,1500,1],
+        "scan_per_queue" : 20,
+        
+        "wiggle_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}1700_{energy:}_mutilier{PUM:.1f}",
+        
+        "lm_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/run2all_skipCalo18_{job:}1700_seed0.root",
+        "initial_name" : "run2all_skipCalo18_{job:}1700_seed0",
+
+        "output_dir" : "./output/run23_fullAna_note/condor_{dataset:}_{job:}1700",
+        "value_dir"  : "./values/run23_fullAna_note/condor_{dataset:}_{job:}1700",
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}1700_{energy:}_mutilier{PUM:.1f}",
+        "logDir" : "./logs/run2_seeds_note",
+        "mode" : 1
+
+    },    
+
+    "run3a" : {
+        "job" : ["T"],
+        "//comment" : ["run3a"],
+        "dataset" : ["run3a"],
+        "keys" : {
+            "energy" : "def energy(scan):\n\treturn (scan // 20)*100 + 2000",
+            "PUM" : "def PUM(scan):\n\treturn (scan % 20)*0.1"
+        },
+        "scan" : [0,1500,1],
+        "scan_per_queue" : 20,
+
+        "wiggle_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}1700_{energy:}_mutilier{PUM:.1f}",
+
+        "lm_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/envelope_{job:}1700_run3a_0.root",
+        "initial_name" : "envelope_{job:}1700_run3a_0",
+
+        "output_dir" : "./output/run23_fullAna_note/condor_{dataset:}_{job:}1700",
+        "value_dir"  : "./values/run23_fullAna_note/condor_{dataset:}_{job:}1700",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}1700_{energy:}_mutilier{PUM:.1f}",
+        "logDir" : "./logs/run3a_seeds_note",
+        "mode" : 1001,
+        "fix" : {
+            "28" : "0.0"
+        }
+    },
+
+    "run3b" : {
+        "job" : ["T"],
+        "//comment" : ["run3b"],
+        "dataset" : ["run3b"],        
+        "keys" : {
+            "energy" : "def energy(scan):\n\treturn (scan // 20)*100 + 2000",
+            "PUM" : "def PUM(scan):\n\treturn (scan % 20)*0.1"                                        
+        },
+        "scan" : [0,1500,1],
+        "scan_per_queue" : 20,
+
+        "wiggle_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}1700_{energy:}_mutilier{PUM:.1f}",
+
+        "lm_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/huyuekai/lustre/Run3/Fitter_wa/envelope_{job:}1700_run3b_0.root",
+        "initial_name" : "envelope_{job:}1700_run3b_0",
+
+        "output_dir" : "./output/run23_fullAna_note/condor_{dataset:}_{job:}1700",
+        "value_dir"  : "./values/run23_fullAna_note/condor_{dataset:}_{job:}1700",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}1700_{energy:}_mutilier{PUM:.1f}}",
+        "logDir" : "./logs/run3b_seeds_note",
+        "mode" : 1001
+    }    
+}

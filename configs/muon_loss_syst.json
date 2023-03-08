@@ -1,0 +1,135 @@
+{
+    "run2" : {
+        "job" : ["T1700","A"],
+        "//comment" : ["run2all_skip_calo18","run2all"],
+        "dataset" : ["run2B","run2C","run2D","run2E","run2F_skip_calo18","run2G","run2H"],
+        "scan" : [0, 200, 1],
+        "scan_per_queue" : 10,
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/values_run23_fullAna/condor_run2all_skipCalo18_{job:}/run2all_skipCalo18_{job:}_seed{scan:}.root",
+        "initial_name" : "run2all_skipCalo18_{job:}_seed{scan:}",
+
+        "output_dir" : "./output/run23_fullAna_note/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "logDir" : "./logs/run2_seeds_note",
+        "mode" : 1
+
+    },    
+
+    "run3a_fix" : {
+        "job" : ["T1700","A"],
+        "//comment" : ["run3a","run3B","run3C","run3D","run3E","run3F","run3G","run3I","run3J","run3K","run3L","run3M"],
+        "dataset" : ["run3a"],
+        "scan" : [0, 200, 1],
+        "scan_per_queue" : 10,
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/cbo_envelope/condor_run3a_{job:}/envelope_{job:}_run3a_0.root",
+        "initial_name" : "envelope_{job:}_run3a_0",
+
+        "output_dir" : "./output/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "logDir" : "./logs/run3a_seeds_note",
+        "mode" : 1001,
+        "fix" : {
+            "28" : "0.0",
+            "9" : "0.0"
+        }
+    },
+    "run3a_float" : {
+        "job" : ["T1700","A"],
+        "//comment" : ["run3a","run3B","run3C","run3D","run3E","run3F","run3G","run3I","run3J","run3K","run3L","run3M"],
+        "dataset" : ["run3a"],
+        "scan" : [0, 200, 1],
+        "scan_per_queue" : 10,
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/cbo_envelope/condor_run3a_{job:}/envelope_{job:}_run3a_0.root",
+        "initial_name" : "envelope_{job:}_run3a_0",
+
+        "output_dir" : "./output/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "logDir" : "./logs/run3a_seeds_note",
+        "mode" : 1001,
+        "fix" : {
+            "28" : "0.0"
+        }
+    },
+
+    "run3b_float" : {
+        "job" : ["T1700","A"],
+        "//comment" : ["run3b"],
+        "dataset" : ["run3N","run3O"],        
+        "scan" : [0, 200, 1],
+        "scan_per_queue" : 10,
+
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/cbo_envelope/condor_run3b_{job:}/envelope_{job:}_run3b_0.root",
+        "initial_name" : "envelope_{job:}_run3b_0",
+
+        "output_dir" : "./output/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "logDir" : "./logs/run3b_seeds_note",
+        "mode" : 1001
+    },
+    "run3b_fix" : {
+        "job" : ["T1700","A"],
+        "//comment" : ["run3b"],
+        "dataset" : ["run3N","run3O"],        
+        "scan" : [0, 200, 1],
+        "scan_per_queue" : 10,
+
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/cbo_envelope/condor_run3b_{job:}/envelope_{job:}_run3b_0.root",
+        "initial_name" : "envelope_{job:}_run3b_0",
+
+        "output_dir" : "./output/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/muonloss/run23_fullAna_note/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "logDir" : "./logs/run3b_seeds_note",
+        "mode" : 1001,
+        "fix" : {
+            "9" : "0.0"
+        }
+    }
+}

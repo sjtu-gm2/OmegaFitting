@@ -140,14 +140,7 @@ def run_queue(args):
         scan_id = subq+dummy.subq_per_q*dummy.q
         run(config,entry,dataset,job,scan,scan_id)
 
-def run(config,entry,dataset,job,scan,scan_id):    
-    tag = '{0:}_{1:}'.format(job,dataset)
-    # print (tag)
-    if config['use_list']:
-        if (not tag in config) or (not scan in config[tag]):
-            print ('skip {0:} {1:}'.format(tag,scan))
-            return
-
+def form_keys(config,entry,dataset,job,scan=0,scan_id=0):
     kw = {
         'job' : job,
         'dataset' : dataset,
@@ -172,8 +165,20 @@ def run(config,entry,dataset,job,scan,scan_id):
                 kw_extra[k] = str(str_key).format(**kw)
 
     kw.update(kw_extra)
+    def f(key):
+        return str(config[key]).format(**kw)
 
-    f = lambda key:str(config[key]).format(**kw)
+    return f    
+
+def run(config,entry,dataset,job,scan,scan_id):
+    tag = '{0:}_{1:}'.format(job,dataset)
+    # print (tag)
+    if config['use_list']:
+        if (not tag in config) or (not scan in config[tag]):
+            print ('skip {0:} {1:}'.format(tag,scan))
+            return
+
+    f = form_keys(config,entry,dataset,job,scan,scan_id)
 
     wiggle_file  = f('wiggle_file')
     wiggle_name  = f('wiggle_name')
@@ -217,7 +222,7 @@ def run(config,entry,dataset,job,scan,scan_id):
     res_name = '{0:}/result_{1:}_{2:}.root'.format(output_dir,value_of_func,tag_out)
     res_func_name = 'func_{0:}_{1:}'.format(value_of_func,tag_out)
     output_file = '{0:}/{1:}.root'.format(value_dir,tag_out)
-    
+
     # trans.extract(res_name,res_func_name,output_file,tag_out)
 
 def fetch_clean(args,mode='fetch'):

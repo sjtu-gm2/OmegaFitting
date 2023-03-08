@@ -17,7 +17,7 @@ source  /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh
 
 mkdir ./run && mkdir ./build
 
-cd OmegaFitting && ln -s $PWD/launch.py $PWD/example.json ../run
+cd OmegaFitting && ln -s $PWD/launch.py $PWD/example.json $PWD/configs ../run
 
 cd ../build && cmake ../OmegaFitting -DRun=${run} -DMain=${main} -DUSE_JSON=OFF && cmake --build . && cd ../run && mkdir logs
 

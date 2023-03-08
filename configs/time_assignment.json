@@ -1,0 +1,38 @@
+{
+    "run2_Default" : {
+        "job" : ["T1700","A"],
+        "//comment" : [],
+        "dataset" : ["run2C"],
+        "scan" : [0, 100, 1],
+        "wiggle_file" : "/home/chencheng/data/TimeAssighnment/data/wiggles/wiggles_{job:}_{dataset:}_Default.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_integral.root",
+        "lm_name" : "def f(dataset):\n\td=dataset.split('_')[0];\n\tif d=='run2F':\n\t\td='run2F_skip_calo18';\n\treturn 'LM_integral_{0:}_from30'.format(d)",
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values_run23_fullAna/condor_{dataset:}_{job:}/{dataset:}_{job:}_seed{scan:}.root",
+        "initial_name" : "{dataset:}_{job:}_seed{scan:}",
+        "output_dir" : "./output/output_clusterTime_Default/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/values_clusterTime_Default/condor_{dataset:}_{job:}",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_seed{scan:}_Default",
+        "logDir" : "./logs/cluserTime_Default",
+        "mode" : 1
+    },
+    "run2_MinEnergy" : {
+        "job" : ["T1700","A"],
+        "//comment" : [],
+        "dataset" : ["run2C"],
+        "scan" : [0, 100, 1],
+        "wiggle_file" : "/home/chencheng/data/TimeAssighnment/data/wiggles/wiggles_{job:}_{dataset:}_MinEnergy.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_integral.root",
+        "lm_name" : "def f(dataset):\n\td=dataset.split('_')[0];\n\tif d=='run2F':\n\t\td='run2F_skip_calo18';\n\treturn 'LM_integral_{0:}_from30'.format(d)",
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values_run23_fullAna/condor_{dataset:}_{job:}/{dataset:}_{job:}_seed{scan:}.root",
+        "initial_name" : "{dataset:}_{job:}_seed{scan:}",
+        "output_dir" : "./output/output_clusterTime_MinEnergy/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/values_clusterTime_MinEnergy/condor_{dataset:}_{job:}",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_seed{scan:}_MinEnergy",
+        "logDir" : "./logs/cluserTime_MinEnergy",
+        "mode" : 1
+    }
+}

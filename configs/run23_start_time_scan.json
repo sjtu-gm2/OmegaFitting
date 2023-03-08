@@ -1,0 +1,242 @@
+{
+    "run2" : {
+        "job" : ["T1700","A"],
+        "keys" : {
+            "seed" : "def f(job):\n\tif job=='T1700':\n\t\treturn '9'\n\telse:\n\t\treturn '83'"
+        },
+        "scan" : [202, 1002, 4],
+        "scan_per_queue" : 20,
+        "dataset" : ["run2all_skip_calo18"],
+        "start_bin" : "{scan:}",
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{seed:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_{job:}/{dataset:}_{job:}_seed{seed:}.root",
+        "initial_name" : "{dataset:}_{job:}_seed{seed:}",
+
+        "output_dir" : "./output/run23_fullAna_note/timeScan/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/timeScan/condor_{dataset:}_{job:}",
+
+
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_time_{scan:}",
+        "logDir" : "./logs/timeScan",
+        "mode" : 1
+    },
+
+    "run2_cbo_freq_envelope" : {
+        "job" : ["T1700","A"],
+        "keys" : {
+            "seed" : "def f(job):\n\tif job=='T1700':\n\t\treturn '9'\n\telse:\n\t\treturn '83'"
+        },
+        "scan" : [202, 1002, 4],
+        "scan_per_queue" : 5,
+        "dataset" : ["run2all_skip_calo18"],
+        "start_bin" : "{scan:}",
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{seed:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/start_time_cbo_freq_model.root",
+        "initial_name" : "{dataset:}_{job:}_seed{seed:}",
+
+        "output_dir" : "./output/run23_fullAna_note/timeScan_freq/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/timeScan_freq/condor_{dataset:}_{job:}",
+
+
+        "value_of_func" : "31paras_calos_2",
+        "tag" : "{dataset:}_{job:}_time_{scan:}",
+        "logDir" : "./logs/timeScan_freq",
+        "mode" : 2402,
+        "fix" : {
+            "10" : "27",
+            "20" : "100",
+            "30" : "24.4"
+        }
+    },
+    "run3a_cbo_freq_envelope" : {
+        "job" : ["T1700","A"],
+        "keys" : {
+            "seed" : "def f(job,dataset):\n\tseeds_map = {'run2all_skip_calo18' : {'T':9,'A':83},'run3a' : {'T':63,'A':193},'run3b' : {'T':160,'A':181}}\n\treturn seeds_map[dataset][job[0]]"
+        },
+        "scan" : [202, 1002, 4],
+        "scan_per_queue" : 5,
+        "dataset" : ["run3a"],
+        "start_bin" : "{scan:}",
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{seed:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/start_time_cbo_freq_model_run23.root",
+        "initial_name" : "{dataset:}_{job:}_seed{seed:}",
+
+        "output_dir" : "./output/run23_fullAna_note/timeScan_freq/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/timeScan_freq/condor_{dataset:}_{job:}",
+
+
+        "value_of_func" : "31paras_calos_2",
+        "tag" : "{dataset:}_{job:}_time_{scan:}",
+        "logDir" : "./logs/timeScan_freq",
+        "mode" : 2402,
+        "fix" : {
+            "10" : "21.5",
+            "20" : "80",
+            "30" : "24.4"
+        }
+    },
+    "run3b_cbo_freq_envelope" : {
+        "job" : ["T1700","A"],
+        "keys" : {
+            "seed" : "def f(job,dataset):\n\tseeds_map = {'run2all_skip_calo18' : {'T':9,'A':83},'run3a' : {'T':63,'A':193},'run3b' : {'T':160,'A':181}}\n\treturn seeds_map[dataset][job[0]]"
+        },
+        "scan" : [202, 1002, 4],
+        "scan_per_queue" : 5,
+        "dataset" : ["run3b"],
+        "start_bin" : "{scan:}",
+        
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{seed:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/start_time_cbo_freq_model_run23.root",
+        "initial_name" : "{dataset:}_{job:}_seed{seed:}",
+
+        "output_dir" : "./output/run23_fullAna_note/timeScan_freq/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/timeScan_freq/condor_{dataset:}_{job:}",
+
+
+        "value_of_func" : "31paras_calos_2",
+        "tag" : "{dataset:}_{job:}_time_{scan:}",
+        "logDir" : "./logs/timeScan_freq",
+        "mode" : 2402,
+        "fix" : {
+            "10" : "25",
+            "20" : "70",
+            "30" : "24.4"
+        }
+    },
+
+    "run3a" : {
+        "job" : ["T1700","A"],
+        "keys" : {
+            "seed" : "def f(job):\n\tif job=='T1700':\n\t\treturn '63'\n\telse:\n\t\treturn '193'"
+        },
+        "scan" : [202, 1002, 4],
+        "scan_per_queue" : 20,
+        "dataset" : ["run3a"],
+        "start_bin" : "{scan:}",
+        
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{seed:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_{job:}/{dataset:}_{job:}_seed{seed:}.root",
+        "initial_name" : "{dataset:}_{job:}_seed{seed:}",
+
+        "output_dir" : "./output/run23_fullAna_note/timeScan/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/timeScan/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_time_{scan:}",
+        "logDir" : "./logs/timeScan_run3a",
+        "mode" : 1001,
+        "fix" : {
+            "28" : "0.0"
+        }
+    },
+
+    "run3b" : {
+        "job" : ["T1700","A"],
+        "keys" : {
+            "seed" : "def f(job):\n\tif job=='T1700':\n\t\treturn '160'\n\telse:\n\t\treturn '181'"
+        },
+        "scan" : [202, 1002, 4],
+        "scan_per_queue" : 20,
+        "dataset" : ["run3b"],
+        "start_bin" : "{scan:}",
+
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{seed:}",
+
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_{job:}/{dataset:}_{job:}_seed{seed:}.root",
+        "initial_name" : "{dataset:}_{job:}_seed{seed:}",
+
+        "output_dir" : "./output/run23_fullAna_note/timeScan/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/timeScan/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_time_{scan:}",
+        "logDir" : "./logs/timeScan_run3b",
+        "mode" : 1001
+    },
+    "run3b_simplified" : {
+        "job" : ["T1700","A"],
+        "keys" : {
+            "seed" : "def f(job):\n\tif job=='T1700':\n\t\treturn '160'\n\telse:\n\t\treturn '181'"
+        },
+        "scan" : [202, 1002, 4],
+        "scan_per_queue" : 20,
+        "dataset" : ["run3b"],
+        "start_bin" : "{scan:}",
+
+        "wiggle_file" : "/home/chencheng/data/Run23_seedScan/wiggles/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{seed:}",
+
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "./values/run23_fullAna_note/condor_{dataset:}_{job:}/{dataset:}_{job:}_seed{seed:}.root",
+        "initial_name" : "{dataset:}_{job:}_seed{seed:}",
+
+        "output_dir" : "./output/run23_fullAna_note/timeScan_simplified/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values/run23_fullAna_note/timeScan_simplified/condor_{dataset:}_{job:}",
+
+        "value_of_func" : "29paras_cbo_envelope_C",
+        "tag" : "{dataset:}_{job:}_time_{scan:}",
+        "logDir" : "./logs/timeScan_run3b_simplified",
+        "mode" : 1001,
+        "fix" : {            
+            "10":"0",         
+            "11":"0",            
+            "12":"0",
+            "13":"0",
+
+            "14":"0",
+            "15":"0",
+
+            "18":"0",
+            "19":"0",
+
+            "20":"0",
+            "21":"0",
+            "22":"0",
+            "23":"0",        
+
+            "24":"0",
+            "25":"0",
+            "26":"0",
+            "27":"0"        
+        }
+    }    
+}

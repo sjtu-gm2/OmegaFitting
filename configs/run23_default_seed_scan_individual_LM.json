@@ -1,0 +1,59 @@
+{
+    "run2" : {
+        "job" : ["T1700","A"],
+        "//comment" : [],
+        "dataset" : ["run2B","run2C","run2D","run2E","run2F_skip_calo18","run2G","run2H"],
+        "scan" : [0, 200, 1],
+        "wiggle_file" : "/home/chencheng/data/Run2_default_analysis/wiggles/rename/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_integral.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/run2_seed2.root",
+        "initial_name" : "{job:}_shadow_run2all_skip_calo18_28paras_cbo_lost_vw_expansion_2",
+        "output_dir" : "./output_run23_individual_lm/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values_run23_individual_lm/condor_{dataset:}_{job:}",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "mode" : 1
+    },
+
+    "run3a" : {
+        "job" : ["T1700","A"],
+        "//comment" : ["run3B","run3C","run3D","run3E","run3F","run3G","run3I","run3J","run3K","run3L","run3M"],
+        "dataset" : ["run3a"],
+        "scan" : [0, 200, 1],
+        "wiggle_file" : "/home/chencheng/data/Run3_default_analysis/wiggles/rename/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_integral.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/calo_fit/condor_{dataset:}_{job:}/default_{job:}_{dataset:}_0.root",
+        "initial_name" : "default_{job:}_{dataset}_0",
+
+        "output_dir" : "./output/_run23_individual_lm/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values_run23_individual_lm/condor_{dataset:}_{job:}",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "mode" : 1
+    },
+
+    "run3b" : {
+        "job" : ["T1700","A"],
+        "//comment" : [],
+        "dataset" : ["run3N","run3O"],
+        "scan" : [0, 200, 1],
+        "wiggle_file" : "/home/chencheng/data/Run3_default_analysis/wiggles/rename/wiggles_{job:}_{dataset:}.root",
+        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
+        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_integral.root",
+        "lm_name" : "LM_integral_{dataset:}_from30",
+        "initial_file" : "/home/chencheng/Fitter_wa/run/values/run3_seed8.root",
+        "initial_name" : "{job:}_shadow_run3b_28paras_cbo_lost_vw_expansion_8",
+        "output_dir" : "./output_run23_individual_lm/condor_{dataset:}_{job:}",
+        "value_dir"  : "./values_run23_individual_lm/condor_{dataset:}_{job:}",
+        "value_of_func" : "28paras_cbo_lost_vw_expansion",
+        "tag" : "{dataset:}_{job:}_seed{scan:}",
+        "mode" : 1,
+        "max_try" : 2
+    }
+}
