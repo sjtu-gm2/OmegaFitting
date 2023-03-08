@@ -112,7 +112,7 @@ int main(int argc,char **argv) {
     TH1 * lm = (TH1*)file_lm->Get(argv[4]);
 
     cout << "Get initialValues from " << argv[5] << "  " << argv[6] << endl;
-    vector<double> init_values = GetInitialValuesD(argv[5],argv[6]);
+    vector<double> init_values = GetInitialValuesD(argv[5],argv[6]);    
 
 
     string outputDir(argv[7]);

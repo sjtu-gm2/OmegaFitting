@@ -13,18 +13,30 @@ vector<double> GetInitialValuesD(string file_path, string index) {
 #ifdef USE_JSON
   Json::Value json_value;
   std::ifstream json_file(file_path.c_str());
-  cout << "load parameters from json:" << file_path << endl;  
+  cout << "load parameters from json:" << file_path << endl;
   json_file >> json_value;  
   for(auto val : json_value[index.c_str()]) {
       init_values.push_back(double(val.asFloat()));
   }  
-#else 
+#else
   TFile * file = TFile::Open(file_path.c_str());
-  TArrayD * arrayd = file->Get<TArrayD>(index.c_str());
-  for(int n=0;n<arrayd->fN;n++) {
-    init_values.push_back(arrayd->At(n));
+  TObject * obj = file->Get(index.c_str());
+  if(!obj->InheritsFrom(TF1::Class())) {
+    cout << "load parameters from Root::TArrayD    " << file_path << endl;
+    TArrayD * arrayd = (TArrayD*)obj;    
+    for(int n=0;n<arrayd->fN;n++) {
+        init_values.push_back(arrayd->At(n));
+    }
+  }
+  else{
+    cout << "load parameters from Root::TF1    " << file_path << endl;
+    TF1 * func = (TF1*)obj;
+    for(int n=0;n<func->GetNpar();n++) {
+        init_values.push_back(func->GetParameter(n));
+    }    
   }
 #endif
+  cout << "end file " << endl;
   return init_values;
 }
 

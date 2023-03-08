@@ -166,7 +166,7 @@ def form_keys(config,entry,dataset,job,scan=0,scan_id=0):
 
     kw.update(kw_extra)
     def f(key):
-        return str(config[key]).format(**kw)
+        return str(config[key]).format(**kw).replace(';','\\;')
 
     return f    
 
