@@ -82,6 +82,7 @@ DECLARE_FUNC(_31paras_calos_2)
 
 //fit pseudo data: cbo envelope study
 DECLARE_FUNC(_pseudo_5pars)
+DECLARE_FUNC(_pseudo_9pars)
 DECLARE_FUNC(_pseudo_10pars)
 
 
@@ -135,6 +136,7 @@ class Fitter {
 
     // pseudo data fit, envelope syst study
     REGISTER_FUNC(_pseudo_5pars,5)
+    REGISTER_FUNC(_pseudo_9pars,9)
     REGISTER_FUNC(_pseudo_10pars,10)
 
   private:    

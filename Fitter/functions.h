@@ -954,3 +954,23 @@ double func_pseudo_10pars(double *x,double *p) {
 
   return norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) * cbo;
 }
+
+//5pars+cbo
+double func_pseudo_9pars(double *x,double *p) {
+  double time = x[0] / time_scale;
+  double norm = p[0];
+  double life = p[1];
+  double asym = p[2];
+  double omega = 2*pipy*0.2291*(1+p[3]*1e-6);
+  double phi = p[4];
+
+  double tau_cbo = p[5]; //fix to infinity
+  double asym_cbo = p[6];
+  double omega_cbo = p[7];
+  double phi_cbo = p[8];
+  // double c_cbo = p[9];
+
+  double cbo = 1-TMath::Exp(-time/tau_cbo)*asym_cbo*TMath::Cos(omega_cbo*time - phi_cbo);
+
+  return norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time + phi)) * cbo;
+}

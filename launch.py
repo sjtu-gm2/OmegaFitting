@@ -1,11 +1,12 @@
-import subprocess,os,json,sys,argparse,re,inspect
+import subprocess,os,json,sys,argparse,re,inspect,numpy,random,string
+
 sys.path.append('%s/../OmegaFitting'%(os.environ['PWD']))
 import trans
 
 condor = '''\
 Universe   = vanilla
-Executable = run_{1:}.sh
-Log        = submit.log
+Executable = ./submit_caches/{1:}/run.sh
+Log        = ./submit_caches/{1:}/submit.log
 {0:}
 '''
 
@@ -19,88 +20,127 @@ Queue {4:}
 executable = '''\
 #! /bin/bash
 source  /cvmfs/sft.cern.ch/lcg/views/LCG_101/x86_64-centos7-gcc11-opt/setup.sh
-python ./launch.py --run ${1} ${2} ${3} ${4} ${5}
-echo -e "END - ${1} ${2} ${3} ${4} ${5}"
+python ./submit_caches/%s/launch.py --run ./submit_caches/%s/${1} ${2} ${3} ${4} ${5}
+echo -e "END - ./submit_caches/%s/${1} ${2} ${3} ${4} ${5}"
 '''
 
-def submit(args):
-    #default setup
+def digest_scan_list(config,process=0):
+    scan = config['scan']
+    scan_per_queue = config['scan_per_queue']    
+
+    if isinstance(scan[0],str):
+        scan_list = [k for k in scan]
+    elif len(scan)==3:
+        start = scan[0]
+        end   = scan[1]
+        step  = scan[2]
+        scan_list = []
+        index = 0
+        while start+index*step<end:
+            scan_list.append(start+index*step)
+            index += 1
+    else:
+        raise ValueError()
+
+    tot_scan = len(scan_list)
+    tot_process = int(numpy.ceil(tot_scan / scan_per_queue))
+    this_process = int(process) % tot_process
+    this_scan_list = []
+    for subprocess in range(scan_per_queue):    
+        this_index = this_process * scan_per_queue + subprocess
+        if this_index < tot_scan:
+            this_scan_list.append(scan_list[this_index])
+
+    dummy = type("",(),{})
+
+    dummy.scan_list = this_scan_list
+    dummy.nq = tot_process
+    dummy.q = this_process    
+    dummy.nsubq = len(this_scan_list)
+    dummy.subq_per_q = scan_per_queue
+    return dummy
+
+def regist_tag(cfg,entry):
+    fname = os.path.basename(cfg).split('.')[0]
+
+    while True:
+        stamp = ''.join([random.choice(string.ascii_uppercase + string.digits) \
+            for _ in range(3)])
+        tag = '{0:}.{1:}.{2:}'.format(fname,entry,stamp)
+        status = subprocess.getstatusoutput('touch ./submit_caches/jobs.log')
+        status = subprocess.getstatusoutput('grep {0:} ./submit_caches/jobs.log'.format(tag))
+        if status[0] == 1:
+            os.system('echo "{0:}" >> ./submit_caches/jobs.log'.format(tag))
+            os.system('mkdir -p ./submit_caches/{0:}'.format(tag))
+            break
+        elif status[0] == 2:
+            print (status)
+            raise ValueError
+    return tag    
+
+def submit(args):    
     config = {
         'logDir' : './logs',
         'scan_per_queue' : 1,
     }
-
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
-
     logDir = config['logDir'].format(key=args[1])
+
     os.system('mkdir -p %s'%(logDir))
-    scan = config['scan']
-    if isinstance(scan[0], str):
-        N = int(len(scan) / config['scan_per_queue'])
-    else:
-        N = int(int((scan[1]-scan[0])/scan[2])  / config['scan_per_queue'])
+    os.system('mkdir -p submit_caches')
+    os.system('touch ./submit_caches/jobs.log')
+
+    tag = regist_tag(args[0],args[1])
+
+    N = digest_scan_list(config).nq
+
+    cfg_base_name = os.path.basename(args[0])
+
     Queues = []
     for job in config['job']:
         for dataset in config['dataset']:
-            q = queue.format(args[0],args[1],job,dataset,N,logDir)
+            q = queue.format(cfg_base_name,args[1],job,dataset,N,logDir)
             Queues.append(q)
 
-    condor_str = condor.format('\n'.join(Queues),args[1])
-    condor_file = 'submit_{0:}.condor'.format(args[1])
+    condor_str = condor.format('\n'.join(Queues),tag)
+    condor_file = './submit_caches/{0:}/submit.condor'.format(tag)
     with open(condor_file,'w') as fp:
         fp.write(condor_str)
-    run_file = 'run_{0:}.sh'.format(args[1])
+    run_file = './submit_caches/{0:}/run.sh'.format(tag)
+    steering_file = './submit_caches/{0:}/launch.py'.format(tag)
+    os.system('cp ./launch.py {0:}'.format(steering_file))
+    os.system('cp {0:} ./submit_caches/{1:}/'.format(args[0],tag))
+
     with open(run_file,'w') as fp:
-        fp.write(executable)
+        fp.write(executable%(tag,tag,tag))
     os.system('chmod 777 {0:}'.format(run_file))
     os.system('condor_submit {0:}'.format(condor_file))
 
 def run_queue(args):
     config = {
-        'scan_per_queue' : 1,
-    }
-    with open(args[0],'r') as fp:
-        config.update(json.load(fp)[args[1]])
-    
-    if config['scan_per_queue']==1:
-        run(args, 0)
-    else:
-        job = args[2]
-        dataset = args[3]
-        process = args[4]
-        for sub_num in range(config['scan_per_queue']):            
-            print("\n",'='*20,'\n','Runing on {0:} {1:} process {2:} sub-{3:}'.format(dataset,job,process,sub_num),'\n','='*20,"\n")
-            run(args,sub_num)
-            
-
-def run(args,sub_num):
-    config = {
         'max_try' : 3,
         'start_bin' : 202,
         'end_bin' : 4357,
-        'use_list' : 0,
+        'use_list' : 0,        
         'scan_per_queue' : 1,
     }
-
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
 
+    entry = args[1]    
     job = args[2]
     dataset = args[3]
-    scan_per_queue = config['scan_per_queue']
-    q_num = int(args[4])
+    process = args[4]
 
-    if isinstance(config['scan'][0], str):
-        N = len(config['scan'])
-        process = (q_num % int(N/scan_per_queue))*scan_per_queue+sub_num
-        scan = config['scan'][process]
-    else:
-        N = int((config['scan'][1]-config['scan'][0])/config['scan'][2])    
-        process = (q_num % int(N/scan_per_queue))*scan_per_queue+sub_num
-        step = config['scan'][2]
-        scan = process * step + config['scan'][0]
+    dummy = digest_scan_list(config,process)    
+    for subq,scan in enumerate(dummy.scan_list):
+        print('\n','-'*30)
+        print('Processing {0:}.{1:}.{2:}  q: {3:}/{4:} sub-q: {5:}/{6:} scan point: {7:}'.format(entry,dataset,job,dummy.q+1,dummy.nq,subq+1,dummy.nsubq,scan))
+        scan_id = subq+dummy.subq_per_q*dummy.q
+        run(config,entry,dataset,job,scan,scan_id)
 
+def run(config,entry,dataset,job,scan,scan_id):    
     tag = '{0:}_{1:}'.format(job,dataset)
     # print (tag)
     if config['use_list']:
@@ -112,12 +152,12 @@ def run(args,sub_num):
         'job' : job,
         'dataset' : dataset,
         'scan' : scan,
-        'process' : process,
-        'key' : args[1]
+        'process' : scan_id,
+        'key' :entry
     }
-    
+
     kw_extra = {}
-    
+
     if 'keys' in config:
         for k,str_key in config['keys'].items():
             if str_key[:4] == 'def ':
@@ -141,7 +181,7 @@ def run(args,sub_num):
     lm_name      = f('lm_name')
     initial_file = f('initial_file')
     initial_name = f('initial_name')
-    
+
     start_bin    = f('start_bin')
     end_bin      = f('end_bin')
 
@@ -172,19 +212,18 @@ def run(args,sub_num):
         wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,start_bin,end_bin,fix,range)
 
     print (cmd)
-
     os.system(cmd)
 
     res_name = '{0:}/result_{1:}_{2:}.root'.format(output_dir,value_of_func,tag_out)
     res_func_name = 'func_{0:}_{1:}'.format(value_of_func,tag_out)
     output_file = '{0:}/{1:}.root'.format(value_dir,tag_out)
+    
+    # trans.extract(res_name,res_func_name,output_file,tag_out)
 
-    trans.extract(res_name,res_func_name,output_file,tag_out)
-
-def fetch(args):
+def fetch_clean(args,mode='fetch'):
     with open(args[0],'r') as fp:
         config = json.load(fp)[args[1]]
-    
+
     fetch_dir = './fetch/'
     if len(args)>2:
         fetch_dir = args[2]
@@ -192,27 +231,59 @@ def fetch(args):
     if len(args)>3:
         filter_str = args[3]
 
-    os.system('mkdir -p {0:}'.format(fetch_dir))
+    if mode == 'fetch':
+        os.system('mkdir -p {0:}'.format(fetch_dir))
 
     for job in config['job']:
         for dataset in config['dataset']:
             input_dir = config['output_dir'].format(job=job,dataset=dataset,key=args[1])
-            basename = os.path.basename(input_dir.rstrip('/'))            
-            cmd = 'hadd -j 8 -f {0:}/{1}.root {2:}/{3:}.root'.format(fetch_dir,basename,input_dir,filter_str)
-            os.system(cmd)
+            basename = os.path.basename(input_dir.rstrip('/'))
+            if mode == 'fetch':
+                cmd = 'hadd -j 8 -f {0:}/{1}.root {2:}/{3:}.root'.format(fetch_dir,basename,input_dir,filter_str)
+                os.system(cmd)
+            elif mode == 'clean':
+                cmd = 'rm -rf {0:}'.format(input_dir)
+                go = input('Delting: {0:}\n----\nPress y or [return] to delete, others to abort!'.format(input_dir))
+                if len(go)==0 or go[0] == 'y':
+                    os.system(cmd)
+                    print('\ndeleted {0:}\n'.format(input_dir),'-'*20)
+                else:                    
+                    raise ValueError('\ndelete aborted!')
+            else:
+                raise ValueError(mode)            
+
+def fetch(args):
+    fetch_clean(args,'fetch')
+
+def clean(args):
+    fetch_clean(args,'clean')
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--submit',nargs='+')
     parser.add_argument('--run',nargs='+')
     parser.add_argument('--fetch',nargs='+')
+    parser.add_argument('--clean',nargs='+')    
+    
+    args = parser.parse_args()
+    
+    keys = []    
+    for key in args.__dict__.keys():
+        if args.__dict__[key]!=None:
+            keys.append(key)
 
-    args = parser.parse_args()    
-    if args.fetch!=None:
-        fetch(args.fetch)
-    elif args.submit!=None and args.run==None:
+    if len(keys)!=1:
+        parser.error('Should use 1 and only 1 job!')
+
+    job = keys[0]
+
+    if job == 'submit':
         submit(args.submit)
-    elif args.submit==None and args.run!=None:
+    elif job == 'run':
         run_queue(args.run)
+    elif job == 'fetch':
+        fetch(args.fetch)
+    elif job == 'clean':
+        clean(args.clean)
     else:
-        raise ValueError('use "python ./launch.py --submit/run/fetch ... "')
+        raise ValueError('use "python ./launch.py --submit/run/fetch/clean ... "')

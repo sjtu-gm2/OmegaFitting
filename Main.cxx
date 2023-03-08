@@ -74,8 +74,10 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
         if(fit_mode == 2401) info = fitter.Fit_31paras_calos_1(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 2402) info = fitter.Fit_31paras_calos_2(method,wiggle,start_time,end_time,info.fit_values,lm);
 
+        //pseudo data fit cbo syst
         if(fit_mode == -5) info = fitter.Fit_pseudo_5pars(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == -10) info = fitter.Fit_pseudo_10pars(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == -9) info = fitter.Fit_pseudo_9pars(method,wiggle,start_time,end_time,info.fit_values,lm);
     }
 }
 
@@ -149,7 +151,7 @@ int main(int argc,char **argv) {
     if(mode==2402) fit_chain = {28,2402};
 
     //pseudo data fit cbo syst
-    if(mode==-2400) fit_chain = {-5,-10};
+    if(mode==-2400) fit_chain = {-5,-10,-9};
 
     int attempts;
     attempts = atoi(argv[10]);

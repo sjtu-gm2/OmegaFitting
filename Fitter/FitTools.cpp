@@ -364,4 +364,8 @@ Fitter::Fitter() : max_attempts(1) {
         "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
         "C_{cbo}"
     };
+    name_vars["pseudo_9pars"] = {
+        "N","#tau","A","R","#phi",
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
+    };
 }
