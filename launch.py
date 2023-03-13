@@ -172,7 +172,7 @@ def form_keys(config,entry,dataset,job,scan=0,scan_id=0):
 
 def run(config,entry,dataset,job,scan,scan_id):
     tag = '{0:}_{1:}'.format(job,dataset)
-    # print (tag)
+
     if config['use_list']:
         if (not tag in config) or (not scan in config[tag]):
             print ('skip {0:} {1:}'.format(tag,scan))
@@ -196,8 +196,12 @@ def run(config,entry,dataset,job,scan,scan_id):
 
     mode = config['mode']
     max_try = config['max_try']
-    
-    value_of_func = config['value_of_func']    
+
+    value_of_func = ''
+
+    if 'value_of_func' in config:
+        value_of_func = config['value_of_func']
+
     os.system('mkdir -p {0:}'.format(output_dir))    
     os.system('mkdir -p {0:}'.format(value_dir))
 
@@ -207,14 +211,14 @@ def run(config,entry,dataset,job,scan,scan_id):
         for key,value in config['fix'].items():
             fix += '{0:} {1:} '.format(key,value)
 
-    range = "None"
+    range_par = "None"
     if 'range' in config:
-        range = ''
+        range_par = ''
         for key,ranges in config['range'].items():
-            range += '{0:} {1:} {2:} '.format(key,ranges[0],ranges[1])
+            range_par += '{0:} {1:} {2:} '.format(key,ranges[0],ranges[1])
 
     cmd = '../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:} {11:} --fix {12:} --range {13:}'.format(
-        wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,start_bin,end_bin,fix,range)
+        wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,start_bin,end_bin,fix,range_par)
 
     print (cmd)
     os.system(cmd)
@@ -269,9 +273,9 @@ if __name__ == '__main__':
     parser.add_argument('--run',nargs='+')
     parser.add_argument('--fetch',nargs='+')
     parser.add_argument('--clean',nargs='+')    
-    
+
     args = parser.parse_args()
-    
+
     keys = []    
     for key in args.__dict__.keys():
         if args.__dict__[key]!=None:
