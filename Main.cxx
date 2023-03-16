@@ -165,33 +165,27 @@ int main(int argc,char **argv) {
     map<int,pair<double,double>> range_parameters;
 
     for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i], "--fix") == 0) {
-            i++;
+        if (strcmp(argv[i++], "--fix") == 0) {            
             while (i < argc && isdigit(argv[i][0])) {
-                int npar = atoi(argv[i]);
-                double fix_value;
-                i++;
-                if(strcmp(argv[i], "nan") == 0) {
+                int npar = atoi(argv[i++]);
+                double fix_value;                
+                if(strcmp(argv[i++], "nan") == 0) {
                     fix_value = init_values[npar];
                 } else {
-                    fix_value = atof(argv[i]);
+                    fix_value = atof(argv[i++]);
                 }
                 fix_parameters[npar] = fix_value;
                 cout << "Fix parameter " << npar << " to " << fix_value << endl;
             }
         }
-        if (strcmp(argv[i], "--range") == 0) {
-            i++;
+        if (strcmp(argv[i++], "--range") == 0) {
             while (i < argc && isdigit(argv[i][0])) {
-                int npar = atoi(argv[i]);
-                auto range = make_pair<double, double>(0, 0);
-                i++;
-                range.first = atof(argv[i]);
-                i++;
-                range.second = atof(argv[i]);
+                int npar = atoi(argv[i++]);
+                auto range = make_pair<double, double>(0, 0);                
+                range.first = atof(argv[i++]);                
+                range.second = atof(argv[i++]);
                 range_parameters[npar] = range;
-                cout << "Set parameter " << npar << " range from " << range.first << " to " << range.second << endl;
-                i++;
+                cout << "Set parameter " << npar << " range from " << range.first << " to " << range.second << endl;                
             }
             break;
         }
