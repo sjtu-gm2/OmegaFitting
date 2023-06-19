@@ -26,11 +26,11 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
 
     cout << " Time range from " << start_time << " to " << end_time << endl;
 
-    if(binW==0.1492) {           
+    if(fabs(binW-0.1492)<0.0001) {           
         fitter.SetTimeUnit(Fitter::micro_second);        
         cout << "wiggle time unit: micro second"<<endl;
     }
-    else if(binW==149.2) {
+    else if(fabs(binW-149.2)<0.0001) {
         fitter.SetTimeUnit(Fitter::nano_second);
         cout << "wiggle time unit: nano second"<<endl;
     }
@@ -61,6 +61,7 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
 
         //cbo syst
         if(fit_mode == 29) info = fitter.Fit_29paras_cbo_envelope_C(method,wiggle,start_time,end_time,info.fit_values,lm);
+
         if(fit_mode == 30) info = fitter.Fit_30paras_cbo_freq(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == 31) info = fitter.Fit_31paras_cbo_time(method,wiggle,start_time,end_time,info.fit_values,lm);
 
@@ -78,6 +79,24 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1 *lm, string outputDir,
         if(fit_mode == -5) info = fitter.Fit_pseudo_5pars(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == -10) info = fitter.Fit_pseudo_10pars(method,wiggle,start_time,end_time,info.fit_values,lm);
         if(fit_mode == -9) info = fitter.Fit_pseudo_9pars(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+        if(fit_mode==2410) fitter.Fit_calos_cbo_envelope_exp_c(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode==2411) fitter.Fit_calos_cbo_envelope_generic(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode==2412) fitter.Fit_calos_cbo_envelope_poly(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode==2413) fitter.Fit_calos_cbo_envelope_alphaalpha(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+        if(fit_mode==2001) fitter.Fit_31paras_EU(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode==2002) fitter.Fit_28paras_EU0(method,wiggle,start_time,end_time,info.fit_values,lm);    
+
+        if(fit_mode == 2901) info = fitter.Fit_SJTU_mod1(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 2902) info = fitter.Fit_SJTU_mod2(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 2903) info = fitter.Fit_SJTU_mod3(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 2904) info = fitter.Fit_SJTU_mod4(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 2905) info = fitter.Fit_SJTU_mod5(method,wiggle,start_time,end_time,info.fit_values,lm);
+        if(fit_mode == 2906) info = fitter.Fit_SJTU_floatTauCBOVW(method,wiggle,start_time,end_time,info.fit_values,lm);
+
+        if(fit_mode==3001) fitter.Fit_EU_nominal(method,wiggle,start_time,end_time,info.fit_values,lm);    
+        if(fit_mode==3002) fitter.Fit_EU_fixTauCBOVW(method,wiggle,start_time,end_time,info.fit_values,lm);    
     }
 }
 
@@ -144,6 +163,15 @@ int main(int argc,char **argv) {
     if(mode==1000) fit_chain = {29}; 
     if(mode==1001) fit_chain = {5,29};
 
+    if(mode==1002) fit_chain = {5,2901};
+    if(mode==1003) fit_chain = {5,2902};
+    if(mode==1004) fit_chain = {5,2903};
+    if(mode==1005) fit_chain = {5,2904};
+    if(mode==1006) fit_chain = {5,2905};
+
+    //SJTU nominal 29 with floated tau_CBOVW
+    if(mode==1007) fit_chain = {5,2906};
+
     //24 calorimeter fit
 
     if(mode==24) fit_chain = {2400};
@@ -152,6 +180,26 @@ int main(int argc,char **argv) {
 
     //pseudo data fit cbo syst
     if(mode==-2400) fit_chain = {-5,-10,-9};
+
+    //sliding fit for  pseudo data
+    if(mode==-2403) fit_chain = {-5,-9};
+
+    //envelope models
+    //exp+c
+    if(mode==2410) fit_chain = {5,2410};
+    //generic
+    if(mode==2411) fit_chain = {5,2411};
+    //poly
+    if(mode==2412) fit_chain = {5,2412};
+    //alphaalpha
+    if(mode==2413) fit_chain = {5,2413};
+
+    //swap with EU    
+    if(mode==2001) fit_chain = {5,2001};
+    if(mode==2002) fit_chain = {5,2002};
+    if(mode==3001) fit_chain = {3001};
+    if(mode==3002) fit_chain = {3002};
+
 
     int attempts;
     attempts = atoi(argv[10]);
@@ -163,35 +211,35 @@ int main(int argc,char **argv) {
 
     map<int,double> fix_parameters;
     map<int,pair<double,double>> range_parameters;
-
-    for (int i = 1; i < argc; i++) {
-        if (strcmp(argv[i++], "--fix") == 0) {            
-            while (i < argc && isdigit(argv[i][0])) {
+    int i=12;
+    while(++i < argc) {        
+        if (strcmp(argv[i], "--fix") == 0 && strcmp(argv[i+1], "None") != 0) {
+            ++i;
+            while (i < argc && isdigit(argv[i][0])) {                
                 int npar = atoi(argv[i++]);
-                double fix_value;                
-                if(strcmp(argv[i++], "nan") == 0) {
+                char * s_fix_value = argv[i++];
+                double fix_value;
+                if(strcmp(s_fix_value, "nan") == 0) {
                     fix_value = init_values[npar];
-                } else {
-                    fix_value = atof(argv[i++]);
+                } else {                    
+                    fix_value = atof(s_fix_value);
                 }
                 fix_parameters[npar] = fix_value;
                 cout << "Fix parameter " << npar << " to " << fix_value << endl;
             }
-        }
-        if (strcmp(argv[i++], "--range") == 0) {
+        }        
+        if (strcmp(argv[i], "--range") == 0 && strcmp(argv[i+1], "None") != 0) {
+            ++i;
             while (i < argc && isdigit(argv[i][0])) {
                 int npar = atoi(argv[i++]);
-                auto range = make_pair<double, double>(0, 0);                
-                range.first = atof(argv[i++]);                
+                auto range = make_pair<double, double>(0, 0);
+                range.first = atof(argv[i++]);
                 range.second = atof(argv[i++]);
                 range_parameters[npar] = range;
-                cout << "Set parameter " << npar << " range from " << range.first << " to " << range.second << endl;                
-            }
-            break;
-        }
-    }
-
+                cout << "Set parameter " << npar << " range from " << range.first << " to " << range.second << endl;
+            }            
+        }        
+    }    
     FullFit(wiggle,start_bin,end_bin,lm,outputDir,name,init_values,fit_chain,attempts,fix_parameters,range_parameters);
-
     return 0;
 }

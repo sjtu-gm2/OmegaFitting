@@ -36,5 +36,4 @@
         "logDir" : "./logs/calorimeter_scan/",
         "max_try" : 3        
     }
-
 }

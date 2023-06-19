@@ -84,6 +84,28 @@ DECLARE_FUNC(_31paras_calos_2)
 DECLARE_FUNC(_pseudo_5pars)
 DECLARE_FUNC(_pseudo_9pars)
 DECLARE_FUNC(_pseudo_10pars)
+DECLARE_FUNC(_31paras_cbo_timing)
+
+//envelope study
+DECLARE_FUNC(_calos_cbo_envelope_alphaalpha)
+DECLARE_FUNC(_calos_cbo_envelope_exp_c)
+DECLARE_FUNC(_calos_cbo_envelope_poly)
+DECLARE_FUNC(_calos_cbo_envelope_generic)
+
+//EU swap
+DECLARE_FUNC(_31paras_EU)
+DECLARE_FUNC(_28paras_EU0)
+DECLARE_FUNC(_EU_nominal)
+DECLARE_FUNC(_EU_fixTauCBOVW)
+DECLARE_FUNC(_SJTU_mod1)
+DECLARE_FUNC(_SJTU_mod2)
+DECLARE_FUNC(_SJTU_mod3)
+DECLARE_FUNC(_SJTU_mod4)
+DECLARE_FUNC(_SJTU_mod5)
+DECLARE_FUNC(_SJTU_floatTauCBOVW)
+
+
+
 
 
 
@@ -138,6 +160,29 @@ class Fitter {
     REGISTER_FUNC(_pseudo_5pars,5)
     REGISTER_FUNC(_pseudo_9pars,9)
     REGISTER_FUNC(_pseudo_10pars,10)
+
+    // cbo timing
+    REGISTER_FUNC(_31paras_cbo_timing,31)
+
+    //envelope study
+    REGISTER_FUNC(_calos_cbo_envelope_alphaalpha,33)
+    REGISTER_FUNC(_calos_cbo_envelope_exp_c,31)
+    REGISTER_FUNC(_calos_cbo_envelope_poly,33)
+    REGISTER_FUNC(_calos_cbo_envelope_generic,37)
+    REGISTER_FUNC(_31paras_EU,31)
+    REGISTER_FUNC(_28paras_EU0,30)
+    REGISTER_FUNC(_EU_nominal,30)
+    REGISTER_FUNC(_EU_fixTauCBOVW,30)    
+    REGISTER_FUNC(_SJTU_mod1,29)
+    REGISTER_FUNC(_SJTU_mod2,29)
+    REGISTER_FUNC(_SJTU_mod3,30)
+    REGISTER_FUNC(_SJTU_mod4,32)
+    REGISTER_FUNC(_SJTU_mod5,32)
+    REGISTER_FUNC(_SJTU_floatTauCBOVW,30)
+    
+    
+    
+
 
   private:    
     map<string,vector<string>> name_vars;

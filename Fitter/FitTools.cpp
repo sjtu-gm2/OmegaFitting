@@ -4,9 +4,7 @@
 #include "TMath.h"
 #include <Math/MinimizerOptions.h>
 
-
 using namespace pocketfft;
-
 
 vector<double> GetInitialValuesD(string file_path, string index) {
   vector<double> init_values;
@@ -14,17 +12,18 @@ vector<double> GetInitialValuesD(string file_path, string index) {
   Json::Value json_value;
   std::ifstream json_file(file_path.c_str());
   cout << "load parameters from json:" << file_path << endl;
-  json_file >> json_value;  
+  json_file >> json_value;
   for(auto val : json_value[index.c_str()]) {
       init_values.push_back(double(val.asFloat()));
-  }  
+  }
 #else
-  TFile * file = TFile::Open(file_path.c_str());
+  TFile * file = TFile::Open(file_path.c_str());  
   TObject * obj = file->Get(index.c_str());
   if(!obj->InheritsFrom(TF1::Class())) {
     cout << "load parameters from Root::TArrayD    " << file_path << endl;
-    TArrayD * arrayd = (TArrayD*)obj;    
+    TArrayD * arrayd = (TArrayD*)obj;
     for(int n=0;n<arrayd->fN;n++) {
+        // cout << "var" << n << " = "<< arrayd->At(n) << endl;
         init_values.push_back(arrayd->At(n));
     }
   }
@@ -35,8 +34,7 @@ vector<double> GetInitialValuesD(string file_path, string index) {
         init_values.push_back(func->GetParameter(n));
     }    
   }
-#endif
-  cout << "end file " << endl;
+#endif  
   return init_values;
 }
 
@@ -134,7 +132,9 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
 
     TFitResultPtr fit_res;
 
-    fit_res = fit_hist->Fit(fit_func,"REMS");
+    cout << "performing fit histogram" << endl;
+    // fit_res = fit_hist->Fit(fit_func,"REMS");
+    fit_res = fit_hist->Fit(fit_func,"SRM");
 
 
 
@@ -149,7 +149,7 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in) {
     int max_attempts_ = max_attempts;
     while(max_attempts_>0 && !isValid) {
      cout << "Invalid fitting!!! Retry " << refit++ << endl;
-     fit_res = fit_hist->Fit(fit_func,"QREMS");
+     fit_res = fit_hist->Fit(fit_func,"QSRM");
 
      fitStatus = fit_res;     
      isValid = fit_res->IsValid();// && (fitStatus%100==0);
@@ -281,16 +281,17 @@ Fitter::Fitter() : max_attempts(1) {
 
     name_vars["13paras_cbo_vo"] = {
         "N","#tau","A","R","#phi",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
     };
 
     name_vars["15paras_changing_cbo_vo"] = {
         "N","#tau","A","R","#phi",
-        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "A_{1}", "#tau_{1}",
     };
+
     name_vars["29paras_cbo_envelope_C"] = {
         "N_{0}","#tau","A","R","#phi_{0}",
         "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
@@ -301,7 +302,7 @@ Fitter::Fitter() : max_attempts(1) {
         "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
         "C_{cbo}",
     };
-    name_vars["30paras_cbo_freq"] = {
+    name_vars["SJTU_nominal"] = {
         "N_{0}","#tau","A","R","#phi_{0}",
         "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
         "k_{loss}",
@@ -309,11 +310,79 @@ Fitter::Fitter() : max_attempts(1) {
         "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
-        "A_{cbo}^{residual}","#tau_{cbo}^{residual}"
+        "C_{cbo}",
     };
-    name_vars["31paras_cbo_time"] = {
+    name_vars["SJTU_mod1"] = {
         "N_{0}","#tau","A","R","#phi_{0}",
         "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+    };
+    name_vars["SJTU_mod2"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+    };
+    name_vars["SJTU_mod3"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+        "tau_{cbovw}"
+    };
+    name_vars["SJTU_mod4"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+        "tau_{cbovw}",
+        "a_cbo_ch",
+        "tau_cbo_ch"
+    };
+    name_vars["SJTU_mod5"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+        "tau_{cbovw}",
+        "a_cbo_ch",
+        "tau_cbo_ch"
+    };
+    name_vars["30paras_cbo_freq"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "A_{cbo}^{residual}","#tau_{cbo}^{residual}"
+    };
+
+    name_vars["31paras_cbo_time"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",
         "k_{loss}",
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
@@ -324,14 +393,14 @@ Fitter::Fitter() : max_attempts(1) {
 
     name_vars["simplified_22paras_calos"] = {
         "N_{0}","#tau","A","R","#phi_{0}",
-        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",
         "k_{loss}",
         "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
         "A_{2cbo}","#phi_{2cbo}",
         "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
         "A_{VW-cbo}","#phi_{VW-cbo}",
     };
-    
+
     name_vars["run1_24paras"] = {
         "N_{0}","#tau","A","R","#phi_{0}",
         "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
@@ -380,4 +449,112 @@ Fitter::Fitter() : max_attempts(1) {
         "N","#tau","A","R","#phi",
         "#tau_{cbo}","A_{cbo}","#omega_{cbo}","#phi_{cbo}",
     };
+    name_vars["31paras_cbo_timing"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+        "#tau_{cbo}^{a}","#tau_{cbo}^{phi}",
+    };
+
+    name_vars["calos_cbo_envelope_exp_c"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "A_{cbo}^{residual}","#tau_{cbo}^{residual}",
+        "C_{cbo}",
+    };
+
+    name_vars["calos_cbo_envelope_generic"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "A_{cbo}^{residual}","#tau_{cbo}^{residual}",
+        "Gen1","Gen2","Gen3","Gen4","Gen5","Gen6","Gen7"
+    };
+
+    name_vars["calos_cbo_envelope_poly"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "A_{cbo}^{residual}","#tau_{cbo}^{residual}",
+        "Pol1","Poly2","Poly3"
+    };
+
+    name_vars["calos_cbo_envelope_alphaalpha"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",        
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "#tau_{y}","A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "A_{cbo}^{residual}","#tau_{cbo}^{residual}",
+        "AA1","AA2","AA3"
+    };
+
+    name_vars["31paras_EU"] = {
+        "N_{0}","#tau","A","R","#phi_{0}",
+        "#tau_{cbo}","A^{N}_{cbo}","#omega_{cbo}","#phi_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}","A_{vw}","K_{vw}","#phi_{vw}",
+        "A_{2cbo}","#phi_{2cbo}","A_{cbo,A}","#phi_{cbo,A}","A_{cbo,#phi}","#phi_{cbo,#phi}",
+        "A_{y}","K_{y}","#phi_{y}",
+        "A_{VW+cbo}","#phi_{VW+cbo}","A_{VW-cbo}","#phi_{VW-cbo}",
+        "C_{cbo}",
+        "#tau_{CBOVW}",
+        "A_{CBO}^{CH}","#tau_{CBO}^{CH}",
+    };
+
+    name_vars["EU_nominal"] = {
+        "N",
+        "#tau",
+        "A",
+        "R",
+        "#phi",
+        "A_{CBO}",
+        "#omega_{CBO}",
+        "#phi_{CBO}",
+        "#tau_{CBO}",
+        "A_{VW}",
+        "#kappa_{fy}",
+        "#phi_{VW}",
+        "k_{LM}",
+        "A_{CBOA}",
+        "#phi_{CBOA}",
+        "A_{CBOP}",
+        "#phi_{CBOP}",
+        "A_{CBOx2}",
+        "#phi_{CBOx2}",
+        "#tau_{VW}",
+        "A_{fy}",
+        "#phi_{fy}",
+        "#tau_{CBOVW}",
+        "A_{CBOplusVW}",
+        "#phi_{CBOplusVW}",
+        "A_{CBOminusVW}",
+        "#phi_{CBOminusVW}",
+        "L_{CBO}^{const}",
+        "A_{cbo}^{res}",
+        "tau_{cbo}^{res}",
+    };
+    name_vars["EU_fixTauCBOVW"] = name_vars["EU_nominal"];
+    name_vars["SJTU_floatTauCBOVW"] = name_vars["SJTU_mod3"];
+    
 }

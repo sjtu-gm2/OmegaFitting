@@ -124,6 +124,7 @@ def run_queue(args):
         'end_bin' : 4357,
         'use_list' : 0,        
         'scan_per_queue' : 1,
+        'auto_combine' : 0
     }
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
@@ -134,12 +135,18 @@ def run_queue(args):
     process = args[4]
 
     dummy = digest_scan_list(config,process)    
+    out_files = []
     for subq,scan in enumerate(dummy.scan_list):
         print('\n','-'*30)
         print('Processing {0:}.{1:}.{2:}  q: {3:}/{4:} sub-q: {5:}/{6:} scan point: {7:}'.format(entry,dataset,job,dummy.q+1,dummy.nq,subq+1,dummy.nsubq,scan))
         scan_id = subq+dummy.subq_per_q*dummy.q
-        run(config,entry,dataset,job,scan,scan_id)
-
+        out_dir,out_name = run(config,entry,dataset,job,scan,scan_id)
+        out_file = '{0:}/result_*{1:}.root'.format(out_dir,out_name)
+        out_files.append(out_file)
+    if config['auto_combine'] == 1:
+        tag = '{0:}_{1:}_{2:}'.format(job,dataset,process)
+        in_files = ' '.join(out_files)
+        os.system('hadd -f {0:}/combined_{1:}.root {2:}'.format(out_dir,tag,in_files))
 def form_keys(config,entry,dataset,job,scan=0,scan_id=0):
     kw = {
         'job' : job,
@@ -191,19 +198,15 @@ def run(config,entry,dataset,job,scan,scan_id):
     end_bin      = f('end_bin')
 
     output_dir   = f('output_dir')
-    value_dir    = f('value_dir')
+    
     tag_out      = f('tag')
 
     mode = config['mode']
     max_try = config['max_try']
 
-    value_of_func = ''
-
-    if 'value_of_func' in config:
-        value_of_func = config['value_of_func']
 
     os.system('mkdir -p {0:}'.format(output_dir))    
-    os.system('mkdir -p {0:}'.format(value_dir))
+    
 
     fix = "None"
     if 'fix' in config:
@@ -223,20 +226,35 @@ def run(config,entry,dataset,job,scan,scan_id):
     print (cmd)
     os.system(cmd)
 
-    res_name = '{0:}/result_{1:}_{2:}.root'.format(output_dir,value_of_func,tag_out)
-    res_func_name = 'func_{0:}_{1:}'.format(value_of_func,tag_out)
-    output_file = '{0:}/{1:}.root'.format(value_dir,tag_out)
+    return output_dir,tag_out
+    
+    # fetch values 
+    # value_dir    = f('value_dir')
+    # value_of_func = config['value_of_func']
+
+    # os.system('mkdir -p {0:}'.format(value_dir))
+    # res_name = '{0:}/result_{1:}_{2:}.root'.format(output_dir,value_of_func,tag_out)
+    # res_func_name = 'func_{0:}_{1:}'.format(value_of_func,tag_out)
+    # output_file = '{0:}/{1:}.root'.format(value_dir,tag_out)
 
     # trans.extract(res_name,res_func_name,output_file,tag_out)
 
 def fetch_clean(args,mode='fetch'):
+    config = {
+        'auto_combine' : 0
+    }
+
     with open(args[0],'r') as fp:
-        config = json.load(fp)[args[1]]
+        config.update(json.load(fp)[args[1]])
 
     fetch_dir = './fetch/'
     if len(args)>2:
         fetch_dir = args[2]
-    filter_str = '*'
+    if config['auto_combine']==1:
+        filter_str = 'combined_*'
+    else:
+        filter_str = '*'
+
     if len(args)>3:
         filter_str = args[3]
 
@@ -248,7 +266,7 @@ def fetch_clean(args,mode='fetch'):
             input_dir = config['output_dir'].format(job=job,dataset=dataset,key=args[1])
             basename = os.path.basename(input_dir.rstrip('/'))
             if mode == 'fetch':
-                cmd = 'hadd -j 8 -f {0:}/{1}.root {2:}/{3:}.root'.format(fetch_dir,basename,input_dir,filter_str)
+                cmd = 'hadd -f {0:}/{4:}_{1:}.root {2:}/{3:}.root'.format(fetch_dir,basename,input_dir,filter_str,args[1])
                 os.system(cmd)
             elif mode == 'clean':
                 cmd = 'rm -rf {0:}'.format(input_dir)
@@ -266,6 +284,8 @@ def fetch(args):
 
 def clean(args):
     fetch_clean(args,'clean')
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()

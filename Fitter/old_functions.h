@@ -10,8 +10,8 @@ Blinders::fitType ftype = Blinders::kOmega_a;
 #if data_version_major == 4
 Blinders * getBlinded = new Blinders(ftype, "Unexpected virtue of ignorance.");
 #elif data_version_major == 2
-Blinders * getBlinded = new Blinders(ftype, "stay home, stay healthy!");
-// Blinders * getBlinded = new Blinders(ftype, "swapping europa shanghai");
+// Blinders * getBlinded = new Blinders(ftype, "stay home, stay healthy!");
+Blinders * getBlinded = new Blinders(ftype, "swapping europa shanghai");
 #elif data_version_major == 3
 Blinders * getBlinded = new Blinders(ftype, "Bla Bla Bla!");
 #endif
@@ -502,8 +502,7 @@ double func_29paras_cbo_envelope_C(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    // double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -541,606 +540,6 @@ double func_29paras_cbo_envelope_C(double *x, double *p) {
     double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
     return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
 }
-
-//1.9MHz func, 30 paras
-//with floated cboVW
-double func_SJTU_floatTauCBOVW(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    double omega_cbo = p[7];
-    double phi_cbo = p[8];
-    
-    double fcbo = 2.32657;
-    double fc = 2*M_PI/0.1492;
-    double fvo = sqrt(fcbo*(2*fc - fcbo));
-    double fvw = fc - 2*fvo;
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    // double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    double omega_vw = p[12]*fvw;
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-    double tau_cbovw = p[29];
-
-    double expan = (1 - (exp(-time/tau_cbo) + cbo_constant)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbovw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    // vo-par
-    double tau_vo = p[20];
-    double asym_vo = p[21];
-    double omega_vo = p[22]*fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-// SJTU fix kVW, mod1
-double func_SJTU_mod1(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    double omega_cbo = p[7];
-    double phi_cbo = p[8];
-    
-    double fcbo = 2.32657;
-    double fc = 2*M_PI/0.1492;
-    double fvo = sqrt(fcbo*(2*fc - fcbo));
-    double fvw = fc - 2*fvo*p[22];
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    // double omega_vw = p[12]*fvw;
-    double omega_vw = fvw;
-
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-
-    double expan = (1 - (exp(-time/tau_cbo) + cbo_constant)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    // vo-par
-    double tau_vo = p[20];
-    double asym_vo = p[21];
-    double omega_vo = p[22]*fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-// SJTU fix kVW,
-// tauy=2tauvw
-// mod2
-double func_SJTU_mod2(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    double omega_cbo = p[7];
-    double phi_cbo = p[8];
-    
-    double fcbo = 2.32657;
-    double fc = 2*M_PI/0.1492;
-    double fvo = sqrt(fcbo*(2*fc - fcbo));
-    double fvw = fc - 2*fvo*p[22];
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    // double omega_vw = p[12]*fvw;
-    double omega_vw = fvw;
-
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-
-    double expan = (1 - (exp(-time/tau_cbo) + cbo_constant)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time/tau_cbo - time/tau_vw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    // vo-par
-    // double tau_vo = p[20];
-    double tau_vo = 2*tau_vw;
-    double asym_vo = p[21];
-    double omega_vo = p[22]*fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-// SJTU fix kVW,
-// tauy=2tauvw
-// float tau_vw_cbo
-// 30 parameters (+1)
-// mod3
-double func_SJTU_mod3(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    double omega_cbo = p[7];
-    double phi_cbo = p[8];
-    
-    double fcbo = 2.32657;
-    double fc = 2*M_PI/0.1492;
-    double fvo = sqrt(fcbo*(2*fc - fcbo));
-    double fvw = fc - 2*fvo*p[22];
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    // double omega_vw = p[12]*fvw;
-    double omega_vw = fvw;
-
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-    double tau_cbovw = p[29];
-
-    double expan = (1 - (exp(-time/tau_cbo) + cbo_constant)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time*tau_cbovw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    // vo-par
-    // double tau_vo = p[20];
-    double tau_vo = 2*tau_vw;
-    double asym_vo = p[21];
-    double omega_vo = p[22]*fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-// SJTU fix kVW,
-// tauy=2tauvw
-// float tau_vw_cbo
-// varyingFreq
-// 32 parameters (+1+2)
-// mod4
-double func_SJTU_mod4(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    // double omega_cbo = p[7];
-    double phi_cbo = p[8];
-
-    double a_cbo_ch = p[30];
-    double tau_cbo_ch = p[31]; 
-    double omega_cbo = p[7] + a_cbo_ch*exp(-time/tau_cbo_ch)/time;
-
-    double fcbo = omega_cbo;
-    double fc = 2*M_PI/0.1492;
-    double ky = p[22];
-    double fvo = ky*fcbo*sqrt(2*fc/ky/fcbo-1);
-    double fvw = fc - 2*fvo;
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    // double omega_vw = p[12]*fvw;
-    double omega_vw = fvw;
-
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-    double tau_cbovw = p[29];
-    
-    
-
-
-    double expan = (1 - (exp(-time/tau_cbo) + cbo_constant)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time*tau_cbovw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    // vo-par
-    // double tau_vo = p[20];
-    double tau_vo = 2*tau_vw;
-    double asym_vo = p[21];
-    double omega_vo = fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-
-// SJTU fix kVW,
-// tauy=2tauvw
-// float tau_vw_cbo
-// varyingFreq
-// CBO envelope higher order
-// 32 parameters (+1+2)
-// mod5
-double func_SJTU_mod5(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    // double omega_cbo = p[7];
-    double phi_cbo = p[8];
-
-    double a_cbo_ch = p[30];
-    double tau_cbo_ch = p[31]; 
-    double omega_cbo = p[7] + a_cbo_ch*exp(-time/tau_cbo_ch)/time;
-
-    double fcbo = omega_cbo;
-    double fc = 2*M_PI/0.1492;
-    double ky = p[22];
-    double fvo = ky*fcbo*sqrt(2*fc/ky/fcbo-1);
-    double fvw = fc - 2*fvo;
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    // double omega_vw = p[12]*fvw;
-    double omega_vw = fvw;
-
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-    double tau_cbovw = p[29];
-    
-    
-    double deco = exp(-time/tau_cbo) + cbo_constant;
-
-    double expan = (1 - deco*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time*tau_cbovw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    double dcbo = 1 - deco*deco*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    // vo-par
-    // double tau_vo = p[20];
-    double tau_vo = 2*tau_vw;
-    double asym_vo = p[21];
-    double omega_vo = fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*deco*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*deco*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-
-// SJTU fix kVW,
-// tauy=2tauvw
-// float tau_vw_cbo
-// changing freq. cbo
-// correlate vw vo and vcbo
-// 32 parameters (+1+2)
-// mod6
-double func_SJTU_mod6(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double a_cbo_ch = p[30];
-    double tau_cbo_ch = p[31];
-
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    double omega_cbo = p[7] + a_cbo_ch*exp(-time/tau_cbo_ch)/time;
-    double phi_cbo = p[8];
-
-    double fcbo = omega_cbo;
-    double fc = 2*M_PI/0.1492;
-    double ky = p[22];
-    double fvo = ky*fcbo*sqrt(2*fc/ky/fcbo-1);
-    double fvw = fc - 2*fvo;
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    // double aloss = lost_muon->Interpolate(time*time_scale);
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    // double omega_vw = p[12]*fvw;
-    double omega_vw = fvw;
-
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-    double tau_cbovw = p[29];
-
-    double Dcbo =exp(-time/tau_cbo) + cbo_constant;
-    double Ncbo = 1 - Dcbo * asym_cbo * cos(omega_cbo*time + phi_cbo);
-    
-    double Nvw = 1 - exp(-time/tau_vw) * asym_vw * cos(omega_vw*time + phi_vw);
-    double Ncbovw = 1 + exp(-time*tau_cbovw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo));
-    
-
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    // Ncbo += Dcbo*Dcbo*cos(2*omega_cbo*time+phi_dcbo)*asym_dcbo;
-    double dcbo = 1 - Dcbo*Dcbo*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    double expan = Ncbo*Nvw*Ncbovw;
-
-    // vo-par
-    // double tau_vo = p[20];
-    double tau_vo = 2*tau_vw;
-    double asym_vo = p[21];
-    double omega_vo = fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*Dcbo*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*Dcbo*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * vo * dcbo;
-}
-
-// SJTU fix kVW,
-// tauy=2tauvw
-// float tau_vw_cbo
-// changing freq. cbo
-// 32 parameters (+1+2)
-// others
-// mod5
-double func_SJTU_mod51(double *x, double *p) {
-    double time = x[0] / time_scale;
-    // 5-par
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double R = p[3];
-    double phi = p[4];
-    double omega = getBlinded->paramToFreq(R);
-    
-    // cbo-par
-    double a_cbo_ch = p[30];
-    double tau_cbo_ch = p[31];
-
-    double tau_cbo = p[5];
-    double asym_cbo = p[6];
-    double omega_cbo = p[7] + a_cbo_ch*exp(-time/tau_cbo_ch)/time;
-    double phi_cbo = p[8];
-    
-    double fcbo = 2.32657;
-    double fc = 2*M_PI/0.1492;
-    double fvo = sqrt(fcbo*(2*fc - fcbo));
-    double fvw = fc - 2*fvo*p[22];
-    
-    // k_loss
-    double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
-
-    // vw-par
-    double tau_vw = p[10];
-    double asym_vw = p[11];
-    // double omega_vw = p[12]*fvw;
-    double omega_vw = fvw;
-
-    double phi_vw = p[13];
-
-    // expansion-par
-    double asym_vwcbo = p[24];
-    double phi_vwcbo = p[25];
-    double asym_vw_cbo = p[26];
-    double phi_vw_cbo = p[27];
-    double cbo_constant = p[28];
-    double tau_cbovw = p[29];
-
-
-    double expan = (1 - (exp(-time/tau_cbo) + cbo_constant)*asym_cbo*cos(omega_cbo*time + phi_cbo) - exp(-time/tau_vw)*asym_vw*cos(omega_vw*time + phi_vw) + exp(-time*tau_cbovw)*(asym_vwcbo*cos((omega_vw + omega_cbo)*time + phi_vwcbo) + asym_vw_cbo*cos((omega_vw - omega_cbo)*time + phi_vw_cbo)));
-    
-    // dcbo-par
-    double asym_dcbo = p[14];
-    double phi_dcbo = p[15];
-    double dcbo = 1 - exp(-2*time/tau_cbo)*asym_dcbo*cos(2*omega_cbo*time + phi_dcbo);
-    
-    // vo-par
-    // double tau_vo = p[20];
-    double tau_vo = 2*tau_vw;
-    double asym_vo = p[21];
-    double omega_vo = p[22]*fvo;
-    double phi_vo = p[23];
-    double vo = 1 - exp(-time/tau_vo)*asym_vo*cos(omega_vo*time + phi_vo);
-    
-    // modification of A and phi
-    double A1_cbo = p[16];
-    double phi1_cbo = p[17];
-    double A2_cbo = p[18];
-    double phi2_cbo = p[19];
-    double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
-    double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
-    return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-
-
 
 //EU
 // based on 29 parameters function
@@ -1235,7 +634,7 @@ double func_31paras_EU_step2(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1304,7 +703,7 @@ double func_31paras_EU2(double *x, double *p) {
 
     // k_loss
     double k = p[9]*1e-6;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1370,7 +769,7 @@ double func_28paras_EU0(double *x, double *p) {
 
     // kloss
     double kloss = p[13];
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // cbo phi, asym
     double a_A = p[14];
@@ -1454,7 +853,7 @@ double func_30paras_cbo_freq(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1518,7 +917,7 @@ double func_31paras_cbo_time(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1587,7 +986,7 @@ double func_31paras_cbo_timing(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1656,7 +1055,7 @@ double func_simplified_22paras_calos(double *x, double *p) {
 
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1724,7 +1123,7 @@ double func_calos_cbo(double *x, double *p){
     
 
     double k=p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     double A1_cbo = p[10];
     double phi1_cbo = p[11];
@@ -1764,7 +1163,7 @@ double func_31paras_calos_1(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1832,7 +1231,7 @@ double func_31paras_calos_2(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -1939,8 +1338,6 @@ double func_pseudo_9pars(double *x,double *p) {
 
 
 
-
-
 double func_calos_cbo_envelope_exp_c(double *x, double *p) {
     double time = x[0] / time_scale;
     // 5-par
@@ -1964,7 +1361,7 @@ double func_calos_cbo_envelope_exp_c(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -2038,7 +1435,7 @@ double func_calos_cbo_envelope_generic(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -2120,7 +1517,7 @@ double func_calos_cbo_envelope_poly(double *x, double *p) {
     
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -2195,7 +1592,7 @@ double func_calos_cbo_envelope_alphaalpha(double *x, double *p) {
 
     // k_loss
     double k = p[9]*1e-9;
-    double aloss = lost_muon->Interpolate(time*time_scale);
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     // vw-par
     double tau_vw = p[10];
@@ -2243,200 +1640,4 @@ double func_calos_cbo_envelope_alphaalpha(double *x, double *p) {
     double At = 1 - A1_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi1_cbo);
     double phit = 1 - A2_cbo*exp(-time/tau_cbo)*cos(omega_cbo*time + phi2_cbo);
     return (1 - k*aloss) * norm * exp(-time/life) * (1 - asym*At*cos(omega*time + phi*phit)) * expan * dcbo * vo;
-}
-
-double func_EU_nominal(double *x, double *par){
-
-    double t = x[0] / time_scale;
-    double N = par[0];
-    double B = par[1];
-    double A = par[2];
-    double R = par[3];
-    // while (par[4] < 0)              par[4] += TMath::TwoPi();
-    // while (par[4] > TMath::TwoPi()) par[4] -= TMath::TwoPi();
-    double p = par[4];
-    
-    //CBO term
-    double ACBO = par[5];
-    double w0 = par[6];
-    // while (par[7] < 0)              par[7] += TMath::TwoPi();
-    // while (par[7] > TMath::TwoPi()) par[7] -= TMath::TwoPi();
-    double pCBO = par[7];
-    double tA = par[8];
-
-
-    //two constant as fixed parameters
-    double A1sys = par[28];
-    double t1sys = par[29];
-    
-
-
-    double varyingFreq = w0*t + A1sys * exp(-t / t1sys); //+ A2sys * exp(-t / t2sys);
-
-    //amplitude and phase only, frequency determined by AV * fcbo
-    double AVW = par[9];
-    double factorfy = par[10];
-    // while (par[11] < 0)              par[11] += TMath::TwoPi();
-    // while (par[11] > TMath::TwoPi()) par[11] -= TMath::TwoPi();
-    double pVW = par[11];
-    double KLoss = par[12];
-
-    double ampA = par[13];
-    // while (par[14] < 0)              par[14] += TMath::TwoPi();
-    // while (par[14] > TMath::TwoPi()) par[14] -= TMath::TwoPi();
-    double phaseA = par[14];
-    double ampP = par[15];
-    // while (par[16] < 0)              par[16] += TMath::TwoPi();
-    // while (par[16] > TMath::TwoPi()) par[16] -= TMath::TwoPi();
-    double phaseP = par[16];
-    double twiceA = par[17];
-    // while (par[18] < 0)              par[18] += TMath::TwoPi();
-    // while (par[18] > TMath::TwoPi()) par[18] -= TMath::TwoPi();
-    double twiceP = par[18];
-    
-    double tauVW = par[19];
-    
-    //Add the fy term
-    double Afy = par[20];
-    double taufy = tauVW * 2.0;
-    // while (par[21] < 0)              par[21] += TMath::TwoPi();
-    // while (par[21] > TMath::TwoPi()) par[21] -= TMath::TwoPi();
-    double phasefy = par[21];
-    double tCBO = tA;
-    
-    double w = getBlinded->paramToFreq(R);    
-    
-    double C = par[27];
-    double deco = exp(-t/tCBO) + C;
-    double decoHighOrder = deco;
-    
-    double NCBOTerm = 1.0 + (deco * ACBO * cos(varyingFreq - pCBO));
-    NCBOTerm         += ( pow(decoHighOrder, 2) * twiceA * cos(2*varyingFreq - twiceP));
-    double ACBOTerm = 1.0 + ampA * decoHighOrder * cos(varyingFreq - phaseA);
-    double PCBOTerm = ampP * decoHighOrder * cos(varyingFreq - phaseP);
-
-    double fcbo = varyingFreq / (t*TMath::TwoPi()); //MHz
-    double fc = 1.0 / 0.1492; //MHz
-    double fy = factorfy * fcbo * sqrt( (2*fc/(factorfy * fcbo)) - 1.0 );
-    double fvw = fc - (2.0 * fy);
-
-    double varyingVW = fvw * TMath::TwoPi() * t;
-    double VWTerm = 1.0 + exp(-t / tauVW) * AVW * cos(varyingVW - pVW);
-    
-    double varY = fy * TMath::TwoPi() * t;
-    double varYTerm = 1.0 + exp(-t / taufy) * Afy * cos(varY - phasefy);
-    
-    // double LMTerm = 1.0; //- kLM*lost_muon->GetBinContent((int)(t/0.1492)+1); 
-    double LMTerm = 1.0 - KLoss*(lost_muon->Interpolate(t*time_scale));
-    double tCBOVW = par[22];
-    double ACBOplusVW = par[23];
-    // while (par[24] < 0)              par[24] += TMath::TwoPi();
-    // while (par[24] > TMath::TwoPi()) par[24] -= TMath::TwoPi();
-    double PCBOplusVW = par[24];
-    double ACBOminusVW = par[25];
-    // while (par[26] < 0)              par[26] += TMath::TwoPi();
-    // while (par[26] > TMath::TwoPi()) par[26] -= TMath::TwoPi();
-    double PCBOminusVW = par[26];
-    double CBOVWTerm = 1.0 + exp(-t / tCBOVW) * ( ACBOplusVW * cos( varyingFreq + varyingVW - PCBOplusVW ) + ACBOminusVW * cos( varyingFreq - varyingVW - PCBOminusVW ) );
-    
-    return N * exp(-t / B) * (1 + A*(ACBOTerm) * cos( w * t - p + PCBOTerm )) * NCBOTerm * VWTerm * LMTerm * varYTerm * CBOVWTerm;
-}
-
-
-double func_EU_fixTauCBOVW(double *x, double *par){
-
-    double t = x[0] / time_scale;
-    double N = par[0];
-    double B = par[1];
-    double A = par[2];
-    double R = par[3];
-    // while (par[4] < 0)              par[4] += TMath::TwoPi();
-    // while (par[4] > TMath::TwoPi()) par[4] -= TMath::TwoPi();
-    double p = par[4];
-    
-    //CBO term
-    double ACBO = par[5];
-    double w0 = par[6];
-    // while (par[7] < 0)              par[7] += TMath::TwoPi();
-    // while (par[7] > TMath::TwoPi()) par[7] -= TMath::TwoPi();
-    double pCBO = par[7];
-    double tA = par[8];
-
-
-    //two constant as fixed parameters
-    double A1sys = par[28];
-    double t1sys = par[29];
-    
-
-
-    double varyingFreq = w0*t + A1sys * exp(-t / t1sys); //+ A2sys * exp(-t / t2sys);
-
-    //amplitude and phase only, frequency determined by AV * fcbo
-    double AVW = par[9];
-    double factorfy = par[10];
-    // while (par[11] < 0)              par[11] += TMath::TwoPi();
-    // while (par[11] > TMath::TwoPi()) par[11] -= TMath::TwoPi();
-    double pVW = par[11];
-    double KLoss = par[12];
-
-    double ampA = par[13];
-    // while (par[14] < 0)              par[14] += TMath::TwoPi();
-    // while (par[14] > TMath::TwoPi()) par[14] -= TMath::TwoPi();
-    double phaseA = par[14];
-    double ampP = par[15];
-    // while (par[16] < 0)              par[16] += TMath::TwoPi();
-    // while (par[16] > TMath::TwoPi()) par[16] -= TMath::TwoPi();
-    double phaseP = par[16];
-    double twiceA = par[17];
-    // while (par[18] < 0)              par[18] += TMath::TwoPi();
-    // while (par[18] > TMath::TwoPi()) par[18] -= TMath::TwoPi();
-    double twiceP = par[18];
-    
-    double tauVW = par[19];
-    
-    //Add the fy term
-    double Afy = par[20];
-    double taufy = tauVW * 2.0;
-    // while (par[21] < 0)              par[21] += TMath::TwoPi();
-    // while (par[21] > TMath::TwoPi()) par[21] -= TMath::TwoPi();
-    double phasefy = par[21];
-    double tCBO = tA;
-    
-    double w = getBlinded->paramToFreq(R);    
-    
-    double C = par[27];
-    double deco = exp(-t/tCBO) + C;
-    double decoHighOrder = deco;
-    
-    double NCBOTerm = 1.0 + (deco * ACBO * cos(varyingFreq - pCBO));
-    NCBOTerm         += ( pow(decoHighOrder, 2) * twiceA * cos(2*varyingFreq - twiceP));
-    double ACBOTerm = 1.0 + ampA * decoHighOrder * cos(varyingFreq - phaseA);
-    double PCBOTerm = ampP * decoHighOrder * cos(varyingFreq - phaseP);
-
-    double fcbo = varyingFreq / (t*TMath::TwoPi()); //MHz
-    double fc = 1.0 / 0.1492; //MHz
-    double fy = factorfy * fcbo * sqrt( (2*fc/(factorfy * fcbo)) - 1.0 );
-    double fvw = fc - (2.0 * fy);
-
-    double varyingVW = fvw * TMath::TwoPi() * t;
-    double VWTerm = 1.0 + exp(-t / tauVW) * AVW * cos(varyingVW - pVW);
-    
-    double varY = fy * TMath::TwoPi() * t;
-    double varYTerm = 1.0 + exp(-t / taufy) * Afy * cos(varY - phasefy);
-    
-    // double LMTerm = 1.0; //- kLM*lost_muon->GetBinContent((int)(t/0.1492)+1); 
-    double LMTerm = 1.0 - KLoss*(lost_muon->Interpolate(t*time_scale));
-    // double tCBOVW = par[22];
-    double tCBOVW = (tCBO*tauVW) / (tCBO+tauVW);
-    double ACBOplusVW = par[23];
-    // while (par[24] < 0)              par[24] += TMath::TwoPi();
-    // while (par[24] > TMath::TwoPi()) par[24] -= TMath::TwoPi();
-    double PCBOplusVW = par[24];
-    double ACBOminusVW = par[25];
-    // while (par[26] < 0)              par[26] += TMath::TwoPi();
-    // while (par[26] > TMath::TwoPi()) par[26] -= TMath::TwoPi();
-    double PCBOminusVW = par[26];
-    double CBOVWTerm = 1.0 + exp(-t / tCBOVW) * ( ACBOplusVW * cos( varyingFreq + varyingVW - PCBOplusVW ) + ACBOminusVW * cos( varyingFreq - varyingVW - PCBOminusVW ) );
-    
-    return N * exp(-t / B) * (1 + A*(ACBOTerm) * cos( w * t - p + PCBOTerm )) * NCBOTerm * VWTerm * LMTerm * varYTerm * CBOVWTerm;
 }
