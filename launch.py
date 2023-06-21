@@ -1,7 +1,7 @@
 import subprocess,os,json,sys,argparse,re,inspect,numpy,random,string
 
 sys.path.append('%s/../OmegaFitting'%(os.environ['PWD']))
-import trans
+# import trans
 
 condor = '''\
 Universe   = vanilla
