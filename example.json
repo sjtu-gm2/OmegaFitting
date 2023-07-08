@@ -2,7 +2,7 @@
     "run2_seed_scan" : {
         "job" : ["T1700","A"],        
         "dataset" : ["run2all_skipCalo18","run2C"],
-        "scan" : [0, 200, 1],
+        "scan" : [10, 200, 1],
         "wiggle_file" : "/home/chencheng/data/Run23_full_ana/wiggles/wiggles_{job:}_{dataset:}.root",
         "wiggle_name" : "wiggle_{job:}_seed{scan:}",
         "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",

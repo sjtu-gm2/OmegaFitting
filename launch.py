@@ -3,6 +3,10 @@ import subprocess,os,json,sys,argparse,re,inspect,numpy,random,string
 sys.path.append('%s/../OmegaFitting'%(os.environ['PWD']))
 # import trans
 
+####################################
+# Template for job submission file #
+####################################
+
 condor = '''\
 Universe   = vanilla
 Executable = ./submit_caches/{1:}/run.sh
@@ -24,7 +28,13 @@ python ./submit_caches/%s/launch.py --run ./submit_caches/%s/${1} ${2} ${3} ${4}
 echo -e "END - ./submit_caches/%s/${1} ${2} ${3} ${4} ${5}"
 '''
 
+#####################
+# Utility functions #
+#####################
+
 def digest_scan_list(config,process=0):
+    'Get scan list for the specified process no.'
+
     scan = config['scan']
     scan_per_queue = config['scan_per_queue']    
 
@@ -61,6 +71,8 @@ def digest_scan_list(config,process=0):
     return dummy
 
 def regist_tag(cfg,entry):
+    'Create cache directory for this job.'
+
     fname = os.path.basename(cfg).split('.')[0]
 
     while True:
@@ -78,7 +90,16 @@ def regist_tag(cfg,entry):
             raise ValueError
     return tag    
 
-def submit(args):    
+##################
+# Main functions #
+##################
+
+def submit(args):
+    '''
+    Create run scripts and job submission files. \\
+    Called by --submit.
+    '''
+
     config = {
         'logDir' : './logs',
         'scan_per_queue' : 1,
@@ -118,6 +139,10 @@ def submit(args):
     os.system('condor_submit {0:}'.format(condor_file))
 
 def run_queue(args):
+    '''
+    Invoke "run" function to run scan jobs in a queue (process).
+    '''
+
     config = {
         'max_try' : 3,
         'start_bin' : 202,
@@ -147,7 +172,12 @@ def run_queue(args):
         tag = '{0:}_{1:}_{2:}'.format(job,dataset,process)
         in_files = ' '.join(out_files)
         os.system('hadd -f {0:}/combined_{1:}.root {2:}'.format(out_dir,tag,in_files))
+
 def form_keys(config,entry,dataset,job,scan=0,scan_id=0):
+    '''
+    Uitility function for parsing function in json file.
+    '''
+
     kw = {
         'job' : job,
         'dataset' : dataset,
@@ -178,6 +208,9 @@ def form_keys(config,entry,dataset,job,scan=0,scan_id=0):
     return f    
 
 def run(config,entry,dataset,job,scan,scan_id):
+    '''
+    Run a fitting for the specified scan id.
+    '''
     tag = '{0:}_{1:}'.format(job,dataset)
 
     if config['use_list']:
