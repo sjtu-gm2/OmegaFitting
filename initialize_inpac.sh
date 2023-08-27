@@ -2,9 +2,9 @@
 
 main=Main
 
-if [[ ${1} -eq "run23" ]];then
+if [[ ${1} == "run23" ]];then
     run=2.0
-elif [[ ${1} -eq "run4" ]];then
+elif [[ ${1} == "run4" ]];then
     run=4.0
 else
     echo "unknown dataperiod ${1}" 
