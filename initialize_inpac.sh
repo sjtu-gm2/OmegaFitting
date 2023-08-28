@@ -23,6 +23,7 @@ then
     cd ../build && cmake ../OmegaFitting -DRun=${run} -DMain=${main} -DUSE_JSON=OFF && cmake --build . && cd ../run && mkdir logs
 else
     echo -e "rebuild framework for Run-${run} analysis"
+    
     mkdir -p build
     cd build && cmake ../OmegaFitting -DRun=${run} -DMain=${main} -DUSE_JSON=OFF && cmake --build . && cd ..
 fi

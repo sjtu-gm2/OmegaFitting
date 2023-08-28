@@ -15,7 +15,8 @@
         "tag" : "{dataset:}_{job:}_seed{scan:}",
         "logDir" : "./logs/seed_scan",
         "mode" : 1,
-        "max_try" : 3
+        "max_try" : 3,
+        "scan_per_queue" : 3
     },
     "run2_calorimeter_scan" : {
         "job" : ["T1700","A"],

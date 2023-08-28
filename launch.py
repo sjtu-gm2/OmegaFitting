@@ -36,7 +36,7 @@ def digest_scan_list(config,process=0):
     'Get scan list for the specified process no.'
 
     scan = config['scan']
-    scan_per_queue = config['scan_per_queue']    
+    scan_per_queue = config['scan_per_queue']
 
     if isinstance(scan[0],str):
         scan_list = [k for k in scan]
@@ -51,6 +51,9 @@ def digest_scan_list(config,process=0):
             index += 1
     else:
         raise ValueError()
+
+    if (scan_per_queue<0):
+        scan_per_queue = len(scan_list)
 
     tot_scan = len(scan_list)
     tot_process = int(numpy.ceil(tot_scan / scan_per_queue))
@@ -89,6 +92,44 @@ def regist_tag(cfg,entry):
             print (status)
             raise ValueError
     return tag    
+
+def parse_config(config,entry,dataset,job,scan,scan_id):
+
+    kw = {
+        'job' : job,
+        'dataset' : dataset,
+        'scan' : scan,
+        'process' : scan_id,
+        'key' :entry
+    }
+
+    kw_extra = {}
+
+    if 'keys' in config:
+        for k,str_key in config['keys'].items():
+            if str_key[:4] == 'def ':
+                space = {}
+                fname = re.split('def\ |\(',str_key)[1]
+                exec(str_key,space)
+                var_dict = dict.fromkeys(inspect.getfullargspec(space[fname])[0])
+                for key in var_dict:
+                    var_dict[key] = kw[key]
+                kw_extra[k] = space[fname](**var_dict)                
+            else:
+                kw_extra[k] = str(str_key).format(**kw)
+
+    kw.update(kw_extra)
+    def f(key):
+        return str(config[key]).format(**kw).replace(';','\\;')
+    
+    parsed_config = {}
+    for key in ['wiggle_file', 'wiggle_name', 'lm_file', 'lm_name', 'initial_file', 'initial_name', 'start_bin', 'end_bin', 'output_dir', 'tag']:
+        parsed_config[key] = f(key)
+    
+    for key in ['mode', 'max_try']:
+        parsed_config[key] = config[key]
+
+    return parsed_config
 
 ##################
 # Main functions #
@@ -149,7 +190,8 @@ def run_queue(args):
         'end_bin' : 4357,
         'use_list' : 0,        
         'scan_per_queue' : 1,
-        'auto_combine' : 0
+        'auto_combine' : False,
+        'refit_by_scan' : True
     }
     with open(args[0],'r') as fp:
         config.update(json.load(fp)[args[1]])
@@ -159,83 +201,74 @@ def run_queue(args):
     dataset = args[3]
     process = args[4]
 
-    dummy = digest_scan_list(config,process)    
-    out_files = []
-    for subq,scan in enumerate(dummy.scan_list):
+    dummy = digest_scan_list(config,process)
+    out_files_match = [] # output files to be hadded
+    out_files = {}       # output files to become initial value
+    out_names = {}
+
+    for subq, scan in enumerate(dummy.scan_list):
         print('\n','-'*30)
+
+        tag = '{0:}_{1:}'.format(job,dataset)
+        if config['use_list']:
+            if (not tag in config) or (not scan in config[tag]):
+                print ('skip {0:} {1:}'.format(tag,scan))
+                continue
         print('Processing {0:}.{1:}.{2:}  q: {3:}/{4:} sub-q: {5:}/{6:} scan point: {7:}'.format(entry,dataset,job,dummy.q+1,dummy.nq,subq+1,dummy.nsubq,scan))
+
         scan_id = subq+dummy.subq_per_q*dummy.q
-        out_dir,out_name = run(config,entry,dataset,job,scan,scan_id)
-        out_file = '{0:}/result_*{1:}.root'.format(out_dir,out_name)
-        out_files.append(out_file)
-    if config['auto_combine'] == 1:
+        new_config = parse_config(config,entry,dataset,job,scan,scan_id)
+
+        # Refit by pluging in the previous output to the initial value
+        now_fit = 0
+        max_fit = 1
+        if config['refit_by_scan']:
+            max_fit = config['max_try']
+            config['max_try'] = 1
+
+        while now_fit < max_fit and subq >= now_fit:
+            if (now_fit > 0):
+                new_config['initial_file'] = out_files[subq - now_fit]
+                new_config['initial_name'] = out_names[subq - now_fit]
+
+            out_dir,out_name,full_tag = run(new_config)
+            out_file_match = '{0:}/result_*{1:}.root'.format(out_dir,out_name)
+            out_files[subq] = ('{0:}/result_{1:}.root'.format(out_dir,full_tag))
+            out_names[subq] = ("func_{0:}".format(full_tag))
+
+            now_fit += 1
+        
+        out_files_match.append(out_file_match)
+
+    if config['auto_combine']:
         tag = '{0:}_{1:}_{2:}'.format(job,dataset,process)
-        in_files = ' '.join(out_files)
+        in_files = ' '.join(out_files_match)
         os.system('hadd -f {0:}/combined_{1:}.root {2:}'.format(out_dir,tag,in_files))
 
-def form_keys(config,entry,dataset,job,scan=0,scan_id=0):
-    '''
-    Uitility function for parsing function in json file.
-    '''
+    # print(out_files)
+    # print(out_names)
 
-    kw = {
-        'job' : job,
-        'dataset' : dataset,
-        'scan' : scan,
-        'process' : scan_id,
-        'key' :entry
-    }
 
-    kw_extra = {}
-
-    if 'keys' in config:
-        for k,str_key in config['keys'].items():
-            if str_key[:4] == 'def ':
-                space = {}
-                fname = re.split('def\ |\(',str_key)[1]
-                exec(str_key,space)
-                var_dict = dict.fromkeys(inspect.getfullargspec(space[fname])[0])
-                for key in var_dict:
-                    var_dict[key] = kw[key]
-                kw_extra[k] = space[fname](**var_dict)                
-            else:
-                kw_extra[k] = str(str_key).format(**kw)
-
-    kw.update(kw_extra)
-    def f(key):
-        return str(config[key]).format(**kw).replace(';','\\;')
-
-    return f    
-
-def run(config,entry,dataset,job,scan,scan_id):
+def run(config):
     '''
     Run a fitting for the specified scan id.
     '''
-    tag = '{0:}_{1:}'.format(job,dataset)
 
-    if config['use_list']:
-        if (not tag in config) or (not scan in config[tag]):
-            print ('skip {0:} {1:}'.format(tag,scan))
-            return
+    wiggle_file  = config['wiggle_file']
+    wiggle_name  = config['wiggle_name']
+    lm_file      = config['lm_file']
+    lm_name      = config['lm_name']
+    initial_file = config['initial_file']
+    initial_name = config['initial_name']
 
-    f = form_keys(config,entry,dataset,job,scan,scan_id)
+    start_bin    = config['start_bin']
+    end_bin      = config['end_bin']
 
-    wiggle_file  = f('wiggle_file')
-    wiggle_name  = f('wiggle_name')
-    lm_file      = f('lm_file')
-    lm_name      = f('lm_name')
-    initial_file = f('initial_file')
-    initial_name = f('initial_name')
+    output_dir   = config['output_dir']
+    tag_out      = config['tag']
 
-    start_bin    = f('start_bin')
-    end_bin      = f('end_bin')
-
-    output_dir   = f('output_dir')
-    
-    tag_out      = f('tag')
-
-    mode = config['mode']
-    max_try = config['max_try']
+    mode         = config['mode']
+    max_try      = config['max_try']
 
 
     os.system('mkdir -p {0:}'.format(output_dir))    
@@ -257,9 +290,18 @@ def run(config,entry,dataset,job,scan,scan_id):
         wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,start_bin,end_bin,fix,range_par)
 
     print (cmd)
-    os.system(cmd)
+    # os.system(cmd)
+    output = os.popen(cmd).read()
+    print(output)
 
-    return output_dir,tag_out
+    pattern = r"function\s+:\s+func_(\w+)"
+    matches = re.findall(pattern, output)
+    if matches:
+        full_tag = matches[-1]
+    else:
+        print("Error! Cannot find function name in output!")
+
+    return output_dir,tag_out,full_tag
     
     # fetch values 
     # value_dir    = f('value_dir')
