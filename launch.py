@@ -206,6 +206,11 @@ def run_queue(args):
     out_files = {}       # output files to become initial value
     out_names = {}
 
+    max_fit = 1
+    if config['refit_by_scan']:
+        max_fit = config['max_try']
+        config['max_try'] = 1
+
     for subq, scan in enumerate(dummy.scan_list):
         print('\n','-'*30)
 
@@ -214,28 +219,28 @@ def run_queue(args):
             if (not tag in config) or (not scan in config[tag]):
                 print ('skip {0:} {1:}'.format(tag,scan))
                 continue
-        print('Processing {0:}.{1:}.{2:}  q: {3:}/{4:} sub-q: {5:}/{6:} scan point: {7:}'.format(entry,dataset,job,dummy.q+1,dummy.nq,subq+1,dummy.nsubq,scan))
 
         scan_id = subq+dummy.subq_per_q*dummy.q
         new_config = parse_config(config,entry,dataset,job,scan,scan_id)
 
         # Refit by pluging in the previous output to the initial value
         now_fit = 0
-        max_fit = 1
-        if config['refit_by_scan']:
-            max_fit = config['max_try']
-            config['max_try'] = 1
 
         while now_fit < max_fit and subq >= now_fit:
             if (now_fit > 0):
                 new_config['initial_file'] = out_files[subq - now_fit]
                 new_config['initial_name'] = out_names[subq - now_fit]
 
-            out_dir,out_name,full_tag = run(new_config)
+            print('Processing {0:}.{1:}.{2:}  q: {3:}/{4:} sub-q: {5:}/{6:} scan point: {7:} time of try: {8:}'.format(entry,dataset,job,dummy.q+1,dummy.nq,subq+1,dummy.nsubq,scan,now_fit+1))
+
+            out_dir,out_name,full_tag,fit_valid = run(new_config)
             out_file_match = '{0:}/result_*{1:}.root'.format(out_dir,out_name)
             out_files[subq] = ('{0:}/result_{1:}.root'.format(out_dir,full_tag))
             out_names[subq] = ("func_{0:}".format(full_tag))
 
+            if fit_valid == "1":
+                print("Fitting succeed.")
+                break
             now_fit += 1
         
         out_files_match.append(out_file_match)
@@ -291,17 +296,36 @@ def run(config):
 
     print (cmd)
     # os.system(cmd)
-    output = os.popen(cmd).read()
-    print(output)
+    process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
 
-    pattern = r"function\s+:\s+func_(\w+)"
-    matches = re.findall(pattern, output)
-    if matches:
-        full_tag = matches[-1]
+    # Find output name and fitting status from regular expression matching
+    pattern_tag = r"function\s+:\s+func_(\w+)"
+    matches_tag = []
+    pattern_valid = r"Valid=(\d+)"
+    matches_valid = []
+
+    for line in process.stdout:
+        print(line.strip())
+        match_tag = re.search(pattern_tag, line)
+        match_valid = re.search(pattern_valid, line)
+        if match_tag:
+            matches_tag.append(match_tag.group(1))
+        if match_valid:
+            matches_valid.append(match_valid.group(1))
+
+    process.wait()
+
+    if matches_tag:
+        full_tag = matches_tag[-1]
     else:
         print("Error! Cannot find function name in output!")
 
-    return output_dir,tag_out,full_tag
+    if matches_valid:
+        fit_valid = matches_valid[-1]
+    else:
+        print("Error! Cannot find fit valid in output!")
+
+    return output_dir,tag_out,full_tag,fit_valid
     
     # fetch values 
     # value_dir    = f('value_dir')
