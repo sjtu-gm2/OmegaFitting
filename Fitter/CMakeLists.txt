@@ -2,7 +2,7 @@ add_subdirectory(Blinders)
 
 add_library(FITTER FitTools.cpp)
 
-option(USE_JSON "Use json for initial values" ON)
+option(USE_JSON "Use json for initial values" OFF)
 set(data_version_major ${PROJECT_VERSION_MAJOR})
 set(data_version_minor ${PROJECT_VERSION_MINOR})
 configure_file(configure.h.in configure.h)

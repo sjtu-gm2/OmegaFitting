@@ -1,3 +1,6 @@
+#include "TH1.h"
+#include "TMath.h"
+
 using namespace std;
 using namespace blinding;
 

@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
 set(Run "4.0" CACHE STRING "Gm2 data period")
-set(Main "Run4U" CACHE STRING "Main SRC file")
+set(Main "Main" CACHE STRING "Main SRC file")
 
 project(ROOTEXAMPLE VERSION ${Run})
 
