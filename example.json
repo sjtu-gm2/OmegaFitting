@@ -22,12 +22,15 @@
         "job" : ["T1700","A"],
         "dataset" : ["run2all_skip_calo18"],
         "scan" : [0,25,1],
+        "keys" : {
+            "wiggle_name_by_func" : "def f(scan,job):\n\tif scan==0 or scan=='0' :return 'wiggle_%s_seed0'%(job)\n\telse: return 'wiggle_%s_seed0_calo%s'%(job,scan)"
+        },
         "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
-        "wiggle_name" : "def f(scan,job):\n\tif scan==0 or scan=='0' :return 'wiggle_%s_seed0'%(job)\n\telse: return 'wiggle_%s_seed0_calo%s'%(job,scan)",
+        "wiggle_name" : "{wiggle_name_by_func}",
         "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
         "lm_name" : "LM_integral_{dataset:}_from30",
-        "initial_file" : "./values/run2_cbo/calos_default/condor_{dataset:}_{job:}/calos_default_{job:}_{dataset:}_{scan:}.root",
-        "initial_name" : "calos_default_{job:}_{dataset:}_{scan:}",
+        "initial_file" : "/home/chencheng/Fitter_wa/run_old/values/old/run2_seed2.root",
+        "initial_name" : "{job:}_shadow_run2all_skip_calo18_28paras_cbo_lost_vw_expansion_2",
         "output_dir" : "./output/calo_fit/condor_{dataset:}_{job:}",
         "value_dir"  : "./values/calo_fit/condor_{dataset:}_{job:}",
         "//value_of_func" : "run1_24paras",
