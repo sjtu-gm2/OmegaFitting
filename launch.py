@@ -1,4 +1,4 @@
-import subprocess,os,json,sys,argparse,re,inspect,numpy,random,string
+import subprocess,os,json,sys,argparse,re,inspect,numpy,random,string,copy
 
 sys.path.append('%s/../OmegaFitting'%(os.environ['PWD']))
 # import trans
@@ -100,7 +100,7 @@ def parse_config(config,entry,dataset,job,scan,scan_id):
         'dataset' : dataset,
         'scan' : scan,
         'process' : scan_id,
-        'key' :entry
+        'key' : entry
     }
 
     kw_extra = {}
@@ -122,12 +122,9 @@ def parse_config(config,entry,dataset,job,scan,scan_id):
     def f(key):
         return str(config[key]).format(**kw).replace(';','\\;')
     
-    parsed_config = {}
+    parsed_config = copy.deepcopy(config)
     for key in ['wiggle_file', 'wiggle_name', 'lm_file', 'lm_name', 'initial_file', 'initial_name', 'start_bin', 'end_bin', 'output_dir', 'tag']:
         parsed_config[key] = f(key)
-    
-    for key in ['mode', 'max_try']:
-        parsed_config[key] = config[key]
 
     return parsed_config
 
@@ -209,7 +206,7 @@ def run_queue(args):
     max_fit = 1
     if config['refit_by_scan']:
         max_fit = config['max_try']
-        config['max_try'] = 1
+        config['max_try'] = 0
 
     for subq, scan in enumerate(dummy.scan_list):
         print('\n','-'*30)
@@ -301,7 +298,7 @@ def run(config):
     # Find output name and fitting status from regular expression matching
     pattern_tag = r"function\s+:\s+func_(\w+)"
     matches_tag = []
-    pattern_valid = r"Valid=(\d+)"
+    pattern_valid = r"Valid\s+=\s+(\d+)"
     matches_valid = []
 
     for line in process.stdout:
