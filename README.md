@@ -11,7 +11,7 @@ To use this fitter, prepare the ROOT files with
 
 1. Wiggle histogram 
 1. Lost muon integral histogram
-1. Initial values saved as `TArrayD`
+1. Initial values saved as `TArrayD` array or `TF1` function
 
 Then write up the configuration `json` file with necessary fitting setup and submit the fitter to `condor (inpac)` or run `local`
 
