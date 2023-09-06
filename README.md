@@ -18,13 +18,19 @@ Then write up the configuration `json` file with necessary fitting setup and sub
 
 ## An example with inpac-condor
 
-Clone git and build with Run2/3 `blinding`
+Clone git and build with Run4 `blinding`
 
 ```
 mkdir Fitter_wa && cd Fitter_wa
 git clone https://github.com/heymanwasup/OmegaFitting.git
-source ./OmegaFitting/initialize_inpac.sh run23
+source ./OmegaFitting/initialize_inpac.sh run4
 ```
+
+The `initialize_inpac.sh` script will build the project as well as make run directory and link some configuration file into it. If you already have those files and just want to rebuild the project, you can run
+```
+source ./OmegaFitting/initialize_inpac.sh run4 false
+```
+in the Fitter_wa directory.
 
 Now, you can find an example of configuration file as `example.json`, you can perform several tasks with this configuration file:
 
