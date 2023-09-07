@@ -34,7 +34,7 @@ source ./OmegaFitting/initialize_inpac.sh run4 false
 ```
 in the `Fitter_wa` directory.
 
-**$\rm\color{MediumPurple}{[Note]}$** Whenever edtting the source file in the `Fitter` direectory, you have to build again by
+**$\rm\color{MediumPurple}{[Note]}$** Whenever editting the source files in the `Fitter` directory, you have to build again by
 ```
 cmake --build ./build
 ```
