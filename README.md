@@ -49,7 +49,7 @@ python ./launch.py --run example.json energy_bin dummy Run4A 0
 # submit to condor
 python ./launch.py --submit example.json energy_bin
 ```
-Lines starting with `#` are comments. The option `--submit` will luanch `ceil(525 / 10) = 53` jobs in total to `inpac condor`.
+Lines starting with `#` are comments. The option `--submit` will launch `ceil(525 / 10) = 53` jobs in total to `inpac condor`.
 
 2. Start time scan
 ```
@@ -63,9 +63,9 @@ The fitting details could be defined in the `.json` configuration file.
 
 After jobs are done, you should have the result files for each fitting in the `output_dir` defined in `.json` file.
 
-Then you `hadd` and `delete` the files by
+Then you can `hadd` and `delete` the files by
 ```
 python ./launch.py --fetch example.json energy_bin
 python ./launch.py --clean example.json energy_bin
 ```
-You also can specify the output directory of *hadded* files by adding the path following `energy_bin`, the default is `./fetch`
+You also can specify the output directory of *hadded* files by adding the path following `energy_bin`, the default is `./fetch`.
