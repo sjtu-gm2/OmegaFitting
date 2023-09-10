@@ -18,19 +18,19 @@ Then write up the configuration `.json` file with necessary fitting setup and su
 
 ## An example with inpac-condor
 
-Clone git and build with Run4 `blinding`
+Clone git and build
 
 ```
 mkdir Fitter_wa && cd Fitter_wa
 git clone git@github.com:sjtu-gm2/OmegaFitting.git
-source ./OmegaFitting/initialize_inpac.sh run4
+source ./OmegaFitting/initialize_inpac.sh
 ```
 
 The `initialize_inpac.sh` script will build the project as well as create a `run` directory and link some configuration files into it.
 
 If you already have those files and just want to rebuild the project, you can run
 ```
-source ./OmegaFitting/initialize_inpac.sh run4 false
+source ./OmegaFitting/initialize_inpac.sh false
 ```
 in the `Fitter_wa` directory.
 
@@ -40,7 +40,7 @@ cmake --build ./build
 ```
 in the `Fitter_wa` directory.
 
-Now, you can find an example of configuration file, `example.json`. You can perform several tasks with this configuration file:
+Now, you can find an example of configuration file, `example.json`. You can perform several tasks with this configuration file under `run4` blinded:
 
 1. Energy bin scan:
 ```
@@ -60,6 +60,8 @@ python ./launch.py --submit example.json start_time_scan
 ```
 
 The fitting details could be defined in the `.json` configuration file.
+
+**$\rm \color{MediumPurple}{[Note]}$** `which_run` should be specified with `run4`, `run5`, `run6` or `run456`.
 
 After jobs are done, you should have the result files for each fitting in the `output_dir` defined in `.json` file.
 
