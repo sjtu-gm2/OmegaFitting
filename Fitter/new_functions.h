@@ -10,13 +10,16 @@ const double pipy = 3.141592653589793;
 double time_scale = 1.0;
 Blinders::fitType ftype = Blinders::kOmega_a;
 
-#if data_version_major == 4
-    Blinders *getBlinded = new Blinders(ftype, "Unexpected virtue of ignorance.");
-#elif data_version_major == 2
-    Blinders *getBlinded = new Blinders(ftype, "stay home, stay healthy!");
-#elif data_version_major == 3
-    Blinders *getBlinded = new Blinders(ftype, "Bla Bla Bla!");
-#endif
+// #if data_version_major == 4
+//     Blinders *getBlinded = new Blinders(ftype, "Unexpected virtue of ignorance.");
+// #elif data_version_major == 2
+//     Blinders *getBlinded = new Blinders(ftype, "stay home, stay healthy!");
+// #elif data_version_major == 3
+//     Blinders *getBlinded = new Blinders(ftype, "Bla Bla Bla!");
+// #endif
+
+string blindedString = "Unexpected virtue of ignorance.";
+Blinders *getBlinded;
 
 TH1 *lost_muon;
 

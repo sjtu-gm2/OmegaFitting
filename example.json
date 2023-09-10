@@ -1,5 +1,6 @@
 {
     "energy_bin_scan"    : {
+        "which_run"      : "run4",
         "job"            : ["all", "calo1", "calo2", "calo3", "calo4", "calo5", "calo6", "calo7", "calo8", "calo9", "calo10", "calo11", "calo12", 
                          "calo13", "calo14", "calo15", "calo16", "calo17", "calo18", "calo19", "calo20", "calo21", "calo22", "calo23", "calo24"],
         "dataset"        : ["Run4A"],
@@ -34,6 +35,7 @@
     },
 
     "energy_bin"         : {
+        "which_run"      : "run4",
         "job"            : ["dummy"],
         "dataset"        : ["Run4A"],
 
@@ -73,6 +75,7 @@
     },
 
     "start_time_scan"    : {
+        "which_run"      : "run4",
         "job"            : ["T_1700"],
         "dataset"        : ["Run4A"],
         "scan"           : [202, 2202, 200],
@@ -90,7 +93,7 @@
         "tag"            : "{dataset:}_{job:}_time_{scan:}",
         "logDir"         : "./logs/timeScan",
 
-        "mode"           : 3,
+        "mode"           : 0,
         "fix"            : {"5": 1e10}
     }
 }

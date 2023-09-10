@@ -74,6 +74,7 @@ class Fitter {
 
     void SetOutputDir(string _output_dir);
     void SetTimeUnit(TimeUnit t_unit);
+    void SetBlindedString(string _which_run);
     void SetMaxAttempts(int _max_attempts){max_attempts = _max_attempts;};
     void SetFixParameters(map<int, double> _fix_parameters){fix_parameters=_fix_parameters;};
     void SetRangeParameters(map<int, pair<double,double> > _range_parameters){range_parameters = _range_parameters;};

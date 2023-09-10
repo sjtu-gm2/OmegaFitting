@@ -8,7 +8,7 @@
 
 using namespace std;
 
-void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1* lm, string outputDir, string method, 
+void FullFit(string which_run, TH1* wiggle, int start_bin, int end_bin, TH1* lm, string outputDir, string method, 
             vector<double> init_values, vector<int> fit_chain, int attempts, map<int,double> fix_parameters, 
             map<int, pair<double, double> > range_parameters){
     int status = mkdir(outputDir.c_str(),0777);
@@ -18,6 +18,7 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1* lm, string outputDir,
     fitter.SetOutputDir(outputDir);    
     fitter.SetFixParameters(fix_parameters);
     fitter.SetRangeParameters(range_parameters);
+    fitter.SetBlindedString(which_run);
 
     double binW = wiggle->GetBinWidth(1);
     double start_time = start_bin * binW;
@@ -53,44 +54,47 @@ void FullFit(TH1* wiggle, int start_bin, int end_bin, TH1* lm, string outputDir,
     }
 }
 
-// argv[1]: wiggle file
-// argv[2]: wiggle name
-// argv[3]: lm file
-// argv[4]: lm name
+// argv[1]: which run
+// argv[2]: wiggle file
+// argv[3]: wiggle name
+// argv[4]: lm file
+// argv[5]: lm name
 
-// argv[5]: initial values json/root file
-// argv[6]: initial values name
+// argv[6]: initial values json/root file
+// argv[7]: initial values name
 
-// argv[7]: output directory
-// argv[8]: version
-// argv[9]: fit mode
+// argv[8]: output directory
+// argv[9]: version
+// argv[10]: fit mode
 
-// argv[10]: maximum attempts
+// argv[11]: maximum attempts
 
-// argv[11]: time bin start
-// argv[12]: time bin end
+// argv[12]: time bin start
+// argv[13]: time bin end
 
 // argv[i] start with '--fix': fix parameters
 // argv[i] start with '--range': range parameters
 int main(int argc, char **argv) {
-    cout << "file " << argv[1] << endl;
-    TFile* file = TFile::Open(argv[1]);
+    string which_run = argv[1];
 
-    char* hname = argv[2];
+    cout << "file " << argv[2] << endl;
+    TFile* file = TFile::Open(argv[2]);
+
+    char* hname = argv[3];
     cout << "Using wiggle: " << hname << endl;
     TH1D* wiggle = (TH1D*)file->Get(hname)->Clone();
 
-    TFile* file_lm = TFile::Open(argv[3]);
-    TH1* lm = (TH1*)file_lm->Get(argv[4]);
+    TFile* file_lm = TFile::Open(argv[4]);
+    TH1* lm = (TH1*)file_lm->Get(argv[5]);
 
-    cout << "Get initial values from " << argv[5] << "  " << argv[6] << endl;
-    vector<double> init_values = GetInitialValuesD(argv[5], argv[6]);    
+    cout << "Get initial values from " << argv[6] << "  " << argv[7] << endl;
+    vector<double> init_values = GetInitialValuesD(argv[6], argv[7]);    
 
 
-    string outputDir(argv[7]);
-    string name = Form("%s", argv[8]);
+    string outputDir(argv[8]);
+    string name = Form("%s", argv[9]);
 
-    int mode = atoi(argv[9]);
+    int mode = atoi(argv[10]);
     cout << "mode " << mode << endl;
     vector<int> fit_chain;
     if(mode==0) fit_chain = {5};
@@ -104,16 +108,16 @@ int main(int argc, char **argv) {
 
 
     int attempts;
-    attempts = atoi(argv[10]);
+    attempts = atoi(argv[11]);
 
     int start_bin, end_bin;
 
-    start_bin = atoi(argv[11]);
-    end_bin   = atoi(argv[12]);
+    start_bin = atoi(argv[12]);
+    end_bin   = atoi(argv[13]);
 
     map<int, double> fix_parameters;
     map<int, pair<double, double> > range_parameters;
-    int i = 12;
+    int i = 13;
     while(++i < argc){        
         if (strcmp(argv[i], "--fix") == 0 && strcmp(argv[i+1], "None") != 0){
             ++i;
@@ -142,6 +146,6 @@ int main(int argc, char **argv) {
             }            
         }        
     }    
-    FullFit(wiggle, start_bin, end_bin, lm, outputDir, name, init_values, fit_chain, attempts, fix_parameters, range_parameters);
+    FullFit(which_run, wiggle, start_bin, end_bin, lm, outputDir, name, init_values, fit_chain, attempts, fix_parameters, range_parameters);
     return 0;
 }

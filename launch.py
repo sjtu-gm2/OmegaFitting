@@ -272,6 +272,8 @@ def run(config):
     mode         = config['mode']
     max_try      = config['max_try']
 
+    which_run    = config['which_run']
+
 
     os.system('mkdir -p {0:}'.format(output_dir))    
     
@@ -288,8 +290,8 @@ def run(config):
         for key,ranges in config['range'].items():
             range_par += '{0:} {1:} {2:} '.format(key,ranges[0],ranges[1])
 
-    cmd = '../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:} {11:} --fix {12:} --range {13:}'.format(
-        wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,start_bin,end_bin,fix,range_par)
+    cmd = '../build/MAIN {0:} {1:} {2:} {3:} {4:} {5:} {6:} {7:} {8:} {9:} {10:} {11:} {12:} --fix {13:} --range {14:}'.format(
+        which_run,wiggle_file,wiggle_name,lm_file,lm_name,initial_file,initial_name,output_dir,tag_out,mode,max_try,start_bin,end_bin,fix,range_par)
 
     print (cmd)
     # os.system(cmd)
