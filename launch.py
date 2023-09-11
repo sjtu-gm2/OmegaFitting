@@ -201,7 +201,7 @@ def run(config):
 
     os.system('mkdir -p {0:}'.format(output_dir))    
 
-    cmd = '../build/MAIN {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} {initial_file:} {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} --fix {fix_pars:}--range {range_pars:}'.format(**config)
+    cmd = '../build/MAIN {which_run} {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} {initial_file:} {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} --fix {fix_pars:}--range {range_pars:}'.format(**config)
 
     print(cmd)
     full_tag, fit_valid = execute_and_parse_output(cmd)

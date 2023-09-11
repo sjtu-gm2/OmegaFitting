@@ -1,43 +1,99 @@
 {
-    "run2_seed_scan" : {
-        "job" : ["T1700","A"],        
-        "dataset" : ["run2all_skipCalo18","run2C"],
-        "scan" : [10, 200, 1],
-        "wiggle_file" : "/home/chencheng/data/Run23_full_ana/wiggles/wiggles_{job:}_{dataset:}.root",
-        "wiggle_name" : "wiggle_{job:}_seed{scan:}",
-        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
-        "lm_name" : "LM_integral_{dataset:}_from30",
-        "initial_file" : "/home/chencheng/Fitter_wa/run_old/values/old/run2_seed2.root",
-        "initial_name" : "{job:}_shadow_run2all_skip_calo18_28paras_cbo_lost_vw_expansion_2",
-        "output_dir" : "./output/condor_{dataset:}_{job:}",
-        "value_dir"  : "./values/condor_{dataset:}_{job:}",
-        "value_of_func" : "28paras_cbo_lost_vw_expansion",
-        "tag" : "{dataset:}_{job:}_seed{scan:}",
-        "logDir" : "./logs/seed_scan",
-        "mode" : 1,
-        "max_try" : 3,
-        "scan_per_queue" : 3
-    },
-    "run2_calorimeter_scan" : {
-        "job" : ["T1700","A"],
-        "dataset" : ["run2all_skip_calo18"],
-        "scan" : [0,25,1],
-        "keys" : {
-            "wiggle_name_by_func" : "def f(scan,job):\n\tif scan==0 or scan=='0' :return 'wiggle_%s_seed0'%(job)\n\telse: return 'wiggle_%s_seed0_calo%s'%(job,scan)"
+    "energy_bin_scan"    : {
+        "which_run"      : "run4",
+        "job"            : ["all", "calo1", "calo2", "calo3", "calo4", "calo5", "calo6", "calo7", "calo8", "calo9", "calo10", "calo11", "calo12", 
+                         "calo13", "calo14", "calo15", "calo16", "calo17", "calo18", "calo19", "calo20", "calo21", "calo22", "calo23", "calo24"],
+        "dataset"        : ["Run4A"],
+        "scan"           : [1000, 3100, 100],
+
+        "start_bin"      : 202,
+        "end_bin"        : 4356,
+
+        "wiggle_file"    : "/home/zengyonghao/public/omegaa/wiggles_{dataset:}.root",
+        "wiggle_name"    : "wiggles_energy_bin/{job:}/wiggle_energy_bin_{scan:}",
+        "lm_file"        : "/home/zengyonghao/public/omegaa/lm_{dataset:}.root",
+        "lm_name"        : "integral_lm",
+        "initial_file"   : "/home/zengyonghao/public/omegaa/init_array_{dataset:}.root",
+        "initial_name"   : "28paras",
+
+        "output_dir"     : "./output/energy_bin_scan/{dataset:}",
+        "tag"            : "{job:}_{dataset:}_energy{scan:}",
+        "logDir"         : "./logs/energyBin",
+
+        "mode"           : 3,
+        "refit_by_scan"  : true,
+        "max_try"        : 3,
+        "scan_per_queue" : 10,
+
+        "fix"            : {
+            "9"          : 0
         },
-        "wiggle_file" : "/home/chencheng/data/Run23FullProd_calos/wiggles/wiggles_{job:}_{dataset:}.root",
-        "wiggle_name" : "{wiggle_name_by_func}",
-        "lm_file" : "/home/chencheng/data/LM_Run23_SJTU/LM_Run23_from30_note.root",
-        "lm_name" : "LM_integral_{dataset:}_from30",
-        "initial_file" : "/home/chencheng/Fitter_wa/run_old/values/old/run2_seed2.root",
-        "initial_name" : "{job:}_shadow_run2all_skip_calo18_28paras_cbo_lost_vw_expansion_2",
-        "output_dir" : "./output/calo_fit/condor_{dataset:}_{job:}",
-        "value_dir"  : "./values/calo_fit/condor_{dataset:}_{job:}",
-        "//value_of_func" : "run1_24paras",
-        "value_of_func" : "28paras_cbo_lost_vw_expansion",
-        "tag" : "default_{job:}_{dataset:}_{scan:}",
-        "mode" : 0,
-        "logDir" : "./logs/calorimeter_scan/",
-        "max_try" : 3        
+        "range"          : {
+            "5"          : [100, 500],
+            "8"          : [2.30, 2.36]
+        }
+    },
+
+    "energy_bin"         : {
+        "which_run"      : "run4",
+        "job"            : ["dummy"],
+        "dataset"        : ["Run4A"],
+
+        "scan"           : [0, 525, 1],
+        "keys"           : {
+            "calo"       : "def get_calo(scan):\n\tcalo_num = scan // 21\n\tif calo_num == 0:\n\t\treturn 'all'\n\telse:\n\t\treturn 'calo%s'%(calo_num)",
+            "energy"     : "def energy_bin(scan):\n\tenergy = int((scan % 21) * 100 + 1000)\n\treturn '%d'%(energy)"
+        },
+
+        "start_bin"      : 202,
+        "end_bin"        : 4356,
+
+        "wiggle_file"    : "/home/zengyonghao/public/omegaa/wiggles_{dataset:}.root",
+        "wiggle_name"    : "wiggles_energy_bin/{calo:}/wiggle_energy_bin_{energy:}",
+        "lm_file"        : "/home/zengyonghao/public/omegaa/lm_{dataset:}.root",
+        "lm_name"        : "integral_lm",
+        "initial_file"   : "/home/zengyonghao/public/omegaa/init_array_{dataset:}.root",
+        "initial_name"   : "28paras",
+
+        "output_dir"     : "./output/energy_bin_scan/{dataset:}",
+        "tag"            : "{calo:}_{dataset:}_energy{energy:}",
+        "logDir"         : "./logs/energyBin",
+
+        "mode"           : 3,
+        "refit_by_scan"  : true,
+        "max_try"        : 3,
+        "scan_per_queue" : 10,
+
+        "//fix"            : {
+            "9"          : 0
+        },
+        "range"          : {
+            "5"          : [0, 1000],
+            "8"          : [2.30, 2.36]
+        }
+
+    },
+
+    "start_time_scan"    : {
+        "which_run"      : "run4",
+        "job"            : ["T_1700"],
+        "dataset"        : ["Run4A"],
+        "scan"           : [202, 2202, 200],
+        "scan_per_queue" : 10,
+        "start_bin"      : "{scan:}",
+        
+        "wiggle_file"    : "/home/zengyonghao/public/omegaa/wiggles_{dataset:}.root",
+        "wiggle_name"    : "wiggles_threshold_scan/all/wiggle_threshold_{job:}",
+        "lm_file"        : "/home/zengyonghao/public/omegaa/lm_{dataset:}.root",
+        "lm_name"        : "integral_lm",
+        "initial_file"   : "/home/zengyonghao/public/omegaa/init_array_{dataset:}.root",
+        "initial_name"   : "28paras",
+
+        "output_dir"     : "./output/start_time_scan/{dataset:}",
+        "tag"            : "{dataset:}_{job:}_time_{scan:}",
+        "logDir"         : "./logs/timeScan",
+
+        "mode"           : 0,
+        "fix"            : {"5": 1e10}
     }
 }

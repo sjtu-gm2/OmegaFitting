@@ -77,10 +77,27 @@ void Fitter::SetTimeUnit(TimeUnit t_unit){
     } else if(t_unit == Fitter::micro_second){
         time_scale = 1.0;
     } else{
-        cout <<"Unknown time unit" << endl;
+        cout << "Unknown time unit" << endl;
         exit(1);
     }
     cout << "Time scale = " << time_scale << endl;
+}
+
+void Fitter::SetBlindedString(string _which_run){
+    if(_which_run == "run4"){
+        blindedString = "Unexpected virtue of ignorance.";
+    } else if(_which_run == "run5"){
+        blindedString = "No bold guesses, no great discoveries.";
+    } else if(_which_run == "run6"){
+        blindedString = "Bad times make a good man.";
+    } else if(_which_run == "run456"){
+        blindedString = "Sow nothing, reap nothing.";
+    } else{
+        cout << "Unknown run, please use run4, run5, run6 or run456!" << endl;
+        exit(1);
+    }
+    getBlinded = new Blinders(ftype, blindedString.c_str());
+    cout << "############# " << _which_run << " is now blinded! #############" << endl;
 }
 
 void Fitter::SetOutputDir(string _output_dir){
