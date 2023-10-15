@@ -160,7 +160,8 @@ def execute_and_parse_output(cmd):
     '''
     pattern_tag = r"function\s+:\s+func_(\w+)"
     matches_tag = []
-    pattern_valid = r"Valid\s+=\s+(\d+)"
+    # pattern_valid = r"Valid\s+=\s+(\d+)"
+    pattern_valid = r"STATUS=(\w+)\s+"
     matches_valid = []
 
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
@@ -181,7 +182,7 @@ def execute_and_parse_output(cmd):
         raise RuntimeError("Cannot find function name in output.")
 
     if matches_valid:
-        fit_valid = matches_valid[-1]
+        fit_valid = matches_valid
     else:
         raise RuntimeError("Cannot find fit valid in output.")
 
@@ -257,7 +258,7 @@ def run_queue(args):
             out_files[subq] = ('{0:}/result_{1:}.root'.format(out_dir, full_tag))
             out_names[subq] = ("func_{0:}".format(full_tag))
 
-            if fit_valid == "1":
+            if all(valid == "OK" or valid == "SUCCESSFUL" or valid == 'CONVERGED' for valid in fit_valid):
                 print("Fitting succeed.")
                 break
             now_fit += 1
