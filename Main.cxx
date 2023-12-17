@@ -105,7 +105,7 @@ int main(int argc, char **argv) {
     if(mode==5) fit_chain = {5, 9, 10, 14, 15};
     if(mode==6) fit_chain = {5, 9, 10, 14, 15, 18};
     if(mode==7) fit_chain = {5, 9, 10, 14, 15, 18, 20, 24};
-
+    if(mode==8) fit_chain = {5, 9, 10, 28};
 
     int attempts;
     attempts = atoi(argv[11]);

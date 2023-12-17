@@ -92,8 +92,10 @@ void Fitter::SetBlindedString(string _which_run){
         blindedString = "Bad times make a good man.";
     } else if(_which_run == "run456"){
         blindedString = "Sow nothing, reap nothing.";
+    } else if(_which_run == "run2" || _which_run == "run3"){
+        blindedString = "Random blind!";
     } else{
-        cout << "Unknown run, please use run4, run5, run6 or run456!" << endl;
+        cout << "Unknown run, please use run2, run3, run4, run5, run6 or run456!" << endl;
         exit(1);
     }
     getBlinded = new Blinders(ftype, blindedString.c_str());
