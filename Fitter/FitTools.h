@@ -64,6 +64,9 @@ DECLARE_FUNC(_18paras)
 DECLARE_FUNC(_20paras)
 DECLARE_FUNC(_24paras)
 DECLARE_FUNC(_28paras)
+DECLARE_FUNC(_6paras_kloss)
+DECLARE_FUNC(_11paras_cbo)
+DECLARE_FUNC(_13paras_res)
 
 class Fitter {
   public:
@@ -88,6 +91,9 @@ class Fitter {
     REGISTER_FUNC(_20paras, 20)
     REGISTER_FUNC(_24paras, 24)
     REGISTER_FUNC(_28paras, 28)
+    REGISTER_FUNC(_6paras_kloss, 6)
+    REGISTER_FUNC(_11paras_cbo, 11)
+    REGISTER_FUNC(_13paras_res, 13)
 
   private:    
     map<string,vector<string> > name_vars;

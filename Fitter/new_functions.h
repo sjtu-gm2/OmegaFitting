@@ -382,3 +382,78 @@ double func_28paras(double *x, double *p){
 
     return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
 }
+
+double func_6paras_kloss(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // kloss
+    double kloss = p[5];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    return wiggle * (1-kloss*aloss);
+}
+
+double func_11paras_cbo(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // cbo
+    double tau_cbo = p[5];
+    double c_cbo = p[6];
+    double Acbo_c = p[7];
+    double Acbo_s = p[8];
+    double omega_cbo = p[9];
+    double cbo = 1 - (TMath::Exp(-time/tau_cbo) + c_cbo) * (Acbo_c*TMath::Cos(omega_cbo*time)+Acbo_s*TMath::Sin(omega_cbo*time));
+
+    // kloss
+    double kloss = p[10];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    return wiggle * (1-kloss*aloss) * cbo;
+}
+
+double func_13paras_res(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // cbo
+    double tau_cbo = p[5];
+    double c_cbo = p[6];
+    double Acbo_c = p[7];
+    double Acbo_s = p[8];
+    double omega_cbo = p[9];
+    double cbo = 1 - (TMath::Exp(-time/tau_cbo) + c_cbo) * (Acbo_c*TMath::Cos(omega_cbo*time)+Acbo_s*TMath::Sin(omega_cbo*time));
+
+    // kloss
+    double kloss = p[10];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // residual
+    double res_norm = p[11];
+    double res_tau = p[12];
+    double res = (1 + res_norm * TMath::Exp(-time/res_tau));
+
+    return wiggle * (1-kloss*aloss) * cbo * res;
+}

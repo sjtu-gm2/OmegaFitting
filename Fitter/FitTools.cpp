@@ -299,5 +299,19 @@ Fitter::Fitter() : max_attempts(1){
         "A_{cbo,A}^{c}", "A_{cbo,A}^{s}", "A_{cbo,#phi}^{c}", "A_{cbo,#phi}^{s}", 
         "A_{vw+cbo}^{c}", "A_{vw+cbo}^{s}", "A_{vw-cbo}^{c}", "A_{vw-cbo}^{s}"
         };
+    name_vars["6paras_kloss"] = {
+        "N", "#tau", "A", "R", "#phi", 
+        "k_{loss}"
+        };
+    name_vars["11paras_cbo"] = {
+        "N", "#tau", "A", "R", "#phi", 
+        "#tau_{cbo}", "c_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
+        "k_{loss}"
+        };
+    name_vars["13paras_res"] = {
+        "N", "#tau", "A", "R", "#phi", 
+        "#tau_{cbo}", "c_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
+        "k_{loss}", "N_{res}", "#tau_{res}"
+        };
     
 }
