@@ -7,7 +7,8 @@ default_config = {
     'use_list' : 0,        
     'scan_per_queue' : 1,
     'auto_combine' : False,
-    'refit_by_scan' : True
+    'refit_by_scan' : True,
+    'fit_option' : 'RSML'
 }
 
 ####################################
@@ -202,7 +203,7 @@ def run(config):
 
     os.system('mkdir -p {0:}'.format(output_dir))    
 
-    cmd = '../build/MAIN {which_run} {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} {initial_file:} {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} --fix {fix_pars:} --range {range_pars:}'.format(**config)
+    cmd = '../build/MAIN {which_run} {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} {initial_file:} {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} {fit_option:} --fix {fix_pars:} --range {range_pars:}'.format(**config)
 
     print(cmd)
     full_tag, fit_valid = execute_and_parse_output(cmd)

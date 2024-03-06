@@ -9,13 +9,14 @@
 using namespace std;
 
 void FullFit(string which_run, TH1* wiggle, int start_bin, int end_bin, TH1* lm, string outputDir, string method, 
-            vector<double> init_values, vector<int> fit_chain, int attempts, map<int,double> fix_parameters, 
+            vector<double> init_values, vector<int> fit_chain, int attempts, TString fit_option, map<int,double> fix_parameters, 
             map<int, pair<double, double> > range_parameters){
     int status = mkdir(outputDir.c_str(),0777);
 
-    Fitter fitter;    
+    Fitter fitter;
     fitter.SetMaxAttempts(attempts);
-    fitter.SetOutputDir(outputDir);    
+    fitter.SetOutputDir(outputDir);
+    fitter.SetFitOption(fit_option);
     fitter.SetFixParameters(fix_parameters);
     fitter.SetRangeParameters(range_parameters);
     fitter.SetBlindedString(which_run);
@@ -77,6 +78,8 @@ void FullFit(string which_run, TH1* wiggle, int start_bin, int end_bin, TH1* lm,
 // argv[12]: time bin start
 // argv[13]: time bin end
 
+// argv[14]: fit option string
+
 // argv[i] start with '--fix': fix parameters
 // argv[i] start with '--range': range parameters
 int main(int argc, char **argv) {
@@ -124,9 +127,11 @@ int main(int argc, char **argv) {
     start_bin = atoi(argv[12]);
     end_bin   = atoi(argv[13]);
 
+    TString fit_option = argv[14];
+
     map<int, double> fix_parameters;
     map<int, pair<double, double> > range_parameters;
-    int i = 13;
+    int i = 14;
     while(++i < argc){        
         if (strcmp(argv[i], "--fix") == 0 && strcmp(argv[i+1], "None") != 0){
             ++i;
@@ -155,6 +160,6 @@ int main(int argc, char **argv) {
             }            
         }        
     }    
-    FullFit(which_run, wiggle, start_bin, end_bin, lm, outputDir, name, init_values, fit_chain, attempts, fix_parameters, range_parameters);
+    FullFit(which_run, wiggle, start_bin, end_bin, lm, outputDir, name, init_values, fit_chain, attempts, fit_option, fix_parameters, range_parameters);
     return 0;
 }

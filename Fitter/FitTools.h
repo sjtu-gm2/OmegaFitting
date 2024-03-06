@@ -81,6 +81,7 @@ class Fitter {
     void SetTimeUnit(TimeUnit t_unit);
     void SetBlindedString(string _which_run);
     void SetMaxAttempts(int _max_attempts){max_attempts = _max_attempts;};
+    void SetFitOption(TString _fit_option){fit_option = _fit_option;};
     void SetFixParameters(map<int, double> _fix_parameters){fix_parameters=_fix_parameters;};
     void SetRangeParameters(map<int, pair<double,double> > _range_parameters){range_parameters = _range_parameters;};
 
@@ -103,6 +104,7 @@ class Fitter {
     map<string,vector<string> > name_vars;
     FitOutputInfo doFit(const FitInput & fit_in);
     string output_dir;
+    TString fit_option = "RSML";
     map<int, double> fix_parameters;
     map<int, pair<double,double> > range_parameters;
 };

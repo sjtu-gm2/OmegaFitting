@@ -151,11 +151,9 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in){
 
     TFitResultPtr fit_res;
 
-    cout << "Performing fit histogram" << endl;
+    cout << "Performing fit histogram with option '" << fit_option << "'" << endl;
     // fit_res = fit_hist->Fit(fit_func,"REMS");
-    TString fit_option = "SRML";
-    fit_res = fit_hist->Fit(fit_func, fit_option);
-    cout << "Fit option is " << fit_option << std::endl;
+    fit_res = fit_hist->Fit(fit_func, this->fit_option);
 
 
     fitStatus = fit_res;
@@ -169,7 +167,7 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in){
     int max_attempts_ = max_attempts;
     while(max_attempts_>0 && !isValid){
      cout << "Invalid fitting!!! Retry " << refit++ << endl;
-     fit_res = fit_hist->Fit(fit_func, fit_option);
+     fit_res = fit_hist->Fit(fit_func, this->fit_option);
 
      fitStatus = fit_res;     
      isValid = fit_res->IsValid();// && (fitStatus%100==0);
