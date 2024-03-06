@@ -153,8 +153,9 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in){
 
     cout << "Performing fit histogram" << endl;
     // fit_res = fit_hist->Fit(fit_func,"REMS");
-    fit_res = fit_hist->Fit(fit_func, "SRM");
-
+    TString fit_option = "SRML";
+    fit_res = fit_hist->Fit(fit_func, fit_option);
+    cout << "Fit option is " << fit_option << std::endl;
 
 
     fitStatus = fit_res;
@@ -168,7 +169,7 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in){
     int max_attempts_ = max_attempts;
     while(max_attempts_>0 && !isValid){
      cout << "Invalid fitting!!! Retry " << refit++ << endl;
-     fit_res = fit_hist->Fit(fit_func, "QSRM");
+     fit_res = fit_hist->Fit(fit_func, fit_option);
 
      fitStatus = fit_res;     
      isValid = fit_res->IsValid();// && (fitStatus%100==0);
@@ -298,6 +299,13 @@ Fitter::Fitter() : max_attempts(1){
         "A_{2cbo}^{c}", "A_{2cbo}^{s}", 
         "A_{cbo,A}^{c}", "A_{cbo,A}^{s}", "A_{cbo,#phi}^{c}", "A_{cbo,#phi}^{s}", 
         "A_{vw+cbo}^{c}", "A_{vw+cbo}^{s}", "A_{vw-cbo}^{c}", "A_{vw-cbo}^{s}"
+        };
+    name_vars["2paras"] = {
+        "N", "#tau"
+        };
+    name_vars["3paras_kloss"] = {
+        "N", "#tau",
+        "k_{loss}"
         };
     name_vars["6paras_kloss"] = {
         "N", "#tau", "A", "R", "#phi", 

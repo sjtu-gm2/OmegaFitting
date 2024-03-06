@@ -51,6 +51,8 @@ void FullFit(string which_run, TH1* wiggle, int start_bin, int end_bin, TH1* lm,
         if(fit_mode == 20) info = fitter.Fit_20paras(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 24) info = fitter.Fit_24paras(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 28) info = fitter.Fit_28paras(method, wiggle, start_time, end_time, info.fit_values, lm);
+        if(fit_mode == 1002) info = fitter.Fit_2paras(method, wiggle, start_time, end_time, info.fit_values);
+        if(fit_mode == 1003) info = fitter.Fit_3paras_kloss(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 1006) info = fitter.Fit_6paras_kloss(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 1011) info = fitter.Fit_11paras_cbo(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 1013) info = fitter.Fit_13paras_res(method, wiggle, start_time, end_time, info.fit_values, lm);
@@ -109,6 +111,8 @@ int main(int argc, char **argv) {
     if(mode==6) fit_chain = {5, 9, 10, 14, 15, 18};
     if(mode==7) fit_chain = {5, 9, 10, 14, 15, 18, 20, 24};
     if(mode==8) fit_chain = {5, 9, 10, 28};
+    if(mode==1002) fit_chain = {1002};
+    if(mode==1003) fit_chain = {1002, 1003};
     if(mode==1006) fit_chain = {5, 1006};
     if(mode==1013) fit_chain = {5, 1011, 1013};
 

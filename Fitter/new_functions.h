@@ -383,6 +383,32 @@ double func_28paras(double *x, double *p){
     return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
 }
 
+double func_2paras(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double decay = norm * TMath::Exp(-time/life);
+
+    return decay;
+}
+
+double func_3paras_kloss(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double decay = norm * TMath::Exp(-time/life);
+
+    // kloss
+    double kloss = p[2];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    return decay * (1-kloss*aloss);
+}
+
 double func_6paras_kloss(double *x, double *p){
     double time = x[0] / time_scale;
 
