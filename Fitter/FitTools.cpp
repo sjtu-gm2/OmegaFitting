@@ -142,7 +142,7 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in){
         }
     }
 
-    fit_func->SetNpx(4500);
+    fit_func->SetNpx(45000);
 
         
     Int_t fitStatus;    

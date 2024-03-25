@@ -142,6 +142,8 @@ def parse_config(config,entry,dataset,job,scan,scan_id):
     if 'fix' in config:
         fix_pars = ''
         for key, value in config['fix'].items():
+            if isinstance(value, str):
+                value = value.format(**kw)
             fix_pars += '{0:} {1:} '.format(key, value)
 
     range_pars = "None"
