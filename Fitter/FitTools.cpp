@@ -298,6 +298,35 @@ Fitter::Fitter() : max_attempts(1){
         "A_{cbo,A}^{c}", "A_{cbo,A}^{s}", "A_{cbo,#phi}^{c}", "A_{cbo,#phi}^{s}", 
         "A_{vw+cbo}^{c}", "A_{vw+cbo}^{s}", "A_{vw-cbo}^{c}", "A_{vw-cbo}^{s}"
         };
+        name_vars["42paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
+    name_vars["46paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#tau_{vw+cbo}", "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#omega_{vw+cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
     name_vars["2paras"] = {
         "N", "#tau"
         };

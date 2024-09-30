@@ -161,7 +161,7 @@ def execute_and_parse_output(cmd):
     '''
     Run the c++ fitting program and parse output to get useful information (tag name and fit valid)
     '''
-    pattern_tag = r"function\s+:\s+func_(\w+)"
+    pattern_tag = r"function\s+:\s+func_([\w-]+)"
     matches_tag = []
     # pattern_valid = r"Valid\s+=\s+(\d+)"
     pattern_valid = r"STATUS=(\w+)\s+"
@@ -205,7 +205,7 @@ def run(config):
 
     os.system('mkdir -p {0:}'.format(output_dir))    
 
-    cmd = '../build/MAIN {which_run} {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} {initial_file:} {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} {fit_option:} --fix {fix_pars:} --range {range_pars:}'.format(**config)
+    cmd = "../build/MAIN {which_run} {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} \"{initial_file:}\" {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} {fit_option:} --fix {fix_pars:} --range {range_pars:}".format(**config)
 
     print(cmd)
     full_tag, fit_valid = execute_and_parse_output(cmd)
@@ -232,7 +232,7 @@ def run_queue(args):
     max_fit = 1
     if config['refit_by_scan']:
         max_fit = config['max_try']
-        config['max_try'] = 0
+        config['max_try'] = max_fit - scan_info["q"] if max_fit > scan_info["q"] else 1
 
     for subq, scan in enumerate(scan_info["scan_list"]):
         print('\n','-'*30)
