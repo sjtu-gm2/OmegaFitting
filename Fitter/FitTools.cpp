@@ -1,8 +1,10 @@
 #include "FitTools.h"
 #include <sstream>
-#include "new_functions.h"
+// #include "new_functions.h"
+#include "functions_run456_new.h"
 #include "TMath.h"
 #include <Math/MinimizerOptions.h>
+#include "TVirtualFitter.h"
 
 using namespace pocketfft;
 
@@ -105,7 +107,8 @@ void Fitter::SetOutputDir(string _output_dir){
 }
 
 FitOutputInfo Fitter::doFit(const FitInput & fit_in){
-    ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(50000);
+    TVirtualFitter::SetMaxIterations(100000);
+    ROOT::Math::MinimizerOptions::SetDefaultMaxFunctionCalls(100000);
     TString wiggle_name, residual_name, func_name, res_name, fft_name, outf_name;
     wiggle_name.Form("wiggle_%s", fit_in.tag.Data());
     residual_name.Form("residual_%s", fit_in.tag.Data());
@@ -116,6 +119,8 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in){
 
 
     lost_muon = fit_in.lost_muon;
+    splines = fit_in.splines;
+    // itp = fit_in.itp;
 
     TH1 * fit_hist = (TH1*)fit_in.wiggle->Clone(wiggle_name.Data());
     TF1 * fit_func = new TF1(func_name, fit_in.func, fit_in.t_start, fit_in.t_end, fit_in.nvars);
@@ -242,60 +247,218 @@ Fitter::Fitter() : max_attempts(1){
     cout << "Fitting on Run" << data_version_major << " data" << endl;
 
     name_vars["5paras"] = {"N", "#tau", "A", "R", "#phi"};
-    name_vars["9paras"] = {
-        "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}"
-        };
-    name_vars["10paras"] = {
-        "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
-        "k_{loss}"
-        };
-    name_vars["14paras_vo"] = {
-        "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
-        "k_{loss}", 
-        "#tau_{vo}", "A_{vo}^{c}", "A_{vo}^{s}", "#omega_{vo}"
-        };
-    name_vars["14paras_vw"] = {
-        "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
-        "k_{loss}", 
-        "#tau_{vw}", "A_{vw}^{c}", "A_{vw}^{s}", "#omega_{vw}"
-        };
-    name_vars["18paras"] = {
-        "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
-        "k_{loss}", 
-        "#tau_{vo}", "A_{vo}^{c}", "A_{vo}^{s}", "#omega_{vo}", 
-        "#tau_{vw}", "A_{vw}^{c}", "A_{vw}^{s}", "#omega_{vw}"
-        };
-    name_vars["20paras"] = {
-        "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
-        "k_{loss}", 
-        "#tau_{vo}", "A_{vo}^{c}", "A_{vo}^{s}", "#omega_{vo}", 
-        "#tau_{vw}", "A_{vw}^{c}", "A_{vw}^{s}", "#omega_{vw}", 
-        "A_{2cbo}^{c}", "A_{2cbo}^{s}"
-        };
-    name_vars["24paras"] = {
-        "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
-        "k_{loss}", 
-        "#tau_{vo}", "A_{vo}^{c}", "A_{vo}^{s}", "#omega_{vo}", 
-        "#tau_{vw}", "A_{vw}^{c}", "A_{vw}^{s}", "#omega_{vw}", 
-        "A_{2cbo}^{c}", "A_{2cbo}^{s}", 
-        "A_{cbo,A}^{c}", "A_{cbo,A}^{s}", "A_{cbo,#phi}^{c}", "A_{cbo,#phi}^{s}"
-        };
     name_vars["28paras"] = {
         "N", "#tau", "A", "R", "#phi", 
-        "#tau_{cbo}", "A_{cbo}^{c}", "A_{cbo}^{s}", "#omega_{cbo}", 
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}", 
         "k_{loss}", 
-        "#tau_{vo}", "A_{vo}^{c}", "A_{vo}^{s}", "#omega_{vo}", 
-        "#tau_{vw}", "A_{vw}^{c}", "A_{vw}^{s}", "#omega_{vw}", 
-        "A_{2cbo}^{c}", "A_{2cbo}^{s}", 
-        "A_{cbo,A}^{c}", "A_{cbo,A}^{s}", "A_{cbo,#phi}^{c}", "A_{cbo,#phi}^{s}", 
-        "A_{vw+cbo}^{c}", "A_{vw+cbo}^{s}", "A_{vw-cbo}^{c}", "A_{vw-cbo}^{s}"
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}", 
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}", 
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#alpha_{cbo,A}", "#beta_{cbo,A}", "#alpha_{cbo,#phi}", "#beta_{cbo,#phi}",
+        "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}"
         };
-    
+    name_vars["29paras"] = {
+        "N", "#tau", "A", "R", "#phi", 
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}", 
+        "k_{loss}", 
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}", 
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}", 
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#alpha_{cbo,A}", "#beta_{cbo,A}", "#alpha_{cbo,#phi}", "#beta_{cbo,#phi}",
+        "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}",
+        "c_{cbo}"
+        };
+
+    name_vars["40paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
+    name_vars["41paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}",
+        "c_{cbo}"
+        };
+
+    name_vars["42paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
+    name_vars["43paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}",
+        "c_{cbo}"
+    };
+
+    name_vars["44paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
+    name_vars["45paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}",
+        "c_{cbo}"
+        };
+
+    name_vars["48paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#tau_{vw+cbo}", "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#omega_{vw+cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
+    name_vars["49paras"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#tau_{vw+cbo}", "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#omega_{vw+cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}",
+        "c_{cbo}"
+        };
+
+    name_vars["42parasGPR"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
+    name_vars["40parasGPR"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{2cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#tau_{vo+cbo}", "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#tau_{vo-cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}"
+        };
+    name_vars["44parasGPR"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}",
+        "a_{cbo}^{1}", "b_{cbo}^{1}"
+        };
+    name_vars["46parasGPR"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{2cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#tau_{vo+cbo}", "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#tau_{vo-cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}",
+        "a_{cbo}", "b_{cbo}", "a_{cbopa}", "b_{cbopa}", "a_{cboma}", "b_{cboma}"
+        };
+    name_vars["50parasGPR"] = {
+        "N", "#tau", "A", "R", "#phi",
+        "#tau_{cbo}", "#omega_{cbo}",
+        "k_{loss}",
+        "#tau_{vw}", "#alpha_{vw}", "#beta_{vw}", "#omega_{vw}",
+        "#tau_{vo}", "#alpha_{vo}", "#beta_{vo}", "#omega_{vo}",
+        "#alpha_{2cbo}", "#beta_{2cbo}",
+        "#tau_{vw-cbo}", "#alpha_{vw-cbo}", "#beta_{vw-cbo}", "#omega_{vw-cbo}",
+        "#tau_{vw+cbo}", "#alpha_{vw+cbo}", "#beta_{vw+cbo}", "#omega_{vw+cbo}",
+        "#alpha_{cbo+a}", "#beta_{cbo+a}", "#alpha_{cbo-a}", "#beta_{cbo-a}",
+        "#alpha_{vw+a}", "#beta_{vw+a}", "#alpha_{vw-a}", "#beta_{vw-a}",
+        "#alpha_{vo+a}", "#beta_{vo+a}", "#alpha_{vo-a}", "#beta_{vo-a}",
+        "#alpha_{vw-cbo+a}", "#beta_{vw-cbo+a}", "#alpha_{vw-cbo-a}", "#beta_{vw-cbo-a}",
+        "#alpha_{vo+cbo}", "#beta_{vo+cbo}", "#alpha_{vo-cbo}", "#beta_{vo-cbo}",
+        "a_{cbo}^{1}", "a_{cbo}^{2}", "b_{cbo}^{1}", "b_{cbo}^{2}"
+        };
 }

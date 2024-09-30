@@ -7,7 +7,7 @@ set(data_version_major ${PROJECT_VERSION_MAJOR})
 set(data_version_minor ${PROJECT_VERSION_MINOR})
 configure_file(configure.h.in configure.h)
 
-list(APPEND EXTRA_LIBS BLINDERS ROOT::Net ROOT::Hist)
+list(APPEND EXTRA_LIBS BLINDERS ROOT::Net ROOT::Hist ROOT::MathCore ROOT::MathMore)
 list(APPEND EXTRA_INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR})
 
 # json
