@@ -4,6 +4,7 @@
 #include "configure.h"
 
 #include <string>
+#include <map>
 #include <iostream>
 #include <functional>
 #include <iomanip>
@@ -21,9 +22,12 @@
 #include "TFitResult.h"
 #include "TMath.h"
 #include "TString.h"
+#include "TSpline.h"
 
 #include "pocketfft_hdronly.h"
 #include "Blinders.hh"
+
+// #include <Math/Interpolator.h>
 
 using namespace std;
 
@@ -42,7 +46,9 @@ struct FitInput {
     int nvars;
     vector<string> name_vars;
     vector<double> init_values;
-    TH1* lost_muon;    
+    TH1* lost_muon;
+    map<string, TSpline3*>* splines;
+    // ROOT::Math::Interpolator * itp;  
 };
 struct FitOutputInfo {
     string file_name;
@@ -56,16 +62,25 @@ struct FitOutputInfo {
 };
 
 DECLARE_FUNC(_5paras)
-DECLARE_FUNC(_9paras)
-DECLARE_FUNC(_10paras)
-DECLARE_FUNC(_14paras_vo)
-DECLARE_FUNC(_14paras_vw)
-DECLARE_FUNC(_18paras)
-DECLARE_FUNC(_20paras)
-DECLARE_FUNC(_24paras)
 DECLARE_FUNC(_28paras)
+DECLARE_FUNC(_29paras)
+
+DECLARE_FUNC(_40paras)
 DECLARE_FUNC(_42paras)
-DECLARE_FUNC(_46paras)
+DECLARE_FUNC(_44paras)
+DECLARE_FUNC(_48paras)
+
+DECLARE_FUNC(_41paras)
+DECLARE_FUNC(_43paras)
+DECLARE_FUNC(_45paras)
+DECLARE_FUNC(_49paras)
+
+DECLARE_FUNC(_42parasGPR)
+DECLARE_FUNC(_40parasGPR)
+DECLARE_FUNC(_44parasGPR)
+DECLARE_FUNC(_46parasGPR)
+DECLARE_FUNC(_50parasGPR)
+
 DECLARE_FUNC(_2paras)
 DECLARE_FUNC(_3paras_kloss)
 DECLARE_FUNC(_6paras_kloss)
@@ -88,16 +103,25 @@ class Fitter {
     void SetRangeParameters(map<int, pair<double,double> > _range_parameters){range_parameters = _range_parameters;};
 
     REGISTER_FUNC(_5paras, 5)
-    REGISTER_FUNC(_9paras, 9)
-    REGISTER_FUNC(_10paras, 10)
-    REGISTER_FUNC(_14paras_vo, 14)
-    REGISTER_FUNC(_14paras_vw, 14)
-    REGISTER_FUNC(_18paras, 18)
-    REGISTER_FUNC(_20paras, 20)
-    REGISTER_FUNC(_24paras, 24)
     REGISTER_FUNC(_28paras, 28)
+    REGISTER_FUNC(_29paras, 29)
+
+    REGISTER_FUNC(_40paras, 40)
     REGISTER_FUNC(_42paras, 42)
-    REGISTER_FUNC(_46paras, 46)
+    REGISTER_FUNC(_44paras, 44)
+    REGISTER_FUNC(_48paras, 48)
+
+    REGISTER_FUNC(_41paras, 41)
+    REGISTER_FUNC(_43paras, 43)
+    REGISTER_FUNC(_45paras, 45)
+    REGISTER_FUNC(_49paras, 49)
+
+    REGISTER_FUNC(_42parasGPR, 42)
+    REGISTER_FUNC(_40parasGPR, 40)
+    REGISTER_FUNC(_44parasGPR, 44)
+    REGISTER_FUNC(_46parasGPR, 46)
+    REGISTER_FUNC(_50parasGPR, 50)
+
     REGISTER_FUNC(_2paras, 2)
     REGISTER_FUNC(_3paras_kloss, 3)
     REGISTER_FUNC(_6paras_kloss, 6)

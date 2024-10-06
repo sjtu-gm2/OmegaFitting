@@ -1,5 +1,7 @@
 #include "TH1.h"
 #include "TMath.h"
+#include "TSpline.h"
+// #include <Math/Interpolator.h>
 
 using namespace std;
 using namespace blinding;
@@ -22,6 +24,14 @@ string blindedString = "Unexpected virtue of ignorance.";
 Blinders *getBlinded;
 
 TH1 *lost_muon;
+TSpline3 *cboAmp;
+TSpline3 *dcboAmp;
+TSpline3 *AtAmp;
+TSpline3 *phitAmp;
+TSpline3 *vwpcboAmp;
+TSpline3 *vwmcboAmp;
+
+// ROOT::Math::Interpolator * itp;
 
 // fit function
 
@@ -383,249 +393,7 @@ double func_28paras(double *x, double *p){
     return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
 }
 
-// Full-expanded function
-double func_42paras(double *x, double *p){
-    double time = x[0] / time_scale;
-
-    // wiggle
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double omega = getBlinded->paramToFreq(p[3]);
-    double phi = p[4];
-
-    // cbo
-    double tau_cbo = p[5];
-    double alpha_cbo = p[6];
-    double beta_cbo = p[7];
-    double omega_cbo = p[8];
-
-    // kloss
-    double kloss = p[9];
-    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
-
-    // frequencies reference
-    double fcbo = 2.34;
-    double fc = 2*Pi/0.1492;
-    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
-    double fvw = fc-2*fvo;
-
-    // vw
-    double tau_vw = p[10];
-    double alpha_vw = p[11];
-    double beta_vw = p[12];
-    double omega_vw = p[13]*fvw*1e-3;
-
-    // vo
-    double tau_vo = p[14];
-    double alpha_vo = p[15];
-    double beta_vo = p[16];
-    double omega_vo = p[17]*fvo*1e-3;
-
-    // dcbo
-    double alpha_2cbo = p[18];
-    double beta_2cbo = p[19];
-
-    // vw-cbo
-    double tau_vwmcbo = p[20];
-    double alpha_vwmcbo = p[21];
-    double beta_vwmcbo = p[22];
-    double omega_vwmcbo = p[23];
-
-    // cbo +- a
-    double alpha_cbopa = p[24];
-    double beta_cbopa = p[25];
-    double alpha_cboma = p[26];
-    double beta_cboma = p[27];
-
-    // vw +- a
-    double alpha_vwpa = p[28];
-    double beta_vwpa = p[29];
-    double alpha_vwma = p[30];
-    double beta_vwma = p[31];
-
-    // vo +- a
-    double alpha_vopa = p[32];
-    double beta_vopa = p[33];
-    double alpha_voma = p[34];
-    double beta_voma = p[35];
-
-    // vw-cbo-a
-    double alpha_vwmcboma = p[36];
-    double beta_vwmcboma = p[37];
-
-    // vo +- cbo
-    double alpha_vopcbo = p[38];
-    double beta_vopcbo = p[39];
-    double alpha_vomcbo = p[40];
-    double beta_vomcbo = p[41];
-
-    double expansion = 1 + asym*TMath::Cos(omega*time-phi)
-                         - TMath::Exp(-time/tau_cbo) * (alpha_cbo*TMath::Cos(omega_cbo*time)+beta_cbo*TMath::Sin(omega_cbo*time))
-                         - TMath::Exp(-time/tau_vw) * (alpha_vw*TMath::Cos(omega_vw*time)+beta_vw*TMath::Sin(omega_vw*time))
-                         - TMath::Exp(-time/tau_vo) * (alpha_vo*TMath::Cos(omega_vo*time)+beta_vo*TMath::Sin(omega_vo*time))
-                         - TMath::Exp(-2*time/tau_cbo) * (alpha_2cbo*TMath::Cos(2*omega_cbo*time)+beta_2cbo*TMath::Sin(2*omega_cbo*time))
-                         - TMath::Exp(-time/tau_vwmcbo) * (alpha_vwmcbo*TMath::Cos(omega_vwmcbo*time)+beta_vwmcbo*TMath::Sin(omega_vwmcbo*time))
-                         + TMath::Exp(-time/tau_cbo) * (alpha_cbopa*TMath::Cos((omega_cbo+omega)*time)+beta_cbopa*TMath::Sin((omega_cbo+omega)*time))
-                         + TMath::Exp(-time/tau_cbo) * (alpha_cboma*TMath::Cos((omega_cbo-omega)*time)+beta_cboma*TMath::Sin((omega_cbo-omega)*time))
-                         + TMath::Exp(-time/tau_vw) * (alpha_vwpa*TMath::Cos((omega_vw+omega)*time)+beta_vwpa*TMath::Sin((omega_vw+omega)*time))
-                         + TMath::Exp(-time/tau_vw) * (alpha_vwma*TMath::Cos((omega_vw-omega)*time)+beta_vwma*TMath::Sin((omega_vw-omega)*time))
-                         + TMath::Exp(-time/tau_vo) * (alpha_vopa*TMath::Cos((omega_vo+omega)*time)+beta_vopa*TMath::Sin((omega_vo+omega)*time))
-                         + TMath::Exp(-time/tau_vo) * (alpha_voma*TMath::Cos((omega_vo-omega)*time)+beta_voma*TMath::Sin((omega_vo-omega)*time))
-                         + TMath::Exp(-time/tau_vwmcbo) * (alpha_vwmcboma*TMath::Cos((omega_vwmcbo-omega)*time)+beta_vwmcboma*TMath::Sin((omega_vwmcbo-omega)*time))
-                         + TMath::Exp(-time/tau_vo-time/tau_cbo) * (alpha_vopcbo*TMath::Cos((omega_vo+omega_cbo)*time)+beta_vopcbo*TMath::Sin((omega_vo+omega_cbo)*time))
-                         + TMath::Exp(-time/tau_vo-time/tau_cbo) * (alpha_vomcbo*TMath::Cos((omega_vo-omega_cbo)*time)+beta_vomcbo*TMath::Sin((omega_vo-omega_cbo)*time));
-
-    return norm * TMath::Exp(-time/life) * (1-kloss*aloss) * expansion;
-}
-
-double func_46paras(double *x, double *p){
-    double time = x[0] / time_scale;
-
-    // wiggle
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double omega = getBlinded->paramToFreq(p[3]);
-    double phi = p[4];
-
-    // cbo
-    double tau_cbo = p[5];
-    double alpha_cbo = p[6];
-    double beta_cbo = p[7];
-    double omega_cbo = p[8];
-
-    // kloss
-    double kloss = p[9];
-    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
-
-    // frequencies reference
-    double fcbo = 2.34;
-    double fc = 2*Pi/0.1492;
-    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
-    double fvw = fc-2*fvo;
-
-    // vw
-    double tau_vw = p[10];
-    double alpha_vw = p[11];
-    double beta_vw = p[12];
-    double omega_vw = p[13]*fvw*1e-3;
-
-    // vo
-    double tau_vo = p[14];
-    double alpha_vo = p[15];
-    double beta_vo = p[16];
-    double omega_vo = p[17]*fvo*1e-3;
-
-    // dcbo
-    double alpha_2cbo = p[18];
-    double beta_2cbo = p[19];
-
-    // vw-cbo
-    double tau_vwmcbo = p[20];
-    double alpha_vwmcbo = p[21];
-    double beta_vwmcbo = p[22];
-    double omega_vwmcbo = p[23];
-
-    // vw+cbo
-    double tau_vwpcbo = p[24];
-    double alpha_vwpcbo = p[25];
-    double beta_vwpcbo = p[26];
-    double omega_vwpcbo = p[27];
-
-    // cbo +- a
-    double alpha_cbopa = p[28];
-    double beta_cbopa = p[29];
-    double alpha_cboma = p[30];
-    double beta_cboma = p[31];
-
-    // vw +- a
-    double alpha_vwpa = p[32];
-    double beta_vwpa = p[33];
-    double alpha_vwma = p[34];
-    double beta_vwma = p[35];
-
-    // vo +- a
-    double alpha_vopa = p[36];
-    double beta_vopa = p[37];
-    double alpha_voma = p[38];
-    double beta_voma = p[39];
-
-    // vw-cbo-a
-    double alpha_vwmcboma = p[40];
-    double beta_vwmcboma = p[41];
-
-    // vo +- cbo
-    double alpha_vopcbo = p[42];
-    double beta_vopcbo = p[43];
-    double alpha_vomcbo = p[44];
-    double beta_vomcbo = p[45];
-
-    double expansion = 1 + asym*TMath::Cos(omega*time-phi)
-                         - TMath::Exp(-time/tau_cbo) * (alpha_cbo*TMath::Cos(omega_cbo*time)+beta_cbo*TMath::Sin(omega_cbo*time))
-                         - TMath::Exp(-time/tau_vw) * (alpha_vw*TMath::Cos(omega_vw*time)+beta_vw*TMath::Sin(omega_vw*time))
-                         - TMath::Exp(-time/tau_vo) * (alpha_vo*TMath::Cos(omega_vo*time)+beta_vo*TMath::Sin(omega_vo*time))
-                         - TMath::Exp(-2*time/tau_cbo) * (alpha_2cbo*TMath::Cos(2*omega_cbo*time)+beta_2cbo*TMath::Sin(2*omega_cbo*time))
-                         - TMath::Exp(-time/tau_vwmcbo) * (alpha_vwmcbo*TMath::Cos(omega_vwmcbo*time)+beta_vwmcbo*TMath::Sin(omega_vwmcbo*time))
-                         - TMath::Exp(-time/tau_vwpcbo) * (alpha_vwpcbo*TMath::Cos(omega_vwpcbo*time)+beta_vwpcbo*TMath::Sin(omega_vwpcbo*time))
-                         + TMath::Exp(-time/tau_cbo) * (alpha_cbopa*TMath::Cos((omega_cbo+omega)*time)+beta_cbopa*TMath::Sin((omega_cbo+omega)*time))
-                         + TMath::Exp(-time/tau_cbo) * (alpha_cboma*TMath::Cos((omega_cbo-omega)*time)+beta_cboma*TMath::Sin((omega_cbo-omega)*time))
-                         + TMath::Exp(-time/tau_vw) * (alpha_vwpa*TMath::Cos((omega_vw+omega)*time)+beta_vwpa*TMath::Sin((omega_vw+omega)*time))
-                         + TMath::Exp(-time/tau_vw) * (alpha_vwma*TMath::Cos((omega_vw-omega)*time)+beta_vwma*TMath::Sin((omega_vw-omega)*time))
-                         + TMath::Exp(-time/tau_vo) * (alpha_vopa*TMath::Cos((omega_vo+omega)*time)+beta_vopa*TMath::Sin((omega_vo+omega)*time))
-                         + TMath::Exp(-time/tau_vo) * (alpha_voma*TMath::Cos((omega_vo-omega)*time)+beta_voma*TMath::Sin((omega_vo-omega)*time))
-                         + TMath::Exp(-time/tau_vwmcbo) * (alpha_vwmcboma*TMath::Cos((omega_vwmcbo-omega)*time)+beta_vwmcboma*TMath::Sin((omega_vwmcbo-omega)*time))
-                         + TMath::Exp(-time/tau_vo-time/tau_cbo) * (alpha_vopcbo*TMath::Cos((omega_vo+omega_cbo)*time)+beta_vopcbo*TMath::Sin((omega_vo+omega_cbo)*time))
-                         + TMath::Exp(-time/tau_vo-time/tau_cbo) * (alpha_vomcbo*TMath::Cos((omega_vo-omega_cbo)*time)+beta_vomcbo*TMath::Sin((omega_vo-omega_cbo)*time));
-
-    return norm * TMath::Exp(-time/life) * (1-kloss*aloss) * expansion;
-}
-
-double func_2paras(double *x, double *p){
-    double time = x[0] / time_scale;
-
-    // wiggle
-    double norm = p[0];
-    double life = p[1];
-    double decay = norm * TMath::Exp(-time/life);
-
-    return decay;
-}
-
-double func_3paras_kloss(double *x, double *p){
-    double time = x[0] / time_scale;
-
-    // wiggle
-    double norm = p[0];
-    double life = p[1];
-    double decay = norm * TMath::Exp(-time/life);
-
-    // kloss
-    double kloss = p[2];
-    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
-
-    return decay * (1-kloss*aloss);
-}
-
-double func_6paras_kloss(double *x, double *p){
-    double time = x[0] / time_scale;
-
-    // wiggle
-    double norm = p[0];
-    double life = p[1];
-    double asym = p[2];
-    double omega = getBlinded->paramToFreq(p[3]);
-    double phi = p[4];
-    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
-
-    // kloss
-    double kloss = p[5];
-    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
-
-    return wiggle * (1-kloss*aloss);
-}
-
-double func_11paras_cbo(double *x, double *p){
+double func_9paras_phi(double *x, double *p){
     double time = x[0] / time_scale;
 
     // wiggle
@@ -638,20 +406,40 @@ double func_11paras_cbo(double *x, double *p){
 
     // cbo
     double tau_cbo = p[5];
-    double c_cbo = p[6];
-    double Acbo_c = p[7];
-    double Acbo_s = p[8];
-    double omega_cbo = p[9];
-    double cbo = 1 - (TMath::Exp(-time/tau_cbo) + c_cbo) * (Acbo_c*TMath::Cos(omega_cbo*time)+Acbo_s*TMath::Sin(omega_cbo*time));
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
+
+    return wiggle * cbo;
+}
+
+double func_10paras_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
 
     // kloss
-    double kloss = p[10];
+    double kloss = p[9];
     double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
     return wiggle * (1-kloss*aloss) * cbo;
 }
 
-double func_13paras_res(double *x, double *p){
+double func_14paras_vo_phi(double *x, double *p){
     double time = x[0] / time_scale;
 
     // wiggle
@@ -664,20 +452,882 @@ double func_13paras_res(double *x, double *p){
 
     // cbo
     double tau_cbo = p[5];
-    double c_cbo = p[6];
-    double Acbo_c = p[7];
-    double Acbo_s = p[8];
-    double omega_cbo = p[9];
-    double cbo = 1 - (TMath::Exp(-time/tau_cbo) + c_cbo) * (Acbo_c*TMath::Cos(omega_cbo*time)+Acbo_s*TMath::Sin(omega_cbo*time));
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
 
     // kloss
-    double kloss = p[10];
+    double kloss = p[9];
     double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
 
-    // residual
-    double res_norm = p[11];
-    double res_tau = p[12];
-    double res = (1 + res_norm * TMath::Exp(-time/res_tau));
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
 
-    return wiggle * (1-kloss*aloss) * cbo * res;
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    return wiggle * (1-kloss*aloss) * cbo * vo;
+}
+
+double func_14paras_vw_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vw
+    double tau_vw = p[10];
+    double A_vw = p[11];
+    double phi_vw = p[12];
+    double omega_vw = p[13]*fvw;
+    double vw = 1 - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw);
+
+    return wiggle * (1-kloss*aloss) * cbo * vw;
+}
+
+double func_18paras_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[14];
+    double A_vw = p[15];
+    double phi_vw = p[16];
+    double omega_vw = p[17]*fvw;
+    double vw = 1 - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw);
+
+    return wiggle * (1-kloss*aloss) * cbo * vo * vw;
+}
+
+double func_20paras_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[14];
+    double A_vw = p[15];
+    double phi_vw = p[16];
+    double omega_vw = p[17]*fvw;
+    double vw = 1 - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw);
+
+    // dcbo
+    double A_dcbo = p[18];
+    double phi_dcbo = p[19];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    return wiggle * (1-kloss*aloss) * cbo * vo * vw * dcbo;
+}
+
+double func_24paras_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[14];
+    double A_vw = p[15];
+    double phi_vw = p[16];
+    double omega_vw = p[17]*fvw;
+    double vw = 1 - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw);
+
+    // dcbo
+    double A_dcbo = p[18];
+    double phi_dcbo = p[19];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    // At and phit
+    double A_At = p[20];
+    double phi_At = p[21];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * A_At*TMath::Cos(omega_cbo*time+phi_At);
+    double A_phit = p[22];
+    double phi_phit = p[23];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    return wiggle * (1-kloss*aloss) * cbo * vo * vw * dcbo;
+}
+
+double func_28paras_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[14];
+    double A_vw = p[15];
+    double phi_vw = p[16];
+    double omega_vw = p[17]*fvw;
+
+    // dcbo
+    double A_dcbo = p[18];
+    double phi_dcbo = p[19];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    // At and phit
+    double A_At = p[20];
+    double phi_At = p[21];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * A_At*TMath::Cos(omega_cbo*time+phi_At);
+    double A_phit = p[22];
+    double phi_phit = p[23];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    // expansion
+    double A_vwpcbo = p[24];
+    double phi_vwpcbo = p[25];
+    double A_vwmcbo = p[26];
+    double phi_vwmcbo = p[27];
+
+    double expansion = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo)
+                         - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw)
+                         + TMath::Exp(-time/tau_cbo-time/tau_vw) * (A_vwpcbo*TMath::Cos((omega_vw+omega_cbo)*time+phi_vwpcbo)
+                         + A_vwmcbo*TMath::Cos((omega_vw-omega_cbo)*time+phi_vwmcbo));
+
+    return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
+}
+
+// ***************** for cbo envelope study *****************
+
+double func_29paras_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[14];
+    double A_vw = p[15];
+    double phi_vw = p[16];
+    double omega_vw = p[17]*fvw;
+
+    // dcbo
+    double A_dcbo = p[18];
+    double phi_dcbo = p[19];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    // At and phit
+    double A_At = p[20];
+    double phi_At = p[21];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * A_At*TMath::Cos(omega_cbo*time+phi_At);
+    double A_phit = p[22];
+    double phi_phit = p[23];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    // expansion
+    double A_vwpcbo = p[24];
+    double phi_vwpcbo = p[25];
+    double A_vwmcbo = p[26];
+    double phi_vwmcbo = p[27];
+
+    // A_cbo envelope
+    double C = p[28];
+
+    double expansion = 1 - (TMath::Exp(-time/tau_cbo)+C) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo)
+                         - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw)
+                         + TMath::Exp(-time/tau_cbo-time/tau_vw) * (A_vwpcbo*TMath::Cos((omega_vw+omega_cbo)*time+phi_vwpcbo)
+                         + A_vwmcbo*TMath::Cos((omega_vw-omega_cbo)*time+phi_vwmcbo));
+
+    return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
+}
+
+double func_12paras_dcbo_phi(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*TMath::Cos(omega*time+phi));
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // dcbo
+    double A_dcbo = p[10];
+    double phi_dcbo = p[11];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    return wiggle * (1-kloss*aloss) * cbo * dcbo;
+}
+
+double func_15paras_onlyCBO(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+    double cbo = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo);
+
+    // dcbo
+    double A_dcbo = p[9];
+    double phi_dcbo = p[10];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    // At and phit
+    double A_At = p[11];
+    double phi_At = p[12];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * A_At*TMath::Cos(omega_cbo*time+phi_At);
+    double A_phit = p[13];
+    double phi_phit = p[14];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    return wiggle * cbo * dcbo;
+}
+
+double func_28paras_phi_forRun5(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[26];
+    double A_cbo = p[27];
+    double phi_cbo = p[5];
+    double omega_cbo = p[6];
+
+    // kloss
+    double kloss = p[7];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[8];
+    double A_vo = p[9];
+    double phi_vo = p[10];
+    double omega_vo = p[11]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[12];
+    double A_vw = p[13];
+    double phi_vw = p[14];
+    double omega_vw = p[15]*fvw;
+
+    // dcbo
+    double A_dcbo = p[16];
+    double phi_dcbo = p[17];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    // At and phit
+    double A_At = p[18];
+    double phi_At = p[19];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * A_At*TMath::Cos(omega_cbo*time+phi_At);
+    double A_phit = p[20];
+    double phi_phit = p[21];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    // expansion
+    double A_vwpcbo = p[22];
+    double phi_vwpcbo = p[23];
+    double A_vwmcbo = p[24];
+    double phi_vwmcbo = p[25];
+
+    double expansion = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time+phi_cbo)
+                         - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw)
+                         + TMath::Exp(-time/tau_cbo-time/tau_vw) * (A_vwpcbo*TMath::Cos((omega_vw+omega_cbo)*time+phi_vwpcbo)
+                         + A_vwmcbo*TMath::Cos((omega_vw-omega_cbo)*time+phi_vwmcbo));
+
+    return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
+}
+
+// double func_26paras_phi_changingA(double *x, double *p){
+//     double time = x[0] / time_scale;
+
+//     // wiggle
+//     double norm = p[0];
+//     double life = p[1];
+//     double asym = p[2];
+//     double omega = getBlinded->paramToFreq(p[3]);
+//     double phi = p[4];
+
+//     // cbo
+//     double A_cbo = itp->Eval(time);
+//     double phi_cbo = p[5];
+//     double omega_cbo = p[6];
+
+//     // kloss
+//     double kloss = p[7];
+//     double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+//     // frequencies reference
+//     double fcbo = 2.34;
+//     double fc = 2*Pi/0.1492;
+//     double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+//     double fvw = fc-2*fvo;
+
+//     // vo
+//     double tau_vo = p[8];
+//     double A_vo = p[9];
+//     double phi_vo = p[10];
+//     double omega_vo = p[11]*fvo;
+//     double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+//     // vw
+//     double tau_vw = p[12];
+//     double A_vw = p[13];
+//     double phi_vw = p[14];
+//     double omega_vw = p[15]*fvw;
+
+//     // dcbo
+//     double A_dcbo = p[16];
+//     double phi_dcbo = p[17];
+//     double dcbo = 1 - A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+//     // At and phit
+//     double A_At = p[18];
+//     double phi_At = p[19];
+//     double At = 1 - A_At*TMath::Cos(omega_cbo*time+phi_At);
+//     double A_phit = p[20];
+//     double phi_phit = p[21];
+//     double phit = 1 - A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+//     double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+//     // expansion
+//     double A_vwpcbo = p[22];
+//     double phi_vwpcbo = p[23];
+//     double A_vwmcbo = p[24];
+//     double phi_vwmcbo = p[25];
+
+//     double expansion = 1 - A_cbo*TMath::Cos(omega_cbo*time+phi_cbo)
+//                          - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw)
+//                          + TMath::Exp(-time/tau_vw) * (A_vwpcbo*TMath::Cos((omega_vw+omega_cbo)*time+phi_vwpcbo)
+//                          + A_vwmcbo*TMath::Cos((omega_vw-omega_cbo)*time+phi_vwmcbo));
+
+//     return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
+// }
+
+double func_28paras_phi_minus(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6];
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time-phi_vo);
+
+    // vw
+    double tau_vw = p[14];
+    double A_vw = p[15];
+    double phi_vw = p[16];
+    double omega_vw = p[17]*fvw;
+
+    // dcbo
+    double A_dcbo = p[18];
+    double phi_dcbo = p[19];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time-phi_dcbo);
+
+    // At and phit
+    double A_At = p[20];
+    double phi_At = p[21];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * A_At*TMath::Cos(omega_cbo*time-phi_At);
+    double A_phit = p[22];
+    double phi_phit = p[23];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * A_phit*TMath::Cos(omega_cbo*time-phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 + asym*At*TMath::Cos(omega*time-phi*phit));
+
+    // expansion
+    double A_vwpcbo = p[24];
+    double phi_vwpcbo = p[25];
+    double A_vwmcbo = p[26];
+    double phi_vwmcbo = p[27];
+
+    double expansion = 1 - TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time-phi_cbo)
+                         - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time-phi_vw)
+                         + TMath::Exp(-time/tau_cbo-time/tau_vw) * (A_vwpcbo*TMath::Cos((omega_vw+omega_cbo)*time-phi_vwpcbo)
+                         + A_vwmcbo*TMath::Cos((omega_vw-omega_cbo)*time-phi_vwmcbo));
+
+    return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
+}
+
+double func_5paras_CBO_residual(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // cbo
+    double tau_cbo = p[0];
+    double A_cbo = p[1];
+    double phi_cbo = p[2];
+    double omega_cbo = p[3];
+    double offset = p[4];
+    double cbo = offset + TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time-phi_cbo);
+
+    return cbo;
+}
+
+double func_7paras_dCBO_residual(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // cbo
+    double tau_cbo = p[0];
+    double A_cbo = p[1];
+    double phi_cbo = p[2];
+    double omega_cbo = p[3];
+    double offset = p[4];
+    double cbo = offset + TMath::Exp(-time/tau_cbo) * A_cbo*TMath::Cos(omega_cbo*time-phi_cbo);
+
+    // dcbo
+    double A_dcbo = p[5];
+    double phi_dcbo = p[6];
+    double dcbo = TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time-phi_dcbo);
+
+    return cbo + dcbo;
+}
+
+
+// newCBO functions
+
+double func_28paras_cboAmp(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[5];
+    double A_cbo = p[6]*cboAmp->Eval(time);
+    double phi_cbo = p[7];
+    double omega_cbo = p[8];
+
+    // std::cout << "A_cbo: " << cboAmp->Eval(time) << std::endl;
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double A_vo = p[11];
+    double phi_vo = p[12];
+    double omega_vo = p[13]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[14];
+    double A_vw = p[15];
+    double phi_vw = p[16];
+    double omega_vw = p[17]*fvw;
+
+    // dcbo
+    double A_dcbo = p[18];
+    double phi_dcbo = p[19];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    // At and phit
+    double A_At = p[20];
+    double phi_At = p[21];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * A_At*TMath::Cos(omega_cbo*time+phi_At);
+    double A_phit = p[22];
+    double phi_phit = p[23];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    // expansion
+    double A_vwpcbo = p[24];
+    double phi_vwpcbo = p[25];
+    double A_vwmcbo = p[26];
+    double phi_vwmcbo = p[27];
+
+    double expansion = 1 - A_cbo*TMath::Cos(omega_cbo*time+phi_cbo)
+                         - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw)
+                         + TMath::Exp(-time/tau_cbo-time/tau_vw) * (A_vwpcbo*TMath::Cos((omega_vw+omega_cbo)*time+phi_vwpcbo)
+                         + A_vwmcbo*TMath::Cos((omega_vw-omega_cbo)*time+phi_vwmcbo));
+
+    return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
+
+    
+}
+
+double func_27paras_cboRelatedAmp(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double A_cbo = p[5]*cboAmp->Eval(time);
+    double phi_cbo = p[6];
+    double omega_cbo = p[7];
+
+    // std::cout << "A_cbo: " << cboAmp->Eval(time) << std::endl;
+
+    // kloss
+    double kloss = p[8];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[9];
+    double A_vo = p[10];
+    double phi_vo = p[11];
+    double omega_vo = p[12]*fvo;
+    double vo = 1 - TMath::Exp(-time/tau_vo) * A_vo*TMath::Cos(omega_vo*time+phi_vo);
+
+    // vw
+    double tau_vw = p[13];
+    double A_vw = p[14];
+    double phi_vw = p[15];
+    double omega_vw = p[16]*fvw;
+
+    // dcbo
+    double A_dcbo = p[17]*dcboAmp->Eval(time);
+    double phi_dcbo = p[18];
+    double dcbo = 1 - A_dcbo*TMath::Cos(2*omega_cbo*time+phi_dcbo);
+
+    // At and phit
+    double A_At = p[19]*AtAmp->Eval(time);
+    double phi_At = p[20];
+    double At = 1 - A_At*TMath::Cos(omega_cbo*time+phi_At);
+    double A_phit = p[21]*phitAmp->Eval(time);
+    double phi_phit = p[22];
+    double phit = 1 - A_phit*TMath::Cos(omega_cbo*time+phi_phit);
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    // expansion
+    double A_vwpcbo = p[23]*vwpcboAmp->Eval(time);
+    double phi_vwpcbo = p[24];
+    double A_vwmcbo = p[25]*vwmcboAmp->Eval(time);
+    double phi_vwmcbo = p[26];
+
+    double expansion = 1 - A_cbo*TMath::Cos(omega_cbo*time+phi_cbo)
+                         - TMath::Exp(-time/tau_vw) * A_vw*TMath::Cos(omega_vw*time+phi_vw)
+                         + (A_vwpcbo*TMath::Cos((omega_vw+omega_cbo)*time+phi_vwpcbo)
+                         + A_vwmcbo*TMath::Cos((omega_vw-omega_cbo)*time+phi_vwmcbo));
+
+    return wiggle * (1-kloss*aloss) * expansion * vo * dcbo;
+
+    
+}
+
+
+double func_32paras(double *x, double *p){
+    double time = x[0] / time_scale;
+
+    // wiggle
+    double norm = p[0];
+    double life = p[1];
+    double asym = p[2];
+    double omega = getBlinded->paramToFreq(p[3]);
+    double phi = p[4];
+
+    // cbo
+    double tau_cbo = p[5];
+    double Acbo_c = p[6];
+    double Acbo_s = p[7];
+    double omega_cbo = p[8];
+
+    // kloss
+    double kloss = p[9];
+    double aloss = lost_muon->GetBinContent((int)(time/0.1492)+1);
+
+    // frequencies reference
+    double fcbo = 2.34;
+    double fc = 2*Pi/0.1492;
+    double fvo = TMath::Sqrt(fcbo*(2*fc-fcbo));
+    double fvw = fc-2*fvo;
+
+    // vo
+    double tau_vo = p[10];
+    double Avo_c = p[11];
+    double Avo_s = p[12];
+    double omega_vo = p[13]*fvo;
+
+    // vw
+    double tau_vw = p[14];
+    double Avw_c = p[15];
+    double Avw_s = p[16];
+    double omega_vw = p[17]*fvw;
+
+    // dcbo
+    double Adcbo_c = p[18];
+    double Adcbo_s = p[19];
+    double dcbo = 1 - TMath::Exp(-2*time/tau_cbo) * (Adcbo_c*TMath::Cos(2*omega_cbo*time)+Adcbo_s*TMath::Sin(2*omega_cbo*time));
+
+    // At and phit
+    double AAt_c = p[20];
+    double AAt_s = p[21];
+    double At = 1 - TMath::Exp(-time/tau_cbo) * (AAt_c*TMath::Cos(omega_cbo*time)+AAt_s*TMath::Sin(omega_cbo*time));
+    double Aphit_c = p[22];
+    double Aphit_s = p[23];
+    double phit = 1 - TMath::Exp(-time/tau_cbo) * (Aphit_c*TMath::Cos(omega_cbo*time)+Aphit_s*TMath::Sin(omega_cbo*time));
+
+    double wiggle = norm * TMath::Exp(-time/life) * (1 - asym*At*TMath::Cos(omega*time+phi*phit));
+
+    // expansion
+    double Avwpcbo_c = p[24];
+    double Avwpcbo_s = p[25];
+    double Avwmcbo_c = p[26];
+    double Avwmcbo_s = p[27];
+    double Avopcbo_c = p[28];
+    double Avopcbo_s = p[29];
+    double Avomcbo_c = p[30];
+    double Avomcbo_s = p[31];
+
+    double expansion = 1 - TMath::Exp(-time/tau_cbo) * (Acbo_c*TMath::Cos(omega_cbo*time)+Acbo_s*TMath::Sin(omega_cbo*time))
+                         - TMath::Exp(-time/tau_vw) * (Avw_c*TMath::Cos(omega_vw*time)+Avw_s*TMath::Sin(omega_vw*time))
+                         - TMath::Exp(-time/tau_vo) * (Avo_c*TMath::Cos(omega_vo*time)+Avo_s*TMath::Sin(omega_vo*time))
+                         + TMath::Exp(-time/tau_cbo-time/tau_vw) * (Avwpcbo_c*TMath::Cos((omega_vw+omega_cbo)*time)+Avwpcbo_s*TMath::Sin((omega_vw+omega_cbo)*time)
+                         + Avwmcbo_c*TMath::Cos((omega_vw-omega_cbo)*time)+Avwmcbo_s*TMath::Sin((omega_vw-omega_cbo)*time))
+                         + TMath::Exp(-time/tau_cbo-time/tau_vo) * (Avopcbo_c*TMath::Cos((omega_vo+omega_cbo)*time)+Avopcbo_s*TMath::Sin((omega_vo+omega_cbo)*time)
+                         + Avomcbo_c*TMath::Cos((omega_vo-omega_cbo)*time)+Avomcbo_s*TMath::Sin((omega_vo-omega_cbo)*time));
+
+    return wiggle * (1-kloss*aloss) * expansion * dcbo;
 }

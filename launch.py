@@ -134,22 +134,26 @@ def parse_config(config,entry,dataset,job,scan,scan_id):
         return str(config[arg]).format(**kw).replace(';','\\;')
     
     parsed_config = copy.deepcopy(config)
-    for arg in ['wiggle_file', 'wiggle_name', 'lm_file', 'lm_name', 'initial_file', 'initial_name', 'start_bin', 'end_bin', 'output_dir', 'tag']:
+    for arg in ['wiggle_file', 'wiggle_name', 'lm_file', 'lm_name', 'initial_file', 'initial_name', 'start_bin', 'end_bin', 'output_dir', 'tag', 'file_GPRAmp', 'folder_name']:
         parsed_config[arg] = get_parsed(arg)
 
     # Process "fix" and "range" in config
     fix_pars = "None"
-    if 'fix' in config:
+    if 'fix' in parsed_config:
         fix_pars = ''
+        if 'fix' in kw:
+            parsed_config['fix'].update(kw['fix'])
         for key, value in config['fix'].items():
             if isinstance(value, str):
                 value = value.format(**kw)
             fix_pars += '{0:} {1:} '.format(key, value)
 
     range_pars = "None"
-    if 'range' in config:
+    if 'range' in parsed_config:
         range_pars = ''
-        for key, ranges in config['range'].items():
+        if 'range' in kw:
+            parsed_config['range'] = kw['range']
+        for key, ranges in parsed_config['range'].items():
             range_pars += '{0:} {1:} {2:} '.format(key, ranges[0], ranges[1])
 
     parsed_config.update({"fix_pars": fix_pars, "range_pars": range_pars})
@@ -167,6 +171,9 @@ def execute_and_parse_output(cmd):
     pattern_valid = r"STATUS=(\w+)\s+"
     matches_valid = []
 
+    pattern_limit = "at limit"
+    matches_limit = []
+
     process = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
     for line in process.stdout:
         print(line.strip())
@@ -176,6 +183,10 @@ def execute_and_parse_output(cmd):
             matches_tag.append(match_tag.group(1))
         if match_valid:
             matches_valid.append(match_valid.group(1))
+        if pattern_limit in line:
+            matches_limit.append(True)
+        if pattern_limit not in line:
+            matches_limit.append(False)
 
     process.wait()
 
@@ -188,8 +199,10 @@ def execute_and_parse_output(cmd):
         fit_valid = matches_valid
     else:
         raise RuntimeError("Cannot find fit valid in output.")
+    
+    limits = matches_limit
 
-    return full_tag, fit_valid
+    return full_tag, fit_valid, limits
 
 ##################
 # Main functions #
@@ -205,12 +218,12 @@ def run(config):
 
     os.system('mkdir -p {0:}'.format(output_dir))    
 
-    cmd = "../build/MAIN {which_run} {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} \"{initial_file:}\" {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} {fit_option:} --fix {fix_pars:} --range {range_pars:}".format(**config)
+    cmd = '../build/MAIN {which_run} {wiggle_file} {wiggle_name:} {lm_file:} {lm_name:} {initial_file:} {initial_name:} {output_dir:} {tag:} {mode:} {max_try:} {start_bin:} {end_bin:} {fit_option:} {file_GPRAmp:} {folder_name:}  --fix {fix_pars:} --range {range_pars:}'.format(**config)
 
     print(cmd)
-    full_tag, fit_valid = execute_and_parse_output(cmd)
+    full_tag, fit_valid, limits = execute_and_parse_output(cmd)
 
-    return output_dir, tag_out, full_tag, fit_valid
+    return output_dir, tag_out, full_tag, fit_valid, limits
 
 
 def run_queue(args):
@@ -256,11 +269,12 @@ def run_queue(args):
 
             print('Processing {0:}.{1:}.{2:}  queue:({3:}/{4:}) sub-queue:({5:}/{6:}) scan point:({7:}) time of try:({8:})'.format(entry, dataset, job, scan_info["q"]+1, scan_info["nq"], subq+1, scan_info["nsubq"], scan, now_fit+1))
 
-            out_dir, out_name, full_tag, fit_valid = run(new_config)
+            out_dir, out_name, full_tag, fit_valid, limits = run(new_config)
             out_file_match = '{0:}/result_*{1:}.root'.format(out_dir, out_name)
             out_files[subq] = ('{0:}/result_{1:}.root'.format(out_dir, full_tag))
             out_names[subq] = ("func_{0:}".format(full_tag))
 
+            # if all(valid == "OK" or valid == "SUCCESSFUL" or valid == 'CONVERGED' for valid in fit_valid) and not any(lim for lim in limits):
             if all(valid == "OK" or valid == "SUCCESSFUL" or valid == 'CONVERGED' for valid in fit_valid):
                 print("Fitting succeed.")
                 break
@@ -271,7 +285,8 @@ def run_queue(args):
     if config['auto_combine']:
         tag = '{0:}_{1:}_{2:}'.format(job, dataset, scan_id)
         in_files = ' '.join(out_files_match)
-        os.system('hadd -f {0:}/combined_{1:}.root {2:}'.format(out_dir, tag, in_files))
+        os.system('hadd -j 8 -f {0:}/combined_{1:}.root {2:}'.format(out_dir, tag, in_files))
+        os.system('rm {0:}'.format(in_files))
 
 
 def submit(args):
@@ -347,7 +362,7 @@ def fetch_clean(args, mode='fetch'):
             input_dir = config['output_dir'].format(job=job, dataset=dataset, key=args[1])
             basename = os.path.basename(input_dir.rstrip('/'))
             if mode == 'fetch':
-                cmd = 'hadd -f {0:}/{4:}_{1:}.root {2:}/{3:}.root'.format(fetch_dir, basename, input_dir, filter_str, args[1])
+                cmd = 'hadd -j 8 -f {0:}/{4:}_{1:}.root {2:}/{3:}.root'.format(fetch_dir, basename, input_dir, filter_str, args[1])
                 os.system(cmd)
             elif mode == 'clean':
                 cmd = 'rm -rf {0:}'.format(input_dir)
