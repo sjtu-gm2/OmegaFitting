@@ -244,10 +244,19 @@ FitOutputInfo Fitter::doFit(const FitInput & fit_in){
     return info;
 }
 
-Fitter::Fitter() : max_attempts(1){
+Fitter::Fitter() : max_attempts(1) {
     cout << "Fitting on Run" << data_version_major << " data" << endl;
 
     name_vars["5paras"] = {"N", "#tau", "A", "R", "#phi"};
+    name_vars["9paras"] = {
+        "N", "#tau", "A", "R", "#phi", 
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}"
+        };
+    name_vars["10paras"] = {
+        "N", "#tau", "A", "R", "#phi", 
+        "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}", 
+        "k_{loss}"
+        };
     name_vars["28paras"] = {
         "N", "#tau", "A", "R", "#phi", 
         "#tau_{cbo}", "#alpha_{cbo}", "#beta_{cbo}", "#omega_{cbo}", 

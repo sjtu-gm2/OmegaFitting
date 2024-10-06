@@ -62,6 +62,8 @@ struct FitOutputInfo {
 };
 
 DECLARE_FUNC(_5paras)
+DECLARE_FUNC(_9paras)
+DECLARE_FUNC(_10paras)
 DECLARE_FUNC(_28paras)
 DECLARE_FUNC(_29paras)
 
@@ -81,12 +83,6 @@ DECLARE_FUNC(_44parasGPR)
 DECLARE_FUNC(_46parasGPR)
 DECLARE_FUNC(_50parasGPR)
 
-DECLARE_FUNC(_2paras)
-DECLARE_FUNC(_3paras_kloss)
-DECLARE_FUNC(_6paras_kloss)
-DECLARE_FUNC(_11paras_cbo)
-DECLARE_FUNC(_13paras_res)
-
 class Fitter {
   public:
     enum TimeUnit {nano_second, micro_second};
@@ -103,6 +99,8 @@ class Fitter {
     void SetRangeParameters(map<int, pair<double,double> > _range_parameters){range_parameters = _range_parameters;};
 
     REGISTER_FUNC(_5paras, 5)
+    REGISTER_FUNC(_9paras, 9)
+    REGISTER_FUNC(_10paras, 10)
     REGISTER_FUNC(_28paras, 28)
     REGISTER_FUNC(_29paras, 29)
 
@@ -121,12 +119,6 @@ class Fitter {
     REGISTER_FUNC(_44parasGPR, 44)
     REGISTER_FUNC(_46parasGPR, 46)
     REGISTER_FUNC(_50parasGPR, 50)
-
-    REGISTER_FUNC(_2paras, 2)
-    REGISTER_FUNC(_3paras_kloss, 3)
-    REGISTER_FUNC(_6paras_kloss, 6)
-    REGISTER_FUNC(_11paras_cbo, 11)
-    REGISTER_FUNC(_13paras_res, 13)
 
   private:    
     map<string,vector<string> > name_vars;

@@ -43,12 +43,9 @@ void FullFit(string which_run, TH1* wiggle, int start_bin, int end_bin, TH1* lm,
     FitOutputInfo info;
     info.fit_values = init_values;
     for (int fit_mode : fit_chain) {
-        if(fit_mode == 1002) info = fitter.Fit_2paras(method, wiggle, start_time, end_time, info.fit_values);
-        if(fit_mode == 1003) info = fitter.Fit_3paras_kloss(method, wiggle, start_time, end_time, info.fit_values, lm);
-        if(fit_mode == 1006) info = fitter.Fit_6paras_kloss(method, wiggle, start_time, end_time, info.fit_values, lm);
-        if(fit_mode == 1011) info = fitter.Fit_11paras_cbo(method, wiggle, start_time, end_time, info.fit_values, lm);
-        if(fit_mode == 1013) info = fitter.Fit_13paras_res(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 1005) info = fitter.Fit_5paras(method, wiggle, start_time, end_time, info.fit_values);
+        if(fit_mode == 1009) info = fitter.Fit_9paras(method, wiggle, start_time, end_time, info.fit_values);
+        if(fit_mode == 1010) info = fitter.Fit_10paras(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 1028) info = fitter.Fit_28paras(method, wiggle, start_time, end_time, info.fit_values, lm);
         if(fit_mode == 1029) info = fitter.Fit_29paras(method, wiggle, start_time, end_time, info.fit_values, lm);
 

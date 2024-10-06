@@ -8,7 +8,9 @@ default_config = {
     'scan_per_queue' : 1,
     'auto_combine' : False,
     'refit_by_scan' : True,
-    'fit_option' : 'RSML'
+    'fit_option' : 'RSML',
+    'file_GPRAmp' : 'None',
+    'folder_name' : 'None',
 }
 
 ####################################
